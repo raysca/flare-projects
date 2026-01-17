@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { createDrizzleClient, workspaces, workspaceMembers, teams, teamMembers, invitations } from "@linearflow/database";
+import { createDrizzleClient, workspaces, workspaceMembers, teams, teamMembers, invitations, users, labels } from "@linearflow/database";
 import { eq, and } from "drizzle-orm";
 import type { Env } from "../index";
 import { authMiddleware, type Variables } from "../middleware/auth";
@@ -100,6 +100,17 @@ app.post("/", zValidator("json", createWorkspaceSchema), async (c) => {
         workspaceId,
         userId: user.id,
         role: "admin",
+    });
+
+    // 3. Create default "General" team
+    await db.insert(teams).values({
+        id: crypto.randomUUID(),
+        workspaceId,
+        name: "General",
+        identifier: "GEN",
+        description: "General team for all issues",
+        color: "#6b7280", // Gray
+        icon: "hash",
     });
 
     return c.json({
@@ -323,6 +334,75 @@ app.post("/:id/invite", zValidator("json", inviteMemberSchema), async (c) => {
     // TODO: Trigger email sending via Queue
 
     return c.json({ message: "Invitation sent", token });
+});
+
+// Imports update: added users and labels
+
+// ... existing code ...
+
+/**
+ * GET /:id/members
+ * List all members of the workspace
+ */
+app.get("/:id/members", async (c) => {
+    const workspaceId = c.req.param("id");
+    const user = c.var.user;
+    const db = createDrizzleClient(c.env.DB);
+
+    // Check membership
+    const member = await db
+        .select()
+        .from(workspaceMembers)
+        .where(and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.userId, user.id)))
+        .get();
+
+    if (!member) {
+        return c.json({ error: "Access denied" }, 403);
+    }
+
+    const members = await db
+        .select({
+            user: {
+                id: users.id,
+                name: users.name,
+                email: users.email,
+                avatarUrl: users.avatarUrl,
+            },
+            role: workspaceMembers.role,
+        })
+        .from(workspaceMembers)
+        .innerJoin(users, eq(workspaceMembers.userId, users.id))
+        .where(eq(workspaceMembers.workspaceId, workspaceId));
+
+    return c.json(members);
+});
+
+/**
+ * GET /:id/labels
+ * List all labels in the workspace
+ */
+app.get("/:id/labels", async (c) => {
+    const workspaceId = c.req.param("id");
+    const user = c.var.user;
+    const db = createDrizzleClient(c.env.DB);
+
+    // Check membership
+    const member = await db
+        .select()
+        .from(workspaceMembers)
+        .where(and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.userId, user.id)))
+        .get();
+
+    if (!member) {
+        return c.json({ error: "Access denied" }, 403);
+    }
+
+    const workspaceLabels = await db
+        .select()
+        .from(labels)
+        .where(eq(labels.workspaceId, workspaceId));
+
+    return c.json(workspaceLabels);
 });
 
 export default app;

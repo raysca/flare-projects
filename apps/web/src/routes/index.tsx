@@ -111,7 +111,8 @@ function Dashboard() {
             {workspaces.map((workspace) => (
               <Link
                 key={workspace.id}
-                to={`/workspace/${workspace.slug}`}
+                to="/workspace/$slug"
+                params={{ slug: workspace.slug }}
                 className="block group"
               >
                 <Card className="h-full transition-all duration-200 hover:shadow-lg hover:border-blue-500/50">

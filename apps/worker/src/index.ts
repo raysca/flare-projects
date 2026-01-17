@@ -4,6 +4,8 @@ import auth from "./routes/auth";
 import workspaces from "./routes/workspaces";
 import invitations from "./routes/invitations";
 import users from "./routes/users";
+import issues from "./routes/issues";
+import dev from "./routes/dev";
 
 // Durable Objects
 export { WorkspaceDO } from "./durable-objects/workspace";
@@ -47,6 +49,10 @@ app.route("/api/v1/auth", auth);
 app.route("/api/v1/workspaces", workspaces);
 app.route("/api/v1/invitations", invitations);
 app.route("/api/v1/users", users);
+app.route("/api/v1/issues", issues);
+
+// Development routes (only enabled in development)
+app.route("/api/dev", dev);
 
 app.get("/api/v1/health", (c) => {
   return c.json({ status: "ok" });

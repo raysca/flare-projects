@@ -1,6 +1,5 @@
-import { Button } from '../components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Button } from '../../components/ui/button'
+import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
 import { LayoutDashboard, Users, Settings } from 'lucide-react'
 
 export const Route = createFileRoute('/workspace/$slug')({
@@ -32,21 +31,24 @@ function WorkspaceLayout() {
 
                 <nav className="flex-1 px-2 space-y-1">
                     <Link
-                        to={`/workspace/${slug}`}
+                        to="/workspace/$slug"
+                        params={{ slug }}
                         className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400 group"
                     >
                         <LayoutDashboard className="w-4 h-4" />
                         Issues
                     </Link>
                     <Link
-                        to={`/workspace/${slug}/team`}
+                        to="/workspace/$slug/team"
+                        params={{ slug }}
                         className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-slate-700 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 group transition-colors"
                     >
                         <Users className="w-4 h-4 text-slate-400 group-hover:text-slate-500" />
                         Team
                     </Link>
                     <Link
-                        to={`/workspace/${slug}/settings`}
+                        to="/workspace/$slug/settings"
+                        params={{ slug }}
                         className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-slate-700 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 group transition-colors"
                     >
                         <Settings className="w-4 h-4 text-slate-400 group-hover:text-slate-500" />
@@ -71,19 +73,7 @@ function WorkspaceLayout() {
                 </header>
 
                 <div className="p-8">
-                    <div className="max-w-4xl mx-auto text-center py-20">
-                        <div className="inline-flex items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 rounded-full mb-6">
-                            <LayoutDashboard className="w-12 h-12 text-slate-400" />
-                        </div>
-                        <h2 className="text-3xl font-bold mb-4">Welcome to your new workspace</h2>
-                        <p className="text-muted-foreground max-w-lg mx-auto mb-8">
-                            This is the starting point for Milestone 2. Issues, projects, and cycles will live here.
-                        </p>
-                        <div className="flex justify-center gap-4">
-                            <Button>Create Issue</Button>
-                            <Button variant="outline">Invite Team</Button>
-                        </div>
-                    </div>
+                    <Outlet />
                 </div>
             </main>
         </div>

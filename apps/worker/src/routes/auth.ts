@@ -12,9 +12,9 @@ import {
 import { createDrizzleClient, users } from "@linearflow/database";
 import { eq } from "drizzle-orm";
 import type { Env } from "../index";
-import { authMiddleware } from "../middleware/auth";
+import { authMiddleware, type AuthContext } from "../middleware/auth";
 
-const auth = new Hono<{ Bindings: Env }>();
+const auth = new Hono<Env>();
 
 // Validation schemas
 const signupSchema = z.object({
@@ -167,7 +167,7 @@ auth.post("/logout", authMiddleware, async (c) => {
  * Get current authenticated user
  */
 auth.get("/me", authMiddleware, async (c) => {
-  const authUser = c.get("user");
+  const authUser = c.var.user;
   const db = createDrizzleClient(c.env.DB);
 
   const user = await db

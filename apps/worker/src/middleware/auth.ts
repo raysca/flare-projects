@@ -19,7 +19,7 @@ export interface AuthContext {
  * Adds user to context if authenticated
  */
 export async function authMiddleware(
-  c: Context<{ Bindings: Env; Variables: AuthContext }>,
+  c: Context<Env & { Variables: AuthContext }>,
   next: Next
 ) {
   const authHeader = c.req.header("Authorization");
@@ -67,7 +67,7 @@ export async function authMiddleware(
  * Optional auth middleware - adds user to context if authenticated, but doesn't require it
  */
 export async function optionalAuthMiddleware(
-  c: Context<{ Bindings: Env; Variables: Partial<AuthContext> }>,
+  c: Context<Env & { Variables: Partial<AuthContext> }>,
   next: Next
 ) {
   const authHeader = c.req.header("Authorization");
@@ -94,7 +94,7 @@ export async function optionalAuthMiddleware(
  * Get authenticated user from context
  */
 export function getAuthUser(
-  c: Context<{ Bindings: Env; Variables: AuthContext }>
+  c: Context<Env & { Variables: AuthContext }>
 ): AuthContext["user"] {
   const user = c.get("user");
   if (!user) {

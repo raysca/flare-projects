@@ -21,7 +21,7 @@ export interface Env {
   JWT_SECRET: string;
 }
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<Env>();
 
 // Middleware
 app.use("*", cors());

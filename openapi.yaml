@@ -1,0 +1,2578 @@
+openapi: 3.1.0
+info:
+  title: LinearFlow API
+  description: |
+    REST API for LinearFlow - A high-performance issue tracking and project management platform.
+    Built on Cloudflare Workers with real-time collaboration, AI-powered features, and edge-native architecture.
+  version: 1.0.0
+  contact:
+    name: LinearFlow Team
+    url: https://linearflow.dev
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.linearflow.dev
+    description: Production server
+  - url: https://api-staging.linearflow.dev
+    description: Staging server
+  - url: http://localhost:8787
+    description: Local development server
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: Users
+    description: User profile and settings management
+  - name: Workspaces
+    description: Workspace management and settings
+  - name: Teams
+    description: Team management within workspaces
+  - name: Issues
+    description: Issue tracking and management
+  - name: Projects
+    description: Project management
+  - name: Cycles
+    description: Sprint/cycle management
+  - name: Labels
+    description: Label management for issues
+  - name: Comments
+    description: Issue comments and discussions
+  - name: Attachments
+    description: File attachment management
+  - name: Notifications
+    description: Notification management
+  - name: Search
+    description: Search and filtering
+  - name: Analytics
+    description: Insights and analytics
+  - name: Integrations
+    description: Third-party integrations
+  - name: AI
+    description: AI-powered features
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ==========================================
+  # Authentication
+  # ==========================================
+  /api/auth/signup:
+    post:
+      tags: [Authentication]
+      summary: Create new user account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, name]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: SecurePass123!
+                name:
+                  type: string
+                  example: John Doe
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+                    description: JWT authentication token
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/login:
+    post:
+      tags: [Authentication]
+      summary: Authenticate user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Logout user
+      responses:
+        '204':
+          description: Logout successful
+
+  /api/auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user
+      responses:
+        '200':
+          description: Current user information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ==========================================
+  # Users
+  # ==========================================
+  /api/users/{userId}:
+    get:
+      tags: [Users]
+      summary: Get user by ID
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Users]
+      summary: Update user profile
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                avatarUrl:
+                  type: string
+                  format: uri
+                timezone:
+                  type: string
+                  example: America/Los_Angeles
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  # ==========================================
+  # Workspaces
+  # ==========================================
+  /api/workspaces:
+    get:
+      tags: [Workspaces]
+      summary: List user's workspaces
+      responses:
+        '200':
+          description: List of workspaces
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Workspace'
+                  total:
+                    type: integer
+
+    post:
+      tags: [Workspaces]
+      summary: Create new workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, slug]
+              properties:
+                name:
+                  type: string
+                  example: Acme Corp
+                slug:
+                  type: string
+                  pattern: '^[a-z0-9-]+$'
+                  example: acme-corp
+                logoUrl:
+                  type: string
+                  format: uri
+      responses:
+        '201':
+          description: Workspace created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/workspaces/{workspaceId}:
+    get:
+      tags: [Workspaces]
+      summary: Get workspace by ID
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      responses:
+        '200':
+          description: Workspace details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Workspaces]
+      summary: Update workspace
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                logoUrl:
+                  type: string
+                  format: uri
+                settings:
+                  type: object
+      responses:
+        '200':
+          description: Workspace updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+
+    delete:
+      tags: [Workspaces]
+      summary: Delete workspace
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      responses:
+        '204':
+          description: Workspace deleted
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/workspaces/{workspaceId}/members:
+    get:
+      tags: [Workspaces]
+      summary: List workspace members
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      responses:
+        '200':
+          description: List of members
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WorkspaceMember'
+
+    post:
+      tags: [Workspaces]
+      summary: Invite member to workspace
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, role]
+              properties:
+                email:
+                  type: string
+                  format: email
+                role:
+                  $ref: '#/components/schemas/WorkspaceRole'
+                teamIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: Invitation sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceMember'
+
+  # ==========================================
+  # Teams
+  # ==========================================
+  /api/workspaces/{workspaceId}/teams:
+    get:
+      tags: [Teams]
+      summary: List teams in workspace
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      responses:
+        '200':
+          description: List of teams
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Team'
+
+    post:
+      tags: [Teams]
+      summary: Create team
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, key]
+              properties:
+                name:
+                  type: string
+                  example: Engineering
+                key:
+                  type: string
+                  pattern: '^[A-Z]{2,5}$'
+                  example: ENG
+                description:
+                  type: string
+                color:
+                  type: string
+                  pattern: '^#[0-9A-Fa-f]{6}$'
+                  example: '#3B82F6'
+      responses:
+        '201':
+          description: Team created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+
+  /api/teams/{teamId}:
+    get:
+      tags: [Teams]
+      summary: Get team by ID
+      parameters:
+        - $ref: '#/components/parameters/teamId'
+      responses:
+        '200':
+          description: Team details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+
+    patch:
+      tags: [Teams]
+      summary: Update team
+      parameters:
+        - $ref: '#/components/parameters/teamId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                color:
+                  type: string
+      responses:
+        '200':
+          description: Team updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+
+    delete:
+      tags: [Teams]
+      summary: Delete team
+      parameters:
+        - $ref: '#/components/parameters/teamId'
+      responses:
+        '204':
+          description: Team deleted
+
+  # ==========================================
+  # Issues
+  # ==========================================
+  /api/issues:
+    get:
+      tags: [Issues]
+      summary: List issues with filters
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: teamId
+          in: query
+          schema:
+            type: string
+        - name: projectId
+          in: query
+          schema:
+            type: string
+        - name: cycleId
+          in: query
+          schema:
+            type: string
+        - name: assigneeId
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/IssueStatus'
+        - name: priority
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/IssuePriority'
+        - name: labels
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [createdAt, updatedAt, priority, status]
+            default: updatedAt
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        '200':
+          description: List of issues
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Issue'
+                  total:
+                    type: integer
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+
+    post:
+      tags: [Issues]
+      summary: Create new issue
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, teamId]
+              properties:
+                title:
+                  type: string
+                  example: Fix login bug
+                description:
+                  type: string
+                  example: Users are unable to login with Google OAuth
+                teamId:
+                  type: string
+                projectId:
+                  type: string
+                cycleId:
+                  type: string
+                status:
+                  $ref: '#/components/schemas/IssueStatus'
+                priority:
+                  $ref: '#/components/schemas/IssuePriority'
+                assigneeId:
+                  type: string
+                labelIds:
+                  type: array
+                  items:
+                    type: string
+                estimate:
+                  type: integer
+                  description: Story points or time estimate
+                dueDate:
+                  type: string
+                  format: date-time
+                parentId:
+                  type: string
+                  description: Parent issue ID for sub-issues
+      responses:
+        '201':
+          description: Issue created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/issues/{issueId}:
+    get:
+      tags: [Issues]
+      summary: Get issue by ID
+      parameters:
+        - $ref: '#/components/parameters/issueId'
+      responses:
+        '200':
+          description: Issue details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Issues]
+      summary: Update issue
+      parameters:
+        - $ref: '#/components/parameters/issueId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                status:
+                  $ref: '#/components/schemas/IssueStatus'
+                priority:
+                  $ref: '#/components/schemas/IssuePriority'
+                assigneeId:
+                  type: string
+                  nullable: true
+                labelIds:
+                  type: array
+                  items:
+                    type: string
+                estimate:
+                  type: integer
+                dueDate:
+                  type: string
+                  format: date-time
+                  nullable: true
+                projectId:
+                  type: string
+                  nullable: true
+                cycleId:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: Issue updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Issues]
+      summary: Delete issue
+      parameters:
+        - $ref: '#/components/parameters/issueId'
+      responses:
+        '204':
+          description: Issue deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/issues/{issueId}/subscribe:
+    post:
+      tags: [Issues]
+      summary: Subscribe to issue updates
+      parameters:
+        - $ref: '#/components/parameters/issueId'
+      responses:
+        '204':
+          description: Subscribed successfully
+
+    delete:
+      tags: [Issues]
+      summary: Unsubscribe from issue
+      parameters:
+        - $ref: '#/components/parameters/issueId'
+      responses:
+        '204':
+          description: Unsubscribed successfully
+
+  /api/issues/{issueId}/related:
+    get:
+      tags: [Issues]
+      summary: Get related issues (AI-powered)
+      parameters:
+        - $ref: '#/components/parameters/issueId'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 5
+      responses:
+        '200':
+          description: Related issues
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        issue:
+                          $ref: '#/components/schemas/Issue'
+                        similarity:
+                          type: number
+                          format: float
+                          description: Similarity score (0-1)
+
+  # ==========================================
+  # Projects
+  # ==========================================
+  /api/workspaces/{workspaceId}/projects:
+    get:
+      tags: [Projects]
+      summary: List projects
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [planned, active, completed, archived]
+      responses:
+        '200':
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Project'
+
+    post:
+      tags: [Projects]
+      summary: Create project
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, key, teamId]
+              properties:
+                name:
+                  type: string
+                  example: Q1 Platform Redesign
+                key:
+                  type: string
+                  pattern: '^[A-Z]{2,5}$'
+                  example: PLAT
+                description:
+                  type: string
+                teamId:
+                  type: string
+                startDate:
+                  type: string
+                  format: date
+                targetDate:
+                  type: string
+                  format: date
+                leadId:
+                  type: string
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+
+  /api/projects/{projectId}:
+    get:
+      tags: [Projects]
+      summary: Get project by ID
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+      responses:
+        '200':
+          description: Project details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+
+    patch:
+      tags: [Projects]
+      summary: Update project
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                status:
+                  type: string
+                  enum: [planned, active, completed, archived]
+                startDate:
+                  type: string
+                  format: date
+                targetDate:
+                  type: string
+                  format: date
+                leadId:
+                  type: string
+      responses:
+        '200':
+          description: Project updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+
+    delete:
+      tags: [Projects]
+      summary: Delete project
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+      responses:
+        '204':
+          description: Project deleted
+
+  # ==========================================
+  # Cycles
+  # ==========================================
+  /api/teams/{teamId}/cycles:
+    get:
+      tags: [Cycles]
+      summary: List cycles for team
+      parameters:
+        - $ref: '#/components/parameters/teamId'
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [planned, active, completed]
+      responses:
+        '200':
+          description: List of cycles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Cycle'
+
+    post:
+      tags: [Cycles]
+      summary: Create cycle
+      parameters:
+        - $ref: '#/components/parameters/teamId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, startDate, endDate]
+              properties:
+                name:
+                  type: string
+                  example: Sprint 24
+                startDate:
+                  type: string
+                  format: date
+                endDate:
+                  type: string
+                  format: date
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Cycle created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cycle'
+
+  /api/cycles/{cycleId}:
+    get:
+      tags: [Cycles]
+      summary: Get cycle by ID
+      parameters:
+        - $ref: '#/components/parameters/cycleId'
+      responses:
+        '200':
+          description: Cycle details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cycle'
+
+    patch:
+      tags: [Cycles]
+      summary: Update cycle
+      parameters:
+        - $ref: '#/components/parameters/cycleId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                startDate:
+                  type: string
+                  format: date
+                endDate:
+                  type: string
+                  format: date
+      responses:
+        '200':
+          description: Cycle updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cycle'
+
+  # ==========================================
+  # Labels
+  # ==========================================
+  /api/workspaces/{workspaceId}/labels:
+    get:
+      tags: [Labels]
+      summary: List labels
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      responses:
+        '200':
+          description: List of labels
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Label'
+
+    post:
+      tags: [Labels]
+      summary: Create label
+      parameters:
+        - $ref: '#/components/parameters/workspaceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, color]
+              properties:
+                name:
+                  type: string
+                  example: bug
+                color:
+                  type: string
+                  pattern: '^#[0-9A-Fa-f]{6}$'
+                  example: '#EF4444'
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Label created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Label'
+
+  /api/labels/{labelId}:
+    patch:
+      tags: [Labels]
+      summary: Update label
+      parameters:
+        - $ref: '#/components/parameters/labelId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                color:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Label updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Label'
+
+    delete:
+      tags: [Labels]
+      summary: Delete label
+      parameters:
+        - $ref: '#/components/parameters/labelId'
+      responses:
+        '204':
+          description: Label deleted
+
+  # ==========================================
+  # Comments
+  # ==========================================
+  /api/issues/{issueId}/comments:
+    get:
+      tags: [Comments]
+      summary: List comments for issue
+      parameters:
+        - $ref: '#/components/parameters/issueId'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of comments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Comment'
+                  total:
+                    type: integer
+
+    post:
+      tags: [Comments]
+      summary: Create comment
+      parameters:
+        - $ref: '#/components/parameters/issueId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body:
+                  type: string
+                  description: Markdown-formatted comment text
+                  example: This is a great suggestion! cc @john
+      responses:
+        '201':
+          description: Comment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+
+  /api/comments/{commentId}:
+    patch:
+      tags: [Comments]
+      summary: Update comment
+      parameters:
+        - $ref: '#/components/parameters/commentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body:
+                  type: string
+      responses:
+        '200':
+          description: Comment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+
+    delete:
+      tags: [Comments]
+      summary: Delete comment
+      parameters:
+        - $ref: '#/components/parameters/commentId'
+      responses:
+        '204':
+          description: Comment deleted
+
+  /api/comments/{commentId}/reactions:
+    post:
+      tags: [Comments]
+      summary: Add reaction to comment
+      parameters:
+        - $ref: '#/components/parameters/commentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [emoji]
+              properties:
+                emoji:
+                  type: string
+                  example: '👍'
+      responses:
+        '201':
+          description: Reaction added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reaction'
+
+    delete:
+      tags: [Comments]
+      summary: Remove reaction from comment
+      parameters:
+        - $ref: '#/components/parameters/commentId'
+        - name: emoji
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Reaction removed
+
+  # ==========================================
+  # Attachments
+  # ==========================================
+  /api/attachments/upload-url:
+    post:
+      tags: [Attachments]
+      summary: Get presigned URL for file upload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [filename, contentType, size]
+              properties:
+                filename:
+                  type: string
+                  example: screenshot.png
+                contentType:
+                  type: string
+                  example: image/png
+                size:
+                  type: integer
+                  description: File size in bytes
+                  example: 1048576
+      responses:
+        '200':
+          description: Presigned upload URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  uploadUrl:
+                    type: string
+                    format: uri
+                    description: R2 presigned URL for direct upload
+                  attachmentId:
+                    type: string
+                    description: ID to use when associating with issue
+                  expiresIn:
+                    type: integer
+                    description: Seconds until URL expires
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/issues/{issueId}/attachments:
+    post:
+      tags: [Attachments]
+      summary: Associate attachment with issue
+      parameters:
+        - $ref: '#/components/parameters/issueId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [attachmentId]
+              properties:
+                attachmentId:
+                  type: string
+                  description: ID from upload-url response
+      responses:
+        '201':
+          description: Attachment associated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attachment'
+
+  /api/attachments/{attachmentId}:
+    get:
+      tags: [Attachments]
+      summary: Get attachment download URL
+      parameters:
+        - $ref: '#/components/parameters/attachmentId'
+      responses:
+        '200':
+          description: Download URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  downloadUrl:
+                    type: string
+                    format: uri
+                  expiresIn:
+                    type: integer
+
+    delete:
+      tags: [Attachments]
+      summary: Delete attachment
+      parameters:
+        - $ref: '#/components/parameters/attachmentId'
+      responses:
+        '204':
+          description: Attachment deleted
+
+  # ==========================================
+  # Notifications
+  # ==========================================
+  /api/notifications:
+    get:
+      tags: [Notifications]
+      summary: List user notifications
+      parameters:
+        - name: unreadOnly
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Notification'
+                  total:
+                    type: integer
+                  unreadCount:
+                    type: integer
+
+  /api/notifications/{notificationId}/read:
+    post:
+      tags: [Notifications]
+      summary: Mark notification as read
+      parameters:
+        - $ref: '#/components/parameters/notificationId'
+      responses:
+        '204':
+          description: Marked as read
+
+  /api/notifications/read-all:
+    post:
+      tags: [Notifications]
+      summary: Mark all notifications as read
+      responses:
+        '204':
+          description: All marked as read
+
+  /api/notifications/settings:
+    get:
+      tags: [Notifications]
+      summary: Get notification preferences
+      responses:
+        '200':
+          description: Notification settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationSettings'
+
+    patch:
+      tags: [Notifications]
+      summary: Update notification preferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationSettings'
+      responses:
+        '200':
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationSettings'
+
+  # ==========================================
+  # Search
+  # ==========================================
+  /api/search:
+    get:
+      tags: [Search]
+      summary: Search across issues (hybrid keyword + semantic)
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Search query (natural language supported)
+          example: urgent bugs from last week
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: teamIds
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [keyword, semantic, hybrid]
+            default: hybrid
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        issue:
+                          $ref: '#/components/schemas/Issue'
+                        score:
+                          type: number
+                          description: Relevance score
+                        highlights:
+                          type: array
+                          items:
+                            type: string
+                          description: Highlighted snippets
+                  total:
+                    type: integer
+                  query:
+                    type: string
+
+  # ==========================================
+  # Analytics
+  # ==========================================
+  /api/analytics/velocity:
+    get:
+      tags: [Analytics]
+      summary: Get issue velocity metrics
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: teamId
+          in: query
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: granularity
+          in: query
+          schema:
+            type: string
+            enum: [day, week, month]
+            default: week
+      responses:
+        '200':
+          description: Velocity data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        period:
+                          type: string
+                          format: date
+                        created:
+                          type: integer
+                        completed:
+                          type: integer
+                        velocity:
+                          type: number
+
+  /api/analytics/cycle-stats:
+    get:
+      tags: [Analytics]
+      summary: Get cycle completion statistics
+      parameters:
+        - name: cycleId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cycle statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalIssues:
+                    type: integer
+                  completedIssues:
+                    type: integer
+                  completionRate:
+                    type: number
+                    format: float
+                  averageTimeToComplete:
+                    type: integer
+                    description: Hours
+                  statusDistribution:
+                    type: object
+                    additionalProperties:
+                      type: integer
+
+  /api/analytics/insights:
+    get:
+      tags: [Analytics]
+      summary: Get AI-generated insights
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: teamId
+          in: query
+          schema:
+            type: string
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [week, month, quarter]
+            default: week
+      responses:
+        '200':
+          description: AI insights
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  insights:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          enum: [bottleneck, trend, anomaly, suggestion]
+                        title:
+                          type: string
+                        description:
+                          type: string
+                        severity:
+                          type: string
+                          enum: [info, warning, critical]
+                        metadata:
+                          type: object
+
+  # ==========================================
+  # AI Features
+  # ==========================================
+  /api/ai/classify-issue:
+    post:
+      tags: [AI]
+      summary: Get AI classification for issue
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, description]
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: AI classification results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum: [bug, feature, improvement, task]
+                  priority:
+                    $ref: '#/components/schemas/IssuePriority'
+                  suggestedLabels:
+                    type: array
+                    items:
+                      type: string
+                  confidence:
+                    type: object
+                    properties:
+                      type:
+                        type: number
+                        format: float
+                      priority:
+                        type: number
+                        format: float
+
+  /api/ai/suggest-assignee:
+    post:
+      tags: [AI]
+      summary: Get AI assignee recommendation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [issueId]
+              properties:
+                issueId:
+                  type: string
+      responses:
+        '200':
+          description: Assignee suggestions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  suggestions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        userId:
+                          type: string
+                        user:
+                          $ref: '#/components/schemas/User'
+                        score:
+                          type: number
+                          format: float
+                        reason:
+                          type: string
+
+  /api/ai/enhance-description:
+    post:
+      tags: [AI]
+      summary: Get AI enhancement suggestions for description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [description]
+              properties:
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Enhancement suggestions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  enhanced:
+                    type: string
+                  suggestions:
+                    type: array
+                    items:
+                      type: string
+
+  # ==========================================
+  # Activity
+  # ==========================================
+  /api/issues/{issueId}/activity:
+    get:
+      tags: [Issues]
+      summary: Get issue activity timeline
+      parameters:
+        - $ref: '#/components/parameters/issueId'
+      responses:
+        '200':
+          description: Activity timeline
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Activity'
+
+  /api/users/{userId}/activity:
+    get:
+      tags: [Users]
+      summary: Get user activity feed
+      parameters:
+        - $ref: '#/components/parameters/userId'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: User activity
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Activity'
+
+  # ==========================================
+  # Views
+  # ==========================================
+  /api/views:
+    get:
+      tags: [Issues]
+      summary: List saved views
+      parameters:
+        - name: workspaceId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of views
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/View'
+
+    post:
+      tags: [Issues]
+      summary: Create saved view
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, workspaceId, filters]
+              properties:
+                name:
+                  type: string
+                  example: My Active Issues
+                workspaceId:
+                  type: string
+                filters:
+                  type: object
+                  description: Filter configuration
+                sortBy:
+                  type: string
+                sortOrder:
+                  type: string
+      responses:
+        '201':
+          description: View created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/View'
+
+  /api/views/{viewId}:
+    delete:
+      tags: [Issues]
+      summary: Delete saved view
+      parameters:
+        - name: viewId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: View deleted
+
+# ==========================================
+# Components
+# ==========================================
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    workspaceId:
+      name: workspaceId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Workspace identifier
+
+    teamId:
+      name: teamId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Team identifier
+
+    userId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: User identifier
+
+    issueId:
+      name: issueId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Issue identifier
+
+    projectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Project identifier
+
+    cycleId:
+      name: cycleId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Cycle identifier
+
+    labelId:
+      name: labelId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Label identifier
+
+    commentId:
+      name: commentId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Comment identifier
+
+    attachmentId:
+      name: attachmentId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Attachment identifier
+
+    notificationId:
+      name: notificationId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Notification identifier
+
+  schemas:
+    # ==========================================
+    # Core Entities
+    # ==========================================
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        avatarUrl:
+          type: string
+          format: uri
+          nullable: true
+        timezone:
+          type: string
+          example: America/Los_Angeles
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - email
+        - name
+        - createdAt
+        - updatedAt
+
+    Workspace:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        logoUrl:
+          type: string
+          format: uri
+          nullable: true
+        settings:
+          type: object
+          properties:
+            defaultIssueStatus:
+              $ref: '#/components/schemas/IssueStatus'
+            defaultIssuePriority:
+              $ref: '#/components/schemas/IssuePriority'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - slug
+        - createdAt
+        - updatedAt
+
+    WorkspaceMember:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+        workspaceId:
+          type: string
+        role:
+          $ref: '#/components/schemas/WorkspaceRole'
+        joinedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - workspaceId
+        - role
+        - joinedAt
+
+    Team:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspaceId:
+          type: string
+        name:
+          type: string
+        key:
+          type: string
+          description: Team identifier key (e.g., ENG)
+          pattern: '^[A-Z]{2,5}$'
+        description:
+          type: string
+          nullable: true
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+        issueCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - workspaceId
+        - name
+        - key
+        - createdAt
+        - updatedAt
+
+    Issue:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        identifier:
+          type: string
+          description: Human-readable identifier (e.g., ENG-123)
+          example: ENG-123
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          $ref: '#/components/schemas/IssueStatus'
+        priority:
+          $ref: '#/components/schemas/IssuePriority'
+        teamId:
+          type: string
+        team:
+          $ref: '#/components/schemas/Team'
+        projectId:
+          type: string
+          nullable: true
+        project:
+          $ref: '#/components/schemas/Project'
+          nullable: true
+        cycleId:
+          type: string
+          nullable: true
+        cycle:
+          $ref: '#/components/schemas/Cycle'
+          nullable: true
+        assigneeId:
+          type: string
+          nullable: true
+        assignee:
+          $ref: '#/components/schemas/User'
+          nullable: true
+        reporterId:
+          type: string
+        reporter:
+          $ref: '#/components/schemas/User'
+        labels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Label'
+        estimate:
+          type: integer
+          nullable: true
+        dueDate:
+          type: string
+          format: date-time
+          nullable: true
+        parentId:
+          type: string
+          nullable: true
+        parent:
+          $ref: '#/components/schemas/Issue'
+          nullable: true
+        subIssueCount:
+          type: integer
+          default: 0
+        commentCount:
+          type: integer
+          default: 0
+        attachmentCount:
+          type: integer
+          default: 0
+        subscriberIds:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - identifier
+        - title
+        - status
+        - priority
+        - teamId
+        - reporterId
+        - createdAt
+        - updatedAt
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        key:
+          type: string
+          pattern: '^[A-Z]{2,5}$'
+        description:
+          type: string
+          nullable: true
+        teamId:
+          type: string
+        team:
+          $ref: '#/components/schemas/Team'
+        status:
+          type: string
+          enum: [planned, active, completed, archived]
+        startDate:
+          type: string
+          format: date
+          nullable: true
+        targetDate:
+          type: string
+          format: date
+          nullable: true
+        leadId:
+          type: string
+          nullable: true
+        lead:
+          $ref: '#/components/schemas/User'
+          nullable: true
+        issueCount:
+          type: integer
+        completedIssueCount:
+          type: integer
+        progress:
+          type: number
+          format: float
+          description: Completion percentage (0-100)
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - key
+        - teamId
+        - status
+        - createdAt
+        - updatedAt
+
+    Cycle:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        teamId:
+          type: string
+        team:
+          $ref: '#/components/schemas/Team'
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [planned, active, completed]
+        issueCount:
+          type: integer
+        completedIssueCount:
+          type: integer
+        progress:
+          type: number
+          format: float
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - teamId
+        - startDate
+        - endDate
+        - status
+        - createdAt
+        - updatedAt
+
+    Label:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+        description:
+          type: string
+          nullable: true
+        workspaceId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - color
+        - workspaceId
+        - createdAt
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        body:
+          type: string
+          description: Markdown-formatted comment
+        issueId:
+          type: string
+        authorId:
+          type: string
+        author:
+          $ref: '#/components/schemas/User'
+        reactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reaction'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        editedAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - body
+        - issueId
+        - authorId
+        - createdAt
+        - updatedAt
+
+    Reaction:
+      type: object
+      properties:
+        id:
+          type: string
+        emoji:
+          type: string
+          example: '👍'
+        userId:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - emoji
+        - userId
+        - createdAt
+
+    Attachment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        filename:
+          type: string
+        contentType:
+          type: string
+        size:
+          type: integer
+          description: File size in bytes
+        url:
+          type: string
+          format: uri
+          description: R2 URL
+        thumbnailUrl:
+          type: string
+          format: uri
+          nullable: true
+        issueId:
+          type: string
+          nullable: true
+        uploadedById:
+          type: string
+        uploadedBy:
+          $ref: '#/components/schemas/User'
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - filename
+        - contentType
+        - size
+        - url
+        - uploadedById
+        - createdAt
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [issue_assigned, issue_mentioned, issue_updated, comment_mentioned, comment_created]
+        title:
+          type: string
+        message:
+          type: string
+        userId:
+          type: string
+        issueId:
+          type: string
+          nullable: true
+        issue:
+          $ref: '#/components/schemas/Issue'
+          nullable: true
+        actorId:
+          type: string
+        actor:
+          $ref: '#/components/schemas/User'
+        readAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type
+        - title
+        - userId
+        - actorId
+        - createdAt
+
+    NotificationSettings:
+      type: object
+      properties:
+        emailNotifications:
+          type: boolean
+          default: true
+        notifyOnAssigned:
+          type: boolean
+          default: true
+        notifyOnMentioned:
+          type: boolean
+          default: true
+        notifyOnIssueUpdated:
+          type: boolean
+          default: false
+        notifyOnComments:
+          type: boolean
+          default: true
+        notifyOnStatusChange:
+          type: boolean
+          default: true
+
+    Activity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [issue_created, issue_updated, issue_deleted, comment_created, status_changed, assignee_changed, label_added, label_removed]
+        actorId:
+          type: string
+        actor:
+          $ref: '#/components/schemas/User'
+        issueId:
+          type: string
+          nullable: true
+        issue:
+          $ref: '#/components/schemas/Issue'
+          nullable: true
+        changes:
+          type: object
+          description: Object containing field changes
+          example:
+            status:
+              from: todo
+              to: in_progress
+        metadata:
+          type: object
+          description: Additional activity metadata
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type
+        - actorId
+        - createdAt
+
+    View:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        workspaceId:
+          type: string
+        userId:
+          type: string
+        filters:
+          type: object
+          description: Saved filter configuration
+        sortBy:
+          type: string
+          nullable: true
+        sortOrder:
+          type: string
+          enum: [asc, desc]
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - workspaceId
+        - userId
+        - filters
+        - createdAt
+
+    # ==========================================
+    # Enums
+    # ==========================================
+    WorkspaceRole:
+      type: string
+      enum: [admin, member, guest]
+      description: |
+        - admin: Full workspace access
+        - member: Can create/edit issues
+        - guest: Read-only access
+
+    IssueStatus:
+      type: string
+      enum: [backlog, todo, in_progress, in_review, done, canceled]
+      description: Issue workflow status
+
+    IssuePriority:
+      type: string
+      enum: [urgent, high, medium, low, no_priority]
+      description: Issue priority level
+
+    # ==========================================
+    # Error Responses
+    # ==========================================
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+              description: Human-readable error message
+            code:
+              type: string
+              description: Machine-readable error code
+            details:
+              type: object
+              description: Additional error context
+              nullable: true
+      required:
+        - error
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              message: Invalid request parameters
+              code: INVALID_REQUEST
+              details:
+                field: email
+                reason: Invalid email format
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              message: Authentication required
+              code: UNAUTHORIZED
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              message: Insufficient permissions
+              code: FORBIDDEN
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              message: Resource not found
+              code: NOT_FOUND

@@ -1,0 +1,4 @@
+# Development environment variables for Cloudflare Workers
+# Copy this to .dev.vars and update with your actual values
+
+JWT_SECRET=your-secret-key-here-change-in-production

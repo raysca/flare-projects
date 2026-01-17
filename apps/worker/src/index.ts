@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import auth from "./routes/auth";
 
 // Durable Objects
 export { WorkspaceDO } from "./durable-objects/workspace";
@@ -17,6 +18,7 @@ export interface Env {
   AI: any; // Workers AI binding
   ANALYTICS: AnalyticsEngineDataset;
   ENVIRONMENT: string;
+  JWT_SECRET: string;
 }
 
 const app = new Hono<{ Bindings: Env }>();
@@ -33,7 +35,9 @@ app.get("/", (c) => {
   });
 });
 
-// API routes will be added in subsequent milestones
+// API routes
+app.route("/api/v1/auth", auth);
+
 app.get("/api/v1/health", (c) => {
   return c.json({ status: "ok" });
 });

@@ -57,9 +57,10 @@ binding = "AI"
 [[analytics_engine_datasets]]
 binding = "ANALYTICS"
 
-# Environment variables (example - update as needed)
+# Environment variables
 [vars]
 ENVIRONMENT = "development"
+JWT_SECRET = "dev-secret-change-in-production" # Change this in production!
 
 # Development configuration
 [env.dev]

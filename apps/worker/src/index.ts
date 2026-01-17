@@ -1,12 +1,13 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import auth from "./routes/auth";
 
 // Durable Objects
 export { WorkspaceDO } from "./durable-objects/workspace";
 export { IssueDO } from "./durable-objects/issue";
 
 // Bindings type definition
-export interface Env {
+export type Bindings = {
   DB: D1Database;
   KV: KVNamespace;
   R2: R2Bucket;
@@ -17,9 +18,14 @@ export interface Env {
   AI: any; // Workers AI binding
   ANALYTICS: AnalyticsEngineDataset;
   ENVIRONMENT: string;
-}
+  JWT_SECRET: string;
+};
 
-const app = new Hono<{ Bindings: Env }>();
+export type Env = {
+  Bindings: Bindings;
+};
+
+const app = new Hono<Env>();
 
 // Middleware
 app.use("*", cors());
@@ -33,7 +39,9 @@ app.get("/", (c) => {
   });
 });
 
-// API routes will be added in subsequent milestones
+// API routes
+app.route("/api/v1/auth", auth);
+
 app.get("/api/v1/health", (c) => {
   return c.json({ status: "ok" });
 });
@@ -43,7 +51,7 @@ export default app;
 // Queue consumer (will be implemented in M6.3)
 export async function queue(
   batch: MessageBatch<any>,
-  env: Env
+  env: Bindings
 ): Promise<void> {
   for (const message of batch.messages) {
     console.log("Processing message:", message.body);

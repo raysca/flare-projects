@@ -1,0 +1,70 @@
+name = "linearflow-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+node_compat = true
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "linearflow-db"
+database_id = "" # Will be populated after: wrangler d1 create linearflow-db
+
+# KV namespace for caching and sessions
+[[kv_namespaces]]
+binding = "KV"
+id = "" # Will be populated after: wrangler kv:namespace create KV
+
+# R2 bucket for file storage
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "linearflow-files"
+
+# Durable Objects for real-time collaboration
+[[durable_objects.bindings]]
+name = "WORKSPACE_DO"
+class_name = "WorkspaceDO"
+script_name = "linearflow-worker"
+
+[[durable_objects.bindings]]
+name = "ISSUE_DO"
+class_name = "IssueDO"
+script_name = "linearflow-worker"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["WorkspaceDO", "IssueDO"]
+
+# Queue for async processing (emails, webhooks, etc.)
+[[queues.producers]]
+binding = "QUEUE"
+queue = "linearflow-queue"
+
+[[queues.consumers]]
+queue = "linearflow-queue"
+max_batch_size = 10
+max_batch_timeout = 30
+
+# Vectorize for semantic search
+[[vectorize]]
+binding = "VECTORIZE"
+index_name = "linearflow-issues"
+
+# Workers AI binding
+[ai]
+binding = "AI"
+
+# Analytics Engine for metrics
+[[analytics_engine_datasets]]
+binding = "ANALYTICS"
+
+# Environment variables (example - update as needed)
+[vars]
+ENVIRONMENT = "development"
+
+# Development configuration
+[env.dev]
+name = "linearflow-worker-dev"
+
+# Production configuration
+[env.production]
+name = "linearflow-worker"

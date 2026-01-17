@@ -7,7 +7,7 @@ nodejs_compat = true
 [[d1_databases]]
 binding = "DB"
 database_name = "linearflow-db"
-database_id = "" # Will be populated after: wrangler d1 create linearflow-db
+database_id = "local-db-id" # Will be populated after: wrangler d1 create linearflow-db
 
 # KV namespace for caching and sessions
 [[kv_namespaces]]

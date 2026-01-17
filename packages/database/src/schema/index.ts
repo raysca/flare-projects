@@ -12,3 +12,4 @@ export * from "./comments";
 export * from "./attachments";
 export * from "./notifications";
 export * from "./activity";
+export * from "./invitations";

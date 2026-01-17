@@ -7,7 +7,7 @@ export { WorkspaceDO } from "./durable-objects/workspace";
 export { IssueDO } from "./durable-objects/issue";
 
 // Bindings type definition
-export interface Env {
+export type Bindings = {
   DB: D1Database;
   KV: KVNamespace;
   R2: R2Bucket;
@@ -19,7 +19,11 @@ export interface Env {
   ANALYTICS: AnalyticsEngineDataset;
   ENVIRONMENT: string;
   JWT_SECRET: string;
-}
+};
+
+export type Env = {
+  Bindings: Bindings;
+};
 
 const app = new Hono<Env>();
 
@@ -47,7 +51,7 @@ export default app;
 // Queue consumer (will be implemented in M6.3)
 export async function queue(
   batch: MessageBatch<any>,
-  env: Env
+  env: Bindings
 ): Promise<void> {
   for (const message of batch.messages) {
     console.log("Processing message:", message.body);

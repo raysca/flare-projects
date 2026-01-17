@@ -12,7 +12,7 @@ import {
 import { createDrizzleClient, users } from "@linearflow/database";
 import { eq } from "drizzle-orm";
 import type { Env } from "../index";
-import { authMiddleware, type AuthContext } from "../middleware/auth";
+import { authMiddleware, type Variables } from "../middleware/auth";
 
 const auth = new Hono<Env>();
 

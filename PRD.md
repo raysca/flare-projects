@@ -276,10 +276,9 @@
 - *Duration: 4 days*
 
 **M1.5: Basic Frontend Setup** *(Depends on: M1.1)*
-- Next.js app structure with App Router
+- Vite app structure with Tanstack Router & Query
 - Authentication pages (login, signup)
 - Layout components (sidebar, header)
-- Hono RPC client setup
 - Basic routing structure
 - *Duration: 3 days*
 

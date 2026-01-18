@@ -30,6 +30,12 @@ const createTeamSchema = z.object({
     icon: z.string().optional(),
 });
 
+const createLabelSchema = z.object({
+    name: z.string().min(1, "Label name is required"),
+    color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Color must be a valid hex color (e.g., #EF4444)"),
+    description: z.string().optional(),
+});
+
 // Middleware to ensure user is logged in
 app.use("*", authMiddleware);
 
@@ -403,6 +409,54 @@ app.get("/:id/labels", async (c) => {
         .where(eq(labels.workspaceId, workspaceId));
 
     return c.json(workspaceLabels);
+});
+
+/**
+ * POST /:id/labels
+ * Create a new label in the workspace
+ */
+app.post("/:id/labels", zValidator("json", createLabelSchema), async (c) => {
+    const workspaceId = c.req.param("id");
+    const user = c.var.user;
+    const data = c.req.valid("json");
+    const db = createDrizzleClient(c.env.DB);
+
+    // Check membership
+    const member = await db
+        .select()
+        .from(workspaceMembers)
+        .where(and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.userId, user.id)))
+        .get();
+
+    if (!member) {
+        return c.json({ error: "Access denied" }, 403);
+    }
+
+    // Check if label with same name already exists in workspace (optional, depending on requirements)
+    const existingLabel = await db
+        .select()
+        .from(labels)
+        .where(and(eq(labels.workspaceId, workspaceId), eq(labels.name, data.name)))
+        .get();
+
+    if (existingLabel) {
+        return c.json({ error: "Label with this name already exists in workspace" }, 409);
+    }
+
+    // Create label
+    const labelId = crypto.randomUUID();
+
+    await db.insert(labels).values({
+        id: labelId,
+        workspaceId,
+        name: data.name,
+        color: data.color,
+        description: data.description,
+    });
+
+    const newLabel = await db.select().from(labels).where(eq(labels.id, labelId)).get();
+
+    return c.json(newLabel, 201);
 });
 
 export default app;

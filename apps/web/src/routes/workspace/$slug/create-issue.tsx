@@ -1,3 +1,4 @@
+// ... imports
 import { Button } from '../../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card'
 import { Input } from '../../../components/ui/input'
@@ -23,18 +24,26 @@ interface Team {
   identifier: string
 }
 
+interface Project {
+  id: string
+  name: string
+  identifier: string
+}
+
 function CreateIssue() {
   const { slug } = Route.useParams()
   const navigate = useNavigate()
 
   const [workspace, setWorkspace] = useState<Workspace | null>(null)
   const [teams, setTeams] = useState<Team[]>([])
+  const [projects, setProjects] = useState<Project[]>([])
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [status, setStatus] = useState('backlog')
   const [priority, setPriority] = useState('no_priority')
   const [teamId, setTeamId] = useState('')
+  const [projectId, setProjectId] = useState('')
 
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -49,9 +58,14 @@ function CreateIssue() {
 
         if (found) {
           setWorkspace(found)
-          // 2. Get teams
-          const teamsData = await apiFetch<Team[]>(`/workspaces/${found.id}/teams`)
+          // 2. Get teams & projects in parallel
+          const [teamsData, projectsData] = await Promise.all([
+            apiFetch<Team[]>(`/workspaces/${found.id}/teams`),
+            apiFetch<Project[]>(`/projects?workspaceId=${found.id}`)
+          ])
+
           setTeams(teamsData)
+          setProjects(projectsData)
 
           // Auto-select first team
           if (teamsData.length > 0) {
@@ -84,6 +98,7 @@ function CreateIssue() {
         body: JSON.stringify({
           workspaceId: workspace.id,
           teamId,
+          projectId: projectId || undefined,
           title,
           description,
           status,
@@ -115,22 +130,36 @@ function CreateIssue() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="team">Team</Label>
-              <select
-                id="team"
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                value={teamId}
-                onChange={(e) => setTeamId(e.target.value)}
-                required
-              >
-                {teams.map(t => (
-                  <option key={t.id} value={t.id}>{t.name} ({t.identifier})</option>
-                ))}
-              </select>
-              {teams.length === 0 && (
-                <p className="text-xs text-destructive">No teams found. Please create a team in workspace settings.</p>
-              )}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="team">Team</Label>
+                <select
+                  id="team"
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={teamId}
+                  onChange={(e) => setTeamId(e.target.value)}
+                  required
+                >
+                  {teams.map(t => (
+                    <option key={t.id} value={t.id}>{t.name} ({t.identifier})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="project">Project (Optional)</Label>
+                <select
+                  id="project"
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={projectId}
+                  onChange={(e) => setProjectId(e.target.value)}
+                >
+                  <option value="">No Project</option>
+                  {projects.map(p => (
+                    <option key={p.id} value={p.id}>{p.name} ({p.identifier})</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="space-y-2">

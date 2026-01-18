@@ -25,7 +25,11 @@ import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.se
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoApiTqTodosRouteImport } from './routes/demo/api.tq-todos'
 import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
+import { Route as WorkspaceSlugProjectsIndexRouteImport } from './routes/workspace/$slug/projects/index'
 import { Route as DemoStartSsrIndexRouteImport } from './routes/demo/start.ssr.index'
+import { Route as WorkspaceSlugProjectsNewRouteImport } from './routes/workspace/$slug/projects/new'
+import { Route as WorkspaceSlugProjectsProjectIdRouteImport } from './routes/workspace/$slug/projects/$projectId'
+import { Route as WorkspaceSlugIssueIssueIdRouteImport } from './routes/workspace/$slug/issue/$issueId'
 import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr.spa-mode'
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
 import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
@@ -111,11 +115,35 @@ const DemoApiNamesRoute = DemoApiNamesRouteImport.update({
   path: '/demo/api/names',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkspaceSlugProjectsIndexRoute =
+  WorkspaceSlugProjectsIndexRouteImport.update({
+    id: '/projects/',
+    path: '/projects/',
+    getParentRoute: () => WorkspaceSlugRoute,
+  } as any)
 const DemoStartSsrIndexRoute = DemoStartSsrIndexRouteImport.update({
   id: '/demo/start/ssr/',
   path: '/demo/start/ssr/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkspaceSlugProjectsNewRoute =
+  WorkspaceSlugProjectsNewRouteImport.update({
+    id: '/projects/new',
+    path: '/projects/new',
+    getParentRoute: () => WorkspaceSlugRoute,
+  } as any)
+const WorkspaceSlugProjectsProjectIdRoute =
+  WorkspaceSlugProjectsProjectIdRouteImport.update({
+    id: '/projects/$projectId',
+    path: '/projects/$projectId',
+    getParentRoute: () => WorkspaceSlugRoute,
+  } as any)
+const WorkspaceSlugIssueIssueIdRoute =
+  WorkspaceSlugIssueIssueIdRouteImport.update({
+    id: '/issue/$issueId',
+    path: '/issue/$issueId',
+    getParentRoute: () => WorkspaceSlugRoute,
+  } as any)
 const DemoStartSsrSpaModeRoute = DemoStartSsrSpaModeRouteImport.update({
   id: '/demo/start/ssr/spa-mode',
   path: '/demo/start/ssr/spa-mode',
@@ -152,7 +180,11 @@ export interface FileRoutesByFullPath {
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
+  '/workspace/$slug/issue/$issueId': typeof WorkspaceSlugIssueIssueIdRoute
+  '/workspace/$slug/projects/$projectId': typeof WorkspaceSlugProjectsProjectIdRoute
+  '/workspace/$slug/projects/new': typeof WorkspaceSlugProjectsNewRoute
   '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
+  '/workspace/$slug/projects/': typeof WorkspaceSlugProjectsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -173,7 +205,11 @@ export interface FileRoutesByTo {
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
+  '/workspace/$slug/issue/$issueId': typeof WorkspaceSlugIssueIssueIdRoute
+  '/workspace/$slug/projects/$projectId': typeof WorkspaceSlugProjectsProjectIdRoute
+  '/workspace/$slug/projects/new': typeof WorkspaceSlugProjectsNewRoute
   '/demo/start/ssr': typeof DemoStartSsrIndexRoute
+  '/workspace/$slug/projects': typeof WorkspaceSlugProjectsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -196,7 +232,11 @@ export interface FileRoutesById {
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
+  '/workspace/$slug/issue/$issueId': typeof WorkspaceSlugIssueIssueIdRoute
+  '/workspace/$slug/projects/$projectId': typeof WorkspaceSlugProjectsProjectIdRoute
+  '/workspace/$slug/projects/new': typeof WorkspaceSlugProjectsNewRoute
   '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
+  '/workspace/$slug/projects/': typeof WorkspaceSlugProjectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -220,7 +260,11 @@ export interface FileRouteTypes {
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
+    | '/workspace/$slug/issue/$issueId'
+    | '/workspace/$slug/projects/$projectId'
+    | '/workspace/$slug/projects/new'
     | '/demo/start/ssr/'
+    | '/workspace/$slug/projects/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -241,7 +285,11 @@ export interface FileRouteTypes {
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
+    | '/workspace/$slug/issue/$issueId'
+    | '/workspace/$slug/projects/$projectId'
+    | '/workspace/$slug/projects/new'
     | '/demo/start/ssr'
+    | '/workspace/$slug/projects'
   id:
     | '__root__'
     | '/'
@@ -263,7 +311,11 @@ export interface FileRouteTypes {
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
+    | '/workspace/$slug/issue/$issueId'
+    | '/workspace/$slug/projects/$projectId'
+    | '/workspace/$slug/projects/new'
     | '/demo/start/ssr/'
+    | '/workspace/$slug/projects/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -399,12 +451,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoApiNamesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workspace/$slug/projects/': {
+      id: '/workspace/$slug/projects/'
+      path: '/projects'
+      fullPath: '/workspace/$slug/projects/'
+      preLoaderRoute: typeof WorkspaceSlugProjectsIndexRouteImport
+      parentRoute: typeof WorkspaceSlugRoute
+    }
     '/demo/start/ssr/': {
       id: '/demo/start/ssr/'
       path: '/demo/start/ssr'
       fullPath: '/demo/start/ssr/'
       preLoaderRoute: typeof DemoStartSsrIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/workspace/$slug/projects/new': {
+      id: '/workspace/$slug/projects/new'
+      path: '/projects/new'
+      fullPath: '/workspace/$slug/projects/new'
+      preLoaderRoute: typeof WorkspaceSlugProjectsNewRouteImport
+      parentRoute: typeof WorkspaceSlugRoute
+    }
+    '/workspace/$slug/projects/$projectId': {
+      id: '/workspace/$slug/projects/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/workspace/$slug/projects/$projectId'
+      preLoaderRoute: typeof WorkspaceSlugProjectsProjectIdRouteImport
+      parentRoute: typeof WorkspaceSlugRoute
+    }
+    '/workspace/$slug/issue/$issueId': {
+      id: '/workspace/$slug/issue/$issueId'
+      path: '/issue/$issueId'
+      fullPath: '/workspace/$slug/issue/$issueId'
+      preLoaderRoute: typeof WorkspaceSlugIssueIssueIdRouteImport
+      parentRoute: typeof WorkspaceSlugRoute
     }
     '/demo/start/ssr/spa-mode': {
       id: '/demo/start/ssr/spa-mode'
@@ -435,6 +515,10 @@ interface WorkspaceSlugRouteChildren {
   WorkspaceSlugSettingsRoute: typeof WorkspaceSlugSettingsRoute
   WorkspaceSlugTeamRoute: typeof WorkspaceSlugTeamRoute
   WorkspaceSlugIndexRoute: typeof WorkspaceSlugIndexRoute
+  WorkspaceSlugIssueIssueIdRoute: typeof WorkspaceSlugIssueIssueIdRoute
+  WorkspaceSlugProjectsProjectIdRoute: typeof WorkspaceSlugProjectsProjectIdRoute
+  WorkspaceSlugProjectsNewRoute: typeof WorkspaceSlugProjectsNewRoute
+  WorkspaceSlugProjectsIndexRoute: typeof WorkspaceSlugProjectsIndexRoute
 }
 
 const WorkspaceSlugRouteChildren: WorkspaceSlugRouteChildren = {
@@ -442,6 +526,10 @@ const WorkspaceSlugRouteChildren: WorkspaceSlugRouteChildren = {
   WorkspaceSlugSettingsRoute: WorkspaceSlugSettingsRoute,
   WorkspaceSlugTeamRoute: WorkspaceSlugTeamRoute,
   WorkspaceSlugIndexRoute: WorkspaceSlugIndexRoute,
+  WorkspaceSlugIssueIssueIdRoute: WorkspaceSlugIssueIssueIdRoute,
+  WorkspaceSlugProjectsProjectIdRoute: WorkspaceSlugProjectsProjectIdRoute,
+  WorkspaceSlugProjectsNewRoute: WorkspaceSlugProjectsNewRoute,
+  WorkspaceSlugProjectsIndexRoute: WorkspaceSlugProjectsIndexRoute,
 }
 
 const WorkspaceSlugRouteWithChildren = WorkspaceSlugRoute._addFileChildren(

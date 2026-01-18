@@ -108,18 +108,20 @@ function WorkspaceIndex() {
 
             <div className="space-y-2">
                 {issues.map((issue) => (
-                    <Card key={issue.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
-                        <CardHeader className="p-4">
-                            <div className="flex items-center gap-3">
-                                <span className="text-muted-foreground font-mono text-sm">{workspace.slug.toUpperCase()}-{issue.number}</span>
-                                {getStatusIcon(issue.status)}
-                                <h3 className="font-medium text-sm text-foreground">{issue.title}</h3>
-                                <div className="ml-auto text-xs text-muted-foreground">
-                                    {new Date(issue.createdAt).toLocaleDateString()}
+                    <Link key={issue.id} to="/workspace/$slug/issue/$issueId" params={{ slug, issueId: issue.id }}>
+                        <Card className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+                            <CardHeader className="p-4">
+                                <div className="flex items-center gap-3">
+                                    <span className="text-muted-foreground font-mono text-sm">{workspace.slug.toUpperCase()}-{issue.number}</span>
+                                    {getStatusIcon(issue.status)}
+                                    <h3 className="font-medium text-sm text-foreground">{issue.title}</h3>
+                                    <div className="ml-auto text-xs text-muted-foreground">
+                                        {new Date(issue.createdAt).toLocaleDateString()}
+                                    </div>
                                 </div>
-                            </div>
-                        </CardHeader>
-                    </Card>
+                            </CardHeader>
+                        </Card>
+                    </Link>
                 ))}
             </div>
         </div>

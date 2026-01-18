@@ -17,6 +17,7 @@ import {
   commentReactions,
   notificationPreferences,
 } from "./data";
+import { hashPassword } from "@linearflow/shared";
 
 /**
  * Batch insert helper for D1 which has a limit on SQL variables
@@ -98,7 +99,12 @@ export async function seed(
     // Seed users
     if (shouldSeed("users")) {
       console.log("👤 Seeding users...");
-      await batchInsert(db, schema.users, users);
+      const password = await hashPassword("password123");
+      const usersToSeed = users.map((user) => ({
+        ...user,
+        passwordHash: password,
+      }));
+      await batchInsert(db, schema.users, usersToSeed);
       log(`   Added ${users.length} users`);
       console.log(`   ✓ Created ${users.length} users`);
     }

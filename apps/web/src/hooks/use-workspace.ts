@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api'
 import { workspaceKeys } from '@/lib/query-keys'
-import type { Workspace, Team, User, Label, Project } from '@/types/issues'
+import type { Workspace, Team, User, Label, Project, Cycle } from '@/types/issues'
 
 // Fetch all workspaces for the current user
 export function useWorkspaces() {
@@ -62,6 +62,15 @@ export function useWorkspaceProjects(workspaceId: string | undefined) {
   return useQuery({
     queryKey: workspaceKeys.projects(workspaceId ?? ''),
     queryFn: () => apiFetch<Project[]>(`/projects?workspaceId=${workspaceId}`),
+    enabled: !!workspaceId,
+  })
+}
+
+// Fetch cycles for a workspace
+export function useWorkspaceCycles(workspaceId: string | undefined) {
+  return useQuery({
+    queryKey: workspaceKeys.cycles(workspaceId ?? ''),
+    queryFn: () => apiFetch<Cycle[]>(`/cycles?workspaceId=${workspaceId}`),
     enabled: !!workspaceId,
   })
 }

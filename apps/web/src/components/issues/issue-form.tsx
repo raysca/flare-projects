@@ -22,6 +22,7 @@ import type {
   User,
   Label,
   CreateIssueInput,
+  Cycle,
 } from '@/types/issues'
 
 interface IssueFormProps {
@@ -30,6 +31,7 @@ interface IssueFormProps {
   projects: Project[]
   members: User[]
   labels: Label[]
+  cycles: Cycle[]
   onSubmit: (input: CreateIssueInput) => Promise<void>
   onCancel: () => void
   isSubmitting?: boolean
@@ -42,6 +44,7 @@ export function IssueForm({
   projects,
   members,
   labels,
+  cycles,
   onSubmit,
   onCancel,
   isSubmitting,
@@ -53,6 +56,7 @@ export function IssueForm({
   )
   const [teamId, setTeamId] = useState(initialValues?.teamId ?? teams[0]?.id ?? '')
   const [projectId, setProjectId] = useState(initialValues?.projectId ?? '')
+  const [cycleId, setCycleId] = useState(initialValues?.cycleId ?? '')
   const [status, setStatus] = useState<IssueStatus>(
     initialValues?.status ?? 'backlog'
   )
@@ -92,6 +96,7 @@ export function IssueForm({
         priority,
         assigneeId,
         projectId: projectId || undefined,
+        cycleId: cycleId || undefined,
         labelIds: labelIds.length > 0 ? labelIds : undefined,
       })
     } catch (err) {
@@ -121,12 +126,12 @@ export function IssueForm({
 
         <div className="space-y-2">
           <FormLabel htmlFor="project">Project (Optional)</FormLabel>
-          <Select value={projectId} onValueChange={setProjectId}>
+          <Select value={projectId || 'no_project'} onValueChange={(val) => setProjectId(val === 'no_project' ? '' : val)}>
             <SelectTrigger>
               <SelectValue placeholder="No project" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">No Project</SelectItem>
+              <SelectItem value="no_project">No Project</SelectItem>
               {projects.map((project) => (
                 <SelectItem key={project.id} value={project.id}>
                   {project.name} ({project.identifier})
@@ -135,6 +140,24 @@ export function IssueForm({
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      {/* Cycle (Optional) */}
+      <div className="space-y-2">
+        <FormLabel htmlFor="cycle">Cycle (Optional)</FormLabel>
+        <Select value={cycleId || 'no_cycle'} onValueChange={(val) => setCycleId(val === 'no_cycle' ? '' : val)}>
+          <SelectTrigger>
+            <SelectValue placeholder="No cycle" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="no_cycle">No Cycle</SelectItem>
+            {cycles.map((cycle) => (
+              <SelectItem key={cycle.id} value={cycle.id}>
+                {cycle.name} ({cycle.status})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Title */}

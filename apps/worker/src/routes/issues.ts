@@ -1,7 +1,8 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { createDrizzleClient, issues, issueLabels, workspaceMembers, teams, comments, users, labels, projects } from "@linearflow/database";
+import { createDrizzleClient, issues, issueLabels, workspaceMembers, teams, comments, users, labels, projects, cycles } from "@linearflow/database";
+
 // ...
 // In GET /:id
 // ...
@@ -23,7 +24,9 @@ const createIssueSchema = z.object({
     type: z.enum(["bug", "feature", "improvement", "task"]).optional(),
     assigneeId: z.string().optional(),
     projectId: z.string().uuid().optional(),
+    cycleId: z.string().uuid().optional(),
     parentId: z.string().optional(),
+
     estimate: z.number().int().nonnegative().optional(),
     dueDate: z.string().datetime().optional(), // Expecting ISO string
     labelIds: z.array(z.string()).optional(),
@@ -37,7 +40,9 @@ const updateIssueSchema = z.object({
     type: z.enum(["bug", "feature", "improvement", "task"]).optional(),
     assigneeId: z.string().optional().nullable(),
     projectId: z.string().uuid().optional().nullable(),
+    cycleId: z.string().uuid().optional().nullable(),
     parentId: z.string().optional().nullable(),
+
     estimate: z.number().int().nonnegative().optional().nullable(),
     dueDate: z.string().datetime().optional().nullable(),
     labelIds: z.array(z.string()).optional(), // Replace all labels
@@ -241,14 +246,22 @@ app.get("/:id", async (c) => {
                 id: projects.id,
                 name: projects.name,
                 identifier: projects.identifier
+            },
+            cycle: {
+                id: cycles.id,
+                name: cycles.name,
+                startDate: cycles.startDate,
+                endDate: cycles.endDate
             }
         })
         .from(issues)
         .leftJoin(assignee, eq(issues.assigneeId, assignee.id))
         .leftJoin(reporter, eq(issues.reporterId, reporter.id))
         .leftJoin(projects, eq(issues.projectId, projects.id))
+        .leftJoin(cycles, eq(issues.cycleId, cycles.id))
         .where(eq(issues.id, issueId))
         .get();
+
 
     if (!issue) {
         return c.json({ error: "Issue not found" }, 404);

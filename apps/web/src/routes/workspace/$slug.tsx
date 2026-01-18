@@ -1,6 +1,6 @@
 import { Button } from '../../components/ui/button'
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
-import { LayoutDashboard, Users, Settings, Network } from 'lucide-react'
+import { LayoutDashboard, Users, Settings, Network, Repeat } from 'lucide-react'
 
 export const Route = createFileRoute('/workspace/$slug')({
     component: WorkspaceLayout,
@@ -53,6 +53,14 @@ function WorkspaceLayout() {
                     >
                         <Network className="w-4 h-4 text-slate-400 group-hover:text-slate-500" />
                         Projects
+                    </Link>
+                    <Link
+                        to="/workspace/$slug/cycles"
+                        params={{ slug }}
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md text-slate-700 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700 group transition-colors"
+                    >
+                        <Repeat className="w-4 h-4 text-slate-400 group-hover:text-slate-500" />
+                        Cycles
                     </Link>
                     <Link
                         to="/workspace/$slug/settings"

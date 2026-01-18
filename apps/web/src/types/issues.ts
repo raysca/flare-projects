@@ -41,6 +41,15 @@ export interface Label {
   color: string
 }
 
+// Cycle type
+export interface Cycle {
+  id: string
+  name: string
+  startDate: string
+  endDate: string
+  status: 'upcoming' | 'active' | 'completed'
+}
+
 // Project type
 export interface Project {
   id: string
@@ -82,6 +91,8 @@ export interface Issue {
   reporterId: string
   project?: Project
   projectId?: string
+  cycle?: Cycle
+  cycleId?: string
   labels?: Label[]
   estimate?: number
   dueDate?: string
@@ -111,6 +122,7 @@ export interface IssueFilters {
   assigneeId?: string | 'unassigned'
   labelIds?: string[]
   projectId?: string
+  cycleId?: string
   search?: string
 }
 
@@ -141,6 +153,7 @@ export interface CreateIssueInput {
   type?: IssueType
   assigneeId?: string
   projectId?: string
+  cycleId?: string
   labelIds?: string[]
   estimate?: number
   dueDate?: string
@@ -154,6 +167,7 @@ export interface UpdateIssueInput {
   type?: IssueType
   assigneeId?: string | null
   projectId?: string | null
+  cycleId?: string | null
   labelIds?: string[]
   estimate?: number | null
   dueDate?: string | null

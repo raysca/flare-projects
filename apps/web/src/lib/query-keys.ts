@@ -19,6 +19,8 @@ export const workspaceKeys = {
     [...workspaceKeys.detail(workspaceId), 'labels'] as const,
   projects: (workspaceId: string) =>
     [...workspaceKeys.detail(workspaceId), 'projects'] as const,
+  cycles: (workspaceId: string) =>
+    [...workspaceKeys.detail(workspaceId), 'cycles'] as const,
 }
 
 export const issueKeys = {

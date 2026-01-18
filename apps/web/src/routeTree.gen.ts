@@ -26,10 +26,13 @@ import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api
 import { Route as DemoApiTqTodosRouteImport } from './routes/demo/api.tq-todos'
 import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
 import { Route as WorkspaceSlugProjectsIndexRouteImport } from './routes/workspace/$slug/projects/index'
+import { Route as WorkspaceSlugCyclesIndexRouteImport } from './routes/workspace/$slug/cycles/index'
 import { Route as DemoStartSsrIndexRouteImport } from './routes/demo/start.ssr.index'
 import { Route as WorkspaceSlugProjectsNewRouteImport } from './routes/workspace/$slug/projects/new'
 import { Route as WorkspaceSlugProjectsProjectIdRouteImport } from './routes/workspace/$slug/projects/$projectId'
 import { Route as WorkspaceSlugIssueIssueIdRouteImport } from './routes/workspace/$slug/issue/$issueId'
+import { Route as WorkspaceSlugCyclesNewRouteImport } from './routes/workspace/$slug/cycles/new'
+import { Route as WorkspaceSlugCyclesCycleIdRouteImport } from './routes/workspace/$slug/cycles/$cycleId'
 import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr.spa-mode'
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
 import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
@@ -121,6 +124,12 @@ const WorkspaceSlugProjectsIndexRoute =
     path: '/projects/',
     getParentRoute: () => WorkspaceSlugRoute,
   } as any)
+const WorkspaceSlugCyclesIndexRoute =
+  WorkspaceSlugCyclesIndexRouteImport.update({
+    id: '/cycles/',
+    path: '/cycles/',
+    getParentRoute: () => WorkspaceSlugRoute,
+  } as any)
 const DemoStartSsrIndexRoute = DemoStartSsrIndexRouteImport.update({
   id: '/demo/start/ssr/',
   path: '/demo/start/ssr/',
@@ -142,6 +151,17 @@ const WorkspaceSlugIssueIssueIdRoute =
   WorkspaceSlugIssueIssueIdRouteImport.update({
     id: '/issue/$issueId',
     path: '/issue/$issueId',
+    getParentRoute: () => WorkspaceSlugRoute,
+  } as any)
+const WorkspaceSlugCyclesNewRoute = WorkspaceSlugCyclesNewRouteImport.update({
+  id: '/cycles/new',
+  path: '/cycles/new',
+  getParentRoute: () => WorkspaceSlugRoute,
+} as any)
+const WorkspaceSlugCyclesCycleIdRoute =
+  WorkspaceSlugCyclesCycleIdRouteImport.update({
+    id: '/cycles/$cycleId',
+    path: '/cycles/$cycleId',
     getParentRoute: () => WorkspaceSlugRoute,
   } as any)
 const DemoStartSsrSpaModeRoute = DemoStartSsrSpaModeRouteImport.update({
@@ -180,10 +200,13 @@ export interface FileRoutesByFullPath {
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
+  '/workspace/$slug/cycles/$cycleId': typeof WorkspaceSlugCyclesCycleIdRoute
+  '/workspace/$slug/cycles/new': typeof WorkspaceSlugCyclesNewRoute
   '/workspace/$slug/issue/$issueId': typeof WorkspaceSlugIssueIssueIdRoute
   '/workspace/$slug/projects/$projectId': typeof WorkspaceSlugProjectsProjectIdRoute
   '/workspace/$slug/projects/new': typeof WorkspaceSlugProjectsNewRoute
   '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
+  '/workspace/$slug/cycles/': typeof WorkspaceSlugCyclesIndexRoute
   '/workspace/$slug/projects/': typeof WorkspaceSlugProjectsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -205,10 +228,13 @@ export interface FileRoutesByTo {
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
+  '/workspace/$slug/cycles/$cycleId': typeof WorkspaceSlugCyclesCycleIdRoute
+  '/workspace/$slug/cycles/new': typeof WorkspaceSlugCyclesNewRoute
   '/workspace/$slug/issue/$issueId': typeof WorkspaceSlugIssueIssueIdRoute
   '/workspace/$slug/projects/$projectId': typeof WorkspaceSlugProjectsProjectIdRoute
   '/workspace/$slug/projects/new': typeof WorkspaceSlugProjectsNewRoute
   '/demo/start/ssr': typeof DemoStartSsrIndexRoute
+  '/workspace/$slug/cycles': typeof WorkspaceSlugCyclesIndexRoute
   '/workspace/$slug/projects': typeof WorkspaceSlugProjectsIndexRoute
 }
 export interface FileRoutesById {
@@ -232,10 +258,13 @@ export interface FileRoutesById {
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
+  '/workspace/$slug/cycles/$cycleId': typeof WorkspaceSlugCyclesCycleIdRoute
+  '/workspace/$slug/cycles/new': typeof WorkspaceSlugCyclesNewRoute
   '/workspace/$slug/issue/$issueId': typeof WorkspaceSlugIssueIssueIdRoute
   '/workspace/$slug/projects/$projectId': typeof WorkspaceSlugProjectsProjectIdRoute
   '/workspace/$slug/projects/new': typeof WorkspaceSlugProjectsNewRoute
   '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
+  '/workspace/$slug/cycles/': typeof WorkspaceSlugCyclesIndexRoute
   '/workspace/$slug/projects/': typeof WorkspaceSlugProjectsIndexRoute
 }
 export interface FileRouteTypes {
@@ -260,10 +289,13 @@ export interface FileRouteTypes {
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
+    | '/workspace/$slug/cycles/$cycleId'
+    | '/workspace/$slug/cycles/new'
     | '/workspace/$slug/issue/$issueId'
     | '/workspace/$slug/projects/$projectId'
     | '/workspace/$slug/projects/new'
     | '/demo/start/ssr/'
+    | '/workspace/$slug/cycles/'
     | '/workspace/$slug/projects/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -285,10 +317,13 @@ export interface FileRouteTypes {
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
+    | '/workspace/$slug/cycles/$cycleId'
+    | '/workspace/$slug/cycles/new'
     | '/workspace/$slug/issue/$issueId'
     | '/workspace/$slug/projects/$projectId'
     | '/workspace/$slug/projects/new'
     | '/demo/start/ssr'
+    | '/workspace/$slug/cycles'
     | '/workspace/$slug/projects'
   id:
     | '__root__'
@@ -311,10 +346,13 @@ export interface FileRouteTypes {
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
+    | '/workspace/$slug/cycles/$cycleId'
+    | '/workspace/$slug/cycles/new'
     | '/workspace/$slug/issue/$issueId'
     | '/workspace/$slug/projects/$projectId'
     | '/workspace/$slug/projects/new'
     | '/demo/start/ssr/'
+    | '/workspace/$slug/cycles/'
     | '/workspace/$slug/projects/'
   fileRoutesById: FileRoutesById
 }
@@ -458,6 +496,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspaceSlugProjectsIndexRouteImport
       parentRoute: typeof WorkspaceSlugRoute
     }
+    '/workspace/$slug/cycles/': {
+      id: '/workspace/$slug/cycles/'
+      path: '/cycles'
+      fullPath: '/workspace/$slug/cycles/'
+      preLoaderRoute: typeof WorkspaceSlugCyclesIndexRouteImport
+      parentRoute: typeof WorkspaceSlugRoute
+    }
     '/demo/start/ssr/': {
       id: '/demo/start/ssr/'
       path: '/demo/start/ssr'
@@ -484,6 +529,20 @@ declare module '@tanstack/react-router' {
       path: '/issue/$issueId'
       fullPath: '/workspace/$slug/issue/$issueId'
       preLoaderRoute: typeof WorkspaceSlugIssueIssueIdRouteImport
+      parentRoute: typeof WorkspaceSlugRoute
+    }
+    '/workspace/$slug/cycles/new': {
+      id: '/workspace/$slug/cycles/new'
+      path: '/cycles/new'
+      fullPath: '/workspace/$slug/cycles/new'
+      preLoaderRoute: typeof WorkspaceSlugCyclesNewRouteImport
+      parentRoute: typeof WorkspaceSlugRoute
+    }
+    '/workspace/$slug/cycles/$cycleId': {
+      id: '/workspace/$slug/cycles/$cycleId'
+      path: '/cycles/$cycleId'
+      fullPath: '/workspace/$slug/cycles/$cycleId'
+      preLoaderRoute: typeof WorkspaceSlugCyclesCycleIdRouteImport
       parentRoute: typeof WorkspaceSlugRoute
     }
     '/demo/start/ssr/spa-mode': {
@@ -515,9 +574,12 @@ interface WorkspaceSlugRouteChildren {
   WorkspaceSlugSettingsRoute: typeof WorkspaceSlugSettingsRoute
   WorkspaceSlugTeamRoute: typeof WorkspaceSlugTeamRoute
   WorkspaceSlugIndexRoute: typeof WorkspaceSlugIndexRoute
+  WorkspaceSlugCyclesCycleIdRoute: typeof WorkspaceSlugCyclesCycleIdRoute
+  WorkspaceSlugCyclesNewRoute: typeof WorkspaceSlugCyclesNewRoute
   WorkspaceSlugIssueIssueIdRoute: typeof WorkspaceSlugIssueIssueIdRoute
   WorkspaceSlugProjectsProjectIdRoute: typeof WorkspaceSlugProjectsProjectIdRoute
   WorkspaceSlugProjectsNewRoute: typeof WorkspaceSlugProjectsNewRoute
+  WorkspaceSlugCyclesIndexRoute: typeof WorkspaceSlugCyclesIndexRoute
   WorkspaceSlugProjectsIndexRoute: typeof WorkspaceSlugProjectsIndexRoute
 }
 
@@ -526,9 +588,12 @@ const WorkspaceSlugRouteChildren: WorkspaceSlugRouteChildren = {
   WorkspaceSlugSettingsRoute: WorkspaceSlugSettingsRoute,
   WorkspaceSlugTeamRoute: WorkspaceSlugTeamRoute,
   WorkspaceSlugIndexRoute: WorkspaceSlugIndexRoute,
+  WorkspaceSlugCyclesCycleIdRoute: WorkspaceSlugCyclesCycleIdRoute,
+  WorkspaceSlugCyclesNewRoute: WorkspaceSlugCyclesNewRoute,
   WorkspaceSlugIssueIssueIdRoute: WorkspaceSlugIssueIssueIdRoute,
   WorkspaceSlugProjectsProjectIdRoute: WorkspaceSlugProjectsProjectIdRoute,
   WorkspaceSlugProjectsNewRoute: WorkspaceSlugProjectsNewRoute,
+  WorkspaceSlugCyclesIndexRoute: WorkspaceSlugCyclesIndexRoute,
   WorkspaceSlugProjectsIndexRoute: WorkspaceSlugProjectsIndexRoute,
 }
 

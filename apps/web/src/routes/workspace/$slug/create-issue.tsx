@@ -10,6 +10,7 @@ import {
   useWorkspaceProjects,
   useWorkspaceMembers,
   useWorkspaceLabels,
+  useWorkspaceCycles,
 } from '@/hooks/use-workspace'
 import type { CreateIssueInput } from '@/types/issues'
 
@@ -34,6 +35,9 @@ function CreateIssue() {
   const { data: labels = [], isLoading: isLoadingLabels } = useWorkspaceLabels(
     workspace?.id
   )
+  const { data: cycles = [], isLoading: isLoadingCycles } = useWorkspaceCycles(
+    workspace?.id
+  )
 
   // Mutation
   const createIssue = useCreateIssue()
@@ -43,7 +47,8 @@ function CreateIssue() {
     isLoadingTeams ||
     isLoadingProjects ||
     isLoadingMembers ||
-    isLoadingLabels
+    isLoadingLabels ||
+    isLoadingCycles
 
   const handleSubmit = async (input: CreateIssueInput) => {
     await createIssue.mutateAsync(input)
@@ -122,6 +127,7 @@ function CreateIssue() {
             projects={projects}
             members={members}
             labels={labels}
+            cycles={cycles}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             isSubmitting={createIssue.isPending}

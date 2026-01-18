@@ -1,129 +1,296 @@
-import { Button } from '../../../components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card'
+import { useState, useCallback } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { LayoutDashboard, Plus, Circle, AlertCircle, CheckCircle2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { apiFetch } from '../../../lib/api'
+import { LayoutDashboard, Plus, Search, HelpCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { IssueTable } from '@/components/issues/issue-table'
+import { IssueBoard } from '@/components/issues/issue-board'
+import { ViewToggle } from '@/components/issues/view-toggle'
+import { IssueQuickCreate } from '@/components/issues/issue-quick-create'
+import { KeyboardShortcutsDialog } from '@/components/keyboard-shortcuts-dialog'
+import { useIssues, useCreateIssue, useUpdateIssue } from '@/hooks/use-issues'
+import {
+  useWorkspaceBySlug,
+  useWorkspaceTeams,
+} from '@/hooks/use-workspace'
+import { useViewMode } from '@/hooks/use-view-mode'
+import {
+  useKeyboardShortcuts,
+  useIssueListNavigation,
+} from '@/hooks/use-keyboard-shortcuts'
+import type { IssueStatus, IssueFilters } from '@/types/issues'
 
 export const Route = createFileRoute('/workspace/$slug/')({
-    component: WorkspaceIndex,
+  component: WorkspaceIndex,
 })
 
-interface Issue {
-    id: string
-    title: string
-    number: number
-    status: string
-    priority: string
-    createdAt: string
-}
-
-interface Workspace {
-    id: string
-    name: string
-    slug: string
-    role: string
-}
-
 function WorkspaceIndex() {
-    const { slug } = Route.useParams()
-    const navigate = useNavigate()
-    const [workspace, setWorkspace] = useState<Workspace | null>(null)
-    const [issues, setIssues] = useState<Issue[]>([])
-    const [isLoading, setIsLoading] = useState(true)
+  const { slug } = Route.useParams()
+  const navigate = useNavigate()
 
-    useEffect(() => {
-        const loadData = async () => {
-            try {
-                // 1. Get workspace by slug
-                const workspaces = await apiFetch<Workspace[]>('/workspaces')
-                const found = workspaces.find((w) => w.slug === slug)
+  // Data queries
+  const { data: workspace, isLoading: isLoadingWorkspace } =
+    useWorkspaceBySlug(slug)
+  const { data: teams = [] } = useWorkspaceTeams(workspace?.id)
 
-                if (found) {
-                    setWorkspace(found)
-                    // 2. Get issues
-                    const issuesData = await apiFetch<Issue[]>(`/issues?workspaceId=${found.id}`)
-                    setIssues(issuesData)
-                }
-            } catch (err) {
-                console.error("Failed to load workspace data", err)
-            } finally {
-                setIsLoading(false)
-            }
-        }
-        loadData()
-    }, [slug])
+  // Filters state (setter for future filter UI)
+  const [filters, _setFilters] = useState<IssueFilters>({})
+  const [searchQuery, setSearchQuery] = useState('')
 
-    if (isLoading) {
-        return <div className="p-8">Loading...</div>
-    }
+  const { data: issues = [], isLoading: isLoadingIssues } = useIssues(
+    workspace?.id,
+    { ...filters, search: searchQuery || undefined }
+  )
 
-    if (!workspace) {
-        return <div className="p-8">Workspace not found</div>
-    }
+  // View mode
+  const { viewMode, setViewMode } = useViewMode(slug)
 
-    if (issues.length === 0) {
-        return (
-            <div className="max-w-4xl mx-auto text-center py-20">
-                <div className="inline-flex items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 rounded-full mb-6">
-                    <LayoutDashboard className="w-12 h-12 text-slate-400" />
-                </div>
-                <h2 className="text-3xl font-bold mb-4">Welcome to {workspace.name}</h2>
-                <p className="text-muted-foreground max-w-lg mx-auto mb-8">
-                    You haven't created any issues yet. Get started by creating your first task, bug, or feature request.
-                </p>
-                <div className="flex justify-center gap-4">
-                    {/* We'll link to a create page */}
-                    <Link to="/workspace/$slug/create-issue" params={{ slug }}>
-                        <Button>
-                            <Plus className="w-4 h-4 mr-2" />
-                            Create Issue
-                        </Button>
-                    </Link>
-                </div>
-            </div>
-        )
-    }
+  // Selection state for keyboard navigation
+  const [selectedIssueId, setSelectedIssueId] = useState<string | undefined>()
 
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'done': return <CheckCircle2 className="w-4 h-4 text-green-500" />;
-            case 'in_progress': return <Circle className="w-4 h-4 text-yellow-500" />; // Half circle ideally
-            case 'todo': return <Circle className="w-4 h-4 text-slate-400" />;
-            default: return <Circle className="w-4 h-4 text-slate-400" />;
-        }
-    }
+  // Quick create state
+  const [quickCreateOpen, setQuickCreateOpen] = useState(false)
 
+  // Shortcuts dialog
+  const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false)
+
+  // Mutations
+  const createIssue = useCreateIssue()
+  const updateIssue = useUpdateIssue()
+
+  // Navigation handler for keyboard
+  const handleOpenIssue = useCallback(
+    (issueId: string) => {
+      navigate({
+        to: '/workspace/$slug/issue/$issueId',
+        params: { slug, issueId },
+      })
+    },
+    [navigate, slug]
+  )
+
+  // Keyboard navigation for issue list
+  useIssueListNavigation({
+    issues,
+    selectedId: selectedIssueId,
+    onSelect: setSelectedIssueId,
+    onOpen: handleOpenIssue,
+    enabled: viewMode === 'table',
+  })
+
+  // Quick create handler
+  const handleQuickCreate = async (title: string, status?: IssueStatus) => {
+    if (!workspace || teams.length === 0) return
+
+    await createIssue.mutateAsync({
+      workspaceId: workspace.id,
+      teamId: teams[0].id,
+      title,
+      status: status ?? 'backlog',
+    })
+  }
+
+  // Quick status change for keyboard shortcuts
+  const handleQuickStatusChange = useCallback(
+    async (status: IssueStatus) => {
+      if (!selectedIssueId) return
+      await updateIssue.mutateAsync({
+        issueId: selectedIssueId,
+        input: { status },
+      })
+    },
+    [selectedIssueId, updateIssue]
+  )
+
+  // Global keyboard shortcuts
+  useKeyboardShortcuts({
+    shortcuts: [
+      {
+        key: 'c',
+        handler: () => setQuickCreateOpen(true),
+        enabled: !quickCreateOpen,
+      },
+      {
+        key: '/',
+        handler: () => document.getElementById('search-input')?.focus(),
+      },
+      { key: '1', handler: () => handleQuickStatusChange('backlog') },
+      { key: '2', handler: () => handleQuickStatusChange('todo') },
+      { key: '3', handler: () => handleQuickStatusChange('in_progress') },
+      { key: '4', handler: () => handleQuickStatusChange('in_review') },
+      { key: '5', handler: () => handleQuickStatusChange('done') },
+      { key: '6', handler: () => handleQuickStatusChange('cancelled') },
+    ],
+    enabled: true,
+  })
+
+  if (isLoadingWorkspace) {
+    return <WorkspaceIndexSkeleton />
+  }
+
+  if (!workspace) {
     return (
-        <div className="max-w-5xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold">Issues</h2>
-                <Link to="/workspace/$slug/create-issue" params={{ slug }}>
-                    <Button>
-                        <Plus className="w-4 h-4 mr-2" />
-                        New Issue
-                    </Button>
-                </Link>
-            </div>
-
-            <div className="space-y-2">
-                {issues.map((issue) => (
-                    <Link key={issue.id} to="/workspace/$slug/issue/$issueId" params={{ slug, issueId: issue.id }}>
-                        <Card className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
-                            <CardHeader className="p-4">
-                                <div className="flex items-center gap-3">
-                                    <span className="text-muted-foreground font-mono text-sm">{workspace.slug.toUpperCase()}-{issue.number}</span>
-                                    {getStatusIcon(issue.status)}
-                                    <h3 className="font-medium text-sm text-foreground">{issue.title}</h3>
-                                    <div className="ml-auto text-xs text-muted-foreground">
-                                        {new Date(issue.createdAt).toLocaleDateString()}
-                                    </div>
-                                </div>
-                            </CardHeader>
-                        </Card>
-                    </Link>
-                ))}
-            </div>
-        </div>
+      <div className="p-8 text-center">
+        <p className="text-muted-foreground">Workspace not found</p>
+      </div>
     )
+  }
+
+  // Empty state
+  if (!isLoadingIssues && issues.length === 0 && !searchQuery && !filters.status?.length) {
+    return (
+      <div className="max-w-4xl mx-auto text-center py-20">
+        <div className="inline-flex items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 rounded-full mb-6">
+          <LayoutDashboard className="w-12 h-12 text-slate-400" />
+        </div>
+        <h2 className="text-3xl font-bold mb-4">Welcome to {workspace.name}</h2>
+        <p className="text-muted-foreground max-w-lg mx-auto mb-8">
+          You haven't created any issues yet. Get started by creating your first
+          task, bug, or feature request.
+        </p>
+        <div className="flex justify-center gap-4">
+          <Link to="/workspace/$slug/create-issue" params={{ slug }}>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Issue
+            </Button>
+          </Link>
+        </div>
+        <KeyboardShortcutsDialog
+          open={shortcutsDialogOpen}
+          onOpenChange={setShortcutsDialogOpen}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-full mx-auto">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <h2 className="text-2xl font-bold">Issues</h2>
+
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          {/* Search */}
+          <div className="relative flex-1 sm:flex-none sm:w-64">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <Input
+              id="search-input"
+              placeholder="Search issues..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+
+          {/* View toggle */}
+          <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+
+          {/* Shortcuts help */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 w-9 p-0"
+                  onClick={() => setShortcutsDialogOpen(true)}
+                >
+                  <HelpCircle className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Keyboard shortcuts (?)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          {/* Create button */}
+          <Link to="/workspace/$slug/create-issue" params={{ slug }}>
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              New Issue
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Quick create */}
+      {teams.length > 0 && (
+        <div className="mb-4">
+          <IssueQuickCreate
+            workspaceId={workspace.id}
+            teamId={teams[0].id}
+            onSubmit={handleQuickCreate}
+            isOpen={quickCreateOpen}
+            onOpenChange={setQuickCreateOpen}
+            onExpandToForm={() =>
+              navigate({ to: '/workspace/$slug/create-issue', params: { slug } })
+            }
+          />
+        </div>
+      )}
+
+      {/* Content */}
+      {viewMode === 'table' ? (
+        <IssueTable
+          issues={issues}
+          workspaceSlug={slug}
+          selectedId={selectedIssueId}
+          onSelectIssue={setSelectedIssueId}
+          isLoading={isLoadingIssues}
+        />
+      ) : (
+        <IssueBoard
+          issues={issues}
+          workspaceSlug={slug}
+          onQuickCreate={() => {
+            setQuickCreateOpen(true)
+          }}
+          isLoading={isLoadingIssues}
+        />
+      )}
+
+      {/* Shortcuts dialog */}
+      <KeyboardShortcutsDialog
+        open={shortcutsDialogOpen}
+        onOpenChange={setShortcutsDialogOpen}
+      />
+    </div>
+  )
+}
+
+function WorkspaceIndexSkeleton() {
+  return (
+    <div className="max-w-full mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <Skeleton className="h-8 w-32" />
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-9 w-64" />
+          <Skeleton className="h-9 w-20" />
+          <Skeleton className="h-9 w-28" />
+        </div>
+      </div>
+      <Skeleton className="h-10 w-full mb-4" />
+      <div className="border rounded-lg">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-3 px-4 py-2.5 border-b">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-4 rounded-full" />
+            <Skeleton className="h-4 flex-1 max-w-md" />
+            <Skeleton className="h-4 w-4" />
+            <Skeleton className="h-6 w-6 rounded-full" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }

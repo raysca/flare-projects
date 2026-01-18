@@ -9,6 +9,7 @@ import { createDrizzleClient, issues, issueLabels, workspaceMembers, teams, comm
 import { eq, and, desc, sql, inArray, aliasedTable } from "drizzle-orm";
 import type { Env } from "../index";
 import { authMiddleware, type Variables } from "../middleware/auth";
+import { logIssueCreated, logIssueDeleted, logStatusChanged, logAssigneeChanged, logCommentCreated } from "../utils/activity";
 
 const app = new Hono<Env & { Variables: Variables }>();
 
@@ -189,6 +190,9 @@ app.post("/", zValidator("json", createIssueSchema), async (c) => {
         );
     }
 
+    // Log activity
+    await logIssueCreated(c.env.DB, data.workspaceId, user.id, issueId);
+
     const newIssue = await db.select().from(issues).where(eq(issues.id, issueId)).get();
 
     return c.json(newIssue, 201);
@@ -312,6 +316,10 @@ app.put("/:id", zValidator("json", updateIssueSchema), async (c) => {
     // Extract labelIds to handle separately
     const { labelIds, ...updateData } = data;
 
+    // Track changes for activity logging
+    const oldStatus = issue.status;
+    const oldAssigneeId = issue.assigneeId;
+
     // DB Update
     await db
         .update(issues)
@@ -337,6 +345,15 @@ app.put("/:id", zValidator("json", updateIssueSchema), async (c) => {
                 }))
             );
         }
+    }
+
+    // Log specific activities
+    if (updateData.status && updateData.status !== oldStatus) {
+        await logStatusChanged(c.env.DB, issue.workspaceId, user.id, issueId, oldStatus, updateData.status);
+    }
+
+    if (updateData.assigneeId !== undefined && updateData.assigneeId !== oldAssigneeId) {
+        await logAssigneeChanged(c.env.DB, issue.workspaceId, user.id, issueId, oldAssigneeId, updateData.assigneeId);
     }
 
     const updatedIssue = await db.select().from(issues).where(eq(issues.id, issueId)).get();
@@ -369,6 +386,9 @@ app.delete("/:id", async (c) => {
     if (!member) {
         return c.json({ error: "Access denied" }, 403);
     }
+
+    // Log activity before deletion
+    await logIssueDeleted(c.env.DB, issue.workspaceId, user.id, issueId);
 
     await db.delete(issues).where(eq(issues.id, issueId));
 
@@ -459,6 +479,9 @@ app.post("/:id/comments", zValidator("json", z.object({ body: z.string().min(1) 
         userId: user.id,
         body,
     });
+
+    // Log activity
+    await logCommentCreated(c.env.DB, issue.workspaceId, user.id, issueId, commentId);
 
     const newComment = await db
         .select({

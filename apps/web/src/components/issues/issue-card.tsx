@@ -25,18 +25,18 @@ export function IssueCard({ issue, workspaceSlug }: IssueCardProps) {
       params={{ slug: workspaceSlug, issueId: issue.id }}
       className="block"
     >
-      <Card className="hover:bg-accent/50 hover:shadow-md transition-all cursor-pointer group">
+      <Card className="hover:bg-bg-hover hover:shadow-md transition-all cursor-pointer group hover-lift focus-visible-ring">
         <CardContent className="p-3 space-y-2">
           {/* Top row: ID and Priority */}
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono text-muted-foreground">
+            <span className="text-[10px] font-mono text-text-tertiary font-medium">
               {formatIssueIdentifier(workspaceSlug, issue.number)}
             </span>
             <PriorityIcon className={cn('size-3.5', priorityConfig.color)} />
           </div>
 
           {/* Title */}
-          <p className="text-sm font-medium leading-snug line-clamp-2">
+          <p className="text-sm font-medium text-text-primary leading-snug line-clamp-2">
             {issue.title}
           </p>
 
@@ -69,7 +69,7 @@ export function IssueCard({ issue, workspaceSlug }: IssueCardProps) {
                 </AvatarFallback>
               </Avatar>
             ) : (
-              <div className="size-5 rounded-full border border-dashed border-muted-foreground/30" />
+              <div className="size-5 rounded-full border border-dashed border-border-default/40" />
             )}
           </div>
         </CardContent>

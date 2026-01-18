@@ -41,12 +41,12 @@ export function IssueRow({
       params={{ slug: workspaceSlug, issueId: issue.id }}
       onClick={onSelect}
       className={cn(
-        'group flex items-center gap-3 px-4 py-2.5 border-b border-border hover:bg-accent/50 transition-colors cursor-pointer',
-        isSelected && 'bg-accent'
+        'group flex items-center gap-3 px-4 py-2.5 border-b border-border-subtle hover:bg-bg-hover transition-colors cursor-pointer focus-visible-ring',
+        isSelected && 'bg-bg-active'
       )}
     >
       {/* Issue ID */}
-      <span className="text-xs font-mono text-muted-foreground w-20 shrink-0">
+      <span className="text-xs font-mono text-text-tertiary w-20 shrink-0 font-medium">
         {formatIssueIdentifier(workspaceSlug, issue.number)}
       </span>
 
@@ -65,7 +65,7 @@ export function IssueRow({
       </TooltipProvider>
 
       {/* Title */}
-      <span className="flex-1 truncate text-sm font-medium text-foreground">
+      <span className="flex-1 truncate text-sm font-medium text-text-primary">
         {issue.title}
       </span>
 
@@ -86,7 +86,7 @@ export function IssueRow({
             </Badge>
           ))}
           {issue.labels.length > 2 && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-text-tertiary">
               +{issue.labels.length - 2}
             </span>
           )}
@@ -120,7 +120,7 @@ export function IssueRow({
                   </AvatarFallback>
                 </Avatar>
               ) : (
-                <div className="size-6 rounded-full border-2 border-dashed border-muted-foreground/30" />
+                <div className="size-6 rounded-full border-2 border-dashed border-border-default/40" />
               )}
             </span>
           </TooltipTrigger>
@@ -131,7 +131,7 @@ export function IssueRow({
       </TooltipProvider>
 
       {/* Date */}
-      <span className="hidden sm:block text-xs text-muted-foreground w-16 text-right shrink-0">
+      <span className="hidden sm:block text-xs text-text-tertiary w-16 text-right shrink-0">
         {formatRelativeTime(issue.createdAt)}
       </span>
     </Link>

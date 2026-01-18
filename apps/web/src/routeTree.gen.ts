@@ -14,28 +14,17 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as CreateWorkspaceRouteImport } from './routes/create-workspace'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkspaceSlugRouteImport } from './routes/workspace/$slug'
-import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
-import { Route as DemoDbChatApiRouteImport } from './routes/demo/db-chat-api'
-import { Route as DemoDbChatRouteImport } from './routes/demo/db-chat'
 import { Route as WorkspaceSlugIndexRouteImport } from './routes/workspace/$slug/index'
 import { Route as WorkspaceSlugTeamRouteImport } from './routes/workspace/$slug/team'
 import { Route as WorkspaceSlugSettingsRouteImport } from './routes/workspace/$slug/settings'
 import { Route as WorkspaceSlugCreateIssueRouteImport } from './routes/workspace/$slug/create-issue'
-import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
-import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
-import { Route as DemoApiTqTodosRouteImport } from './routes/demo/api.tq-todos'
-import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
 import { Route as WorkspaceSlugProjectsIndexRouteImport } from './routes/workspace/$slug/projects/index'
 import { Route as WorkspaceSlugCyclesIndexRouteImport } from './routes/workspace/$slug/cycles/index'
-import { Route as DemoStartSsrIndexRouteImport } from './routes/demo/start.ssr.index'
 import { Route as WorkspaceSlugProjectsNewRouteImport } from './routes/workspace/$slug/projects/new'
 import { Route as WorkspaceSlugProjectsProjectIdRouteImport } from './routes/workspace/$slug/projects/$projectId'
 import { Route as WorkspaceSlugIssueIssueIdRouteImport } from './routes/workspace/$slug/issue/$issueId'
 import { Route as WorkspaceSlugCyclesNewRouteImport } from './routes/workspace/$slug/cycles/new'
 import { Route as WorkspaceSlugCyclesCycleIdRouteImport } from './routes/workspace/$slug/cycles/$cycleId'
-import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr.spa-mode'
-import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
-import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -62,21 +51,6 @@ const WorkspaceSlugRoute = WorkspaceSlugRouteImport.update({
   path: '/workspace/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
-  id: '/demo/tanstack-query',
-  path: '/demo/tanstack-query',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoDbChatApiRoute = DemoDbChatApiRouteImport.update({
-  id: '/demo/db-chat-api',
-  path: '/demo/db-chat-api',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoDbChatRoute = DemoDbChatRouteImport.update({
-  id: '/demo/db-chat',
-  path: '/demo/db-chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const WorkspaceSlugIndexRoute = WorkspaceSlugIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -98,26 +72,6 @@ const WorkspaceSlugCreateIssueRoute =
     path: '/create-issue',
     getParentRoute: () => WorkspaceSlugRoute,
   } as any)
-const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
-  id: '/demo/start/server-funcs',
-  path: '/demo/start/server-funcs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoStartApiRequestRoute = DemoStartApiRequestRouteImport.update({
-  id: '/demo/start/api-request',
-  path: '/demo/start/api-request',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoApiTqTodosRoute = DemoApiTqTodosRouteImport.update({
-  id: '/demo/api/tq-todos',
-  path: '/demo/api/tq-todos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoApiNamesRoute = DemoApiNamesRouteImport.update({
-  id: '/demo/api/names',
-  path: '/demo/api/names',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const WorkspaceSlugProjectsIndexRoute =
   WorkspaceSlugProjectsIndexRouteImport.update({
     id: '/projects/',
@@ -130,11 +84,6 @@ const WorkspaceSlugCyclesIndexRoute =
     path: '/cycles/',
     getParentRoute: () => WorkspaceSlugRoute,
   } as any)
-const DemoStartSsrIndexRoute = DemoStartSsrIndexRouteImport.update({
-  id: '/demo/start/ssr/',
-  path: '/demo/start/ssr/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const WorkspaceSlugProjectsNewRoute =
   WorkspaceSlugProjectsNewRouteImport.update({
     id: '/projects/new',
@@ -164,48 +113,22 @@ const WorkspaceSlugCyclesCycleIdRoute =
     path: '/cycles/$cycleId',
     getParentRoute: () => WorkspaceSlugRoute,
   } as any)
-const DemoStartSsrSpaModeRoute = DemoStartSsrSpaModeRouteImport.update({
-  id: '/demo/start/ssr/spa-mode',
-  path: '/demo/start/ssr/spa-mode',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoStartSsrFullSsrRoute = DemoStartSsrFullSsrRouteImport.update({
-  id: '/demo/start/ssr/full-ssr',
-  path: '/demo/start/ssr/full-ssr',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
-  id: '/demo/start/ssr/data-only',
-  path: '/demo/start/ssr/data-only',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/create-workspace': typeof CreateWorkspaceRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
-  '/demo/db-chat': typeof DemoDbChatRoute
-  '/demo/db-chat-api': typeof DemoDbChatApiRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/workspace/$slug': typeof WorkspaceSlugRouteWithChildren
-  '/demo/api/names': typeof DemoApiNamesRoute
-  '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
-  '/demo/start/api-request': typeof DemoStartApiRequestRoute
-  '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
   '/workspace/$slug/create-issue': typeof WorkspaceSlugCreateIssueRoute
   '/workspace/$slug/settings': typeof WorkspaceSlugSettingsRoute
   '/workspace/$slug/team': typeof WorkspaceSlugTeamRoute
   '/workspace/$slug/': typeof WorkspaceSlugIndexRoute
-  '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
-  '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
-  '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
   '/workspace/$slug/cycles/$cycleId': typeof WorkspaceSlugCyclesCycleIdRoute
   '/workspace/$slug/cycles/new': typeof WorkspaceSlugCyclesNewRoute
   '/workspace/$slug/issue/$issueId': typeof WorkspaceSlugIssueIssueIdRoute
   '/workspace/$slug/projects/$projectId': typeof WorkspaceSlugProjectsProjectIdRoute
   '/workspace/$slug/projects/new': typeof WorkspaceSlugProjectsNewRoute
-  '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
   '/workspace/$slug/cycles/': typeof WorkspaceSlugCyclesIndexRoute
   '/workspace/$slug/projects/': typeof WorkspaceSlugProjectsIndexRoute
 }
@@ -214,26 +137,15 @@ export interface FileRoutesByTo {
   '/create-workspace': typeof CreateWorkspaceRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
-  '/demo/db-chat': typeof DemoDbChatRoute
-  '/demo/db-chat-api': typeof DemoDbChatApiRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
-  '/demo/api/names': typeof DemoApiNamesRoute
-  '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
-  '/demo/start/api-request': typeof DemoStartApiRequestRoute
-  '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
   '/workspace/$slug/create-issue': typeof WorkspaceSlugCreateIssueRoute
   '/workspace/$slug/settings': typeof WorkspaceSlugSettingsRoute
   '/workspace/$slug/team': typeof WorkspaceSlugTeamRoute
   '/workspace/$slug': typeof WorkspaceSlugIndexRoute
-  '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
-  '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
-  '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
   '/workspace/$slug/cycles/$cycleId': typeof WorkspaceSlugCyclesCycleIdRoute
   '/workspace/$slug/cycles/new': typeof WorkspaceSlugCyclesNewRoute
   '/workspace/$slug/issue/$issueId': typeof WorkspaceSlugIssueIssueIdRoute
   '/workspace/$slug/projects/$projectId': typeof WorkspaceSlugProjectsProjectIdRoute
   '/workspace/$slug/projects/new': typeof WorkspaceSlugProjectsNewRoute
-  '/demo/start/ssr': typeof DemoStartSsrIndexRoute
   '/workspace/$slug/cycles': typeof WorkspaceSlugCyclesIndexRoute
   '/workspace/$slug/projects': typeof WorkspaceSlugProjectsIndexRoute
 }
@@ -243,27 +155,16 @@ export interface FileRoutesById {
   '/create-workspace': typeof CreateWorkspaceRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
-  '/demo/db-chat': typeof DemoDbChatRoute
-  '/demo/db-chat-api': typeof DemoDbChatApiRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/workspace/$slug': typeof WorkspaceSlugRouteWithChildren
-  '/demo/api/names': typeof DemoApiNamesRoute
-  '/demo/api/tq-todos': typeof DemoApiTqTodosRoute
-  '/demo/start/api-request': typeof DemoStartApiRequestRoute
-  '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
   '/workspace/$slug/create-issue': typeof WorkspaceSlugCreateIssueRoute
   '/workspace/$slug/settings': typeof WorkspaceSlugSettingsRoute
   '/workspace/$slug/team': typeof WorkspaceSlugTeamRoute
   '/workspace/$slug/': typeof WorkspaceSlugIndexRoute
-  '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
-  '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
-  '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
   '/workspace/$slug/cycles/$cycleId': typeof WorkspaceSlugCyclesCycleIdRoute
   '/workspace/$slug/cycles/new': typeof WorkspaceSlugCyclesNewRoute
   '/workspace/$slug/issue/$issueId': typeof WorkspaceSlugIssueIssueIdRoute
   '/workspace/$slug/projects/$projectId': typeof WorkspaceSlugProjectsProjectIdRoute
   '/workspace/$slug/projects/new': typeof WorkspaceSlugProjectsNewRoute
-  '/demo/start/ssr/': typeof DemoStartSsrIndexRoute
   '/workspace/$slug/cycles/': typeof WorkspaceSlugCyclesIndexRoute
   '/workspace/$slug/projects/': typeof WorkspaceSlugProjectsIndexRoute
 }
@@ -274,27 +175,16 @@ export interface FileRouteTypes {
     | '/create-workspace'
     | '/login'
     | '/signup'
-    | '/demo/db-chat'
-    | '/demo/db-chat-api'
-    | '/demo/tanstack-query'
     | '/workspace/$slug'
-    | '/demo/api/names'
-    | '/demo/api/tq-todos'
-    | '/demo/start/api-request'
-    | '/demo/start/server-funcs'
     | '/workspace/$slug/create-issue'
     | '/workspace/$slug/settings'
     | '/workspace/$slug/team'
     | '/workspace/$slug/'
-    | '/demo/start/ssr/data-only'
-    | '/demo/start/ssr/full-ssr'
-    | '/demo/start/ssr/spa-mode'
     | '/workspace/$slug/cycles/$cycleId'
     | '/workspace/$slug/cycles/new'
     | '/workspace/$slug/issue/$issueId'
     | '/workspace/$slug/projects/$projectId'
     | '/workspace/$slug/projects/new'
-    | '/demo/start/ssr/'
     | '/workspace/$slug/cycles/'
     | '/workspace/$slug/projects/'
   fileRoutesByTo: FileRoutesByTo
@@ -303,26 +193,15 @@ export interface FileRouteTypes {
     | '/create-workspace'
     | '/login'
     | '/signup'
-    | '/demo/db-chat'
-    | '/demo/db-chat-api'
-    | '/demo/tanstack-query'
-    | '/demo/api/names'
-    | '/demo/api/tq-todos'
-    | '/demo/start/api-request'
-    | '/demo/start/server-funcs'
     | '/workspace/$slug/create-issue'
     | '/workspace/$slug/settings'
     | '/workspace/$slug/team'
     | '/workspace/$slug'
-    | '/demo/start/ssr/data-only'
-    | '/demo/start/ssr/full-ssr'
-    | '/demo/start/ssr/spa-mode'
     | '/workspace/$slug/cycles/$cycleId'
     | '/workspace/$slug/cycles/new'
     | '/workspace/$slug/issue/$issueId'
     | '/workspace/$slug/projects/$projectId'
     | '/workspace/$slug/projects/new'
-    | '/demo/start/ssr'
     | '/workspace/$slug/cycles'
     | '/workspace/$slug/projects'
   id:
@@ -331,27 +210,16 @@ export interface FileRouteTypes {
     | '/create-workspace'
     | '/login'
     | '/signup'
-    | '/demo/db-chat'
-    | '/demo/db-chat-api'
-    | '/demo/tanstack-query'
     | '/workspace/$slug'
-    | '/demo/api/names'
-    | '/demo/api/tq-todos'
-    | '/demo/start/api-request'
-    | '/demo/start/server-funcs'
     | '/workspace/$slug/create-issue'
     | '/workspace/$slug/settings'
     | '/workspace/$slug/team'
     | '/workspace/$slug/'
-    | '/demo/start/ssr/data-only'
-    | '/demo/start/ssr/full-ssr'
-    | '/demo/start/ssr/spa-mode'
     | '/workspace/$slug/cycles/$cycleId'
     | '/workspace/$slug/cycles/new'
     | '/workspace/$slug/issue/$issueId'
     | '/workspace/$slug/projects/$projectId'
     | '/workspace/$slug/projects/new'
-    | '/demo/start/ssr/'
     | '/workspace/$slug/cycles/'
     | '/workspace/$slug/projects/'
   fileRoutesById: FileRoutesById
@@ -361,18 +229,7 @@ export interface RootRouteChildren {
   CreateWorkspaceRoute: typeof CreateWorkspaceRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
-  DemoDbChatRoute: typeof DemoDbChatRoute
-  DemoDbChatApiRoute: typeof DemoDbChatApiRoute
-  DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   WorkspaceSlugRoute: typeof WorkspaceSlugRouteWithChildren
-  DemoApiNamesRoute: typeof DemoApiNamesRoute
-  DemoApiTqTodosRoute: typeof DemoApiTqTodosRoute
-  DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
-  DemoStartServerFuncsRoute: typeof DemoStartServerFuncsRoute
-  DemoStartSsrDataOnlyRoute: typeof DemoStartSsrDataOnlyRoute
-  DemoStartSsrFullSsrRoute: typeof DemoStartSsrFullSsrRoute
-  DemoStartSsrSpaModeRoute: typeof DemoStartSsrSpaModeRoute
-  DemoStartSsrIndexRoute: typeof DemoStartSsrIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -412,27 +269,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspaceSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/demo/tanstack-query': {
-      id: '/demo/tanstack-query'
-      path: '/demo/tanstack-query'
-      fullPath: '/demo/tanstack-query'
-      preLoaderRoute: typeof DemoTanstackQueryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/db-chat-api': {
-      id: '/demo/db-chat-api'
-      path: '/demo/db-chat-api'
-      fullPath: '/demo/db-chat-api'
-      preLoaderRoute: typeof DemoDbChatApiRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/db-chat': {
-      id: '/demo/db-chat'
-      path: '/demo/db-chat'
-      fullPath: '/demo/db-chat'
-      preLoaderRoute: typeof DemoDbChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/workspace/$slug/': {
       id: '/workspace/$slug/'
       path: '/'
@@ -461,34 +297,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspaceSlugCreateIssueRouteImport
       parentRoute: typeof WorkspaceSlugRoute
     }
-    '/demo/start/server-funcs': {
-      id: '/demo/start/server-funcs'
-      path: '/demo/start/server-funcs'
-      fullPath: '/demo/start/server-funcs'
-      preLoaderRoute: typeof DemoStartServerFuncsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/start/api-request': {
-      id: '/demo/start/api-request'
-      path: '/demo/start/api-request'
-      fullPath: '/demo/start/api-request'
-      preLoaderRoute: typeof DemoStartApiRequestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/api/tq-todos': {
-      id: '/demo/api/tq-todos'
-      path: '/demo/api/tq-todos'
-      fullPath: '/demo/api/tq-todos'
-      preLoaderRoute: typeof DemoApiTqTodosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/api/names': {
-      id: '/demo/api/names'
-      path: '/demo/api/names'
-      fullPath: '/demo/api/names'
-      preLoaderRoute: typeof DemoApiNamesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/workspace/$slug/projects/': {
       id: '/workspace/$slug/projects/'
       path: '/projects'
@@ -502,13 +310,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/workspace/$slug/cycles/'
       preLoaderRoute: typeof WorkspaceSlugCyclesIndexRouteImport
       parentRoute: typeof WorkspaceSlugRoute
-    }
-    '/demo/start/ssr/': {
-      id: '/demo/start/ssr/'
-      path: '/demo/start/ssr'
-      fullPath: '/demo/start/ssr/'
-      preLoaderRoute: typeof DemoStartSsrIndexRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/workspace/$slug/projects/new': {
       id: '/workspace/$slug/projects/new'
@@ -544,27 +345,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/workspace/$slug/cycles/$cycleId'
       preLoaderRoute: typeof WorkspaceSlugCyclesCycleIdRouteImport
       parentRoute: typeof WorkspaceSlugRoute
-    }
-    '/demo/start/ssr/spa-mode': {
-      id: '/demo/start/ssr/spa-mode'
-      path: '/demo/start/ssr/spa-mode'
-      fullPath: '/demo/start/ssr/spa-mode'
-      preLoaderRoute: typeof DemoStartSsrSpaModeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/start/ssr/full-ssr': {
-      id: '/demo/start/ssr/full-ssr'
-      path: '/demo/start/ssr/full-ssr'
-      fullPath: '/demo/start/ssr/full-ssr'
-      preLoaderRoute: typeof DemoStartSsrFullSsrRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/start/ssr/data-only': {
-      id: '/demo/start/ssr/data-only'
-      path: '/demo/start/ssr/data-only'
-      fullPath: '/demo/start/ssr/data-only'
-      preLoaderRoute: typeof DemoStartSsrDataOnlyRouteImport
-      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -606,18 +386,7 @@ const rootRouteChildren: RootRouteChildren = {
   CreateWorkspaceRoute: CreateWorkspaceRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
-  DemoDbChatRoute: DemoDbChatRoute,
-  DemoDbChatApiRoute: DemoDbChatApiRoute,
-  DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   WorkspaceSlugRoute: WorkspaceSlugRouteWithChildren,
-  DemoApiNamesRoute: DemoApiNamesRoute,
-  DemoApiTqTodosRoute: DemoApiTqTodosRoute,
-  DemoStartApiRequestRoute: DemoStartApiRequestRoute,
-  DemoStartServerFuncsRoute: DemoStartServerFuncsRoute,
-  DemoStartSsrDataOnlyRoute: DemoStartSsrDataOnlyRoute,
-  DemoStartSsrFullSsrRoute: DemoStartSsrFullSsrRoute,
-  DemoStartSsrSpaModeRoute: DemoStartSsrSpaModeRoute,
-  DemoStartSsrIndexRoute: DemoStartSsrIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

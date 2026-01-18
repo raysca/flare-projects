@@ -9,6 +9,7 @@ import projects from "./routes/projects";
 import cycles from "./routes/cycles";
 import labels from "./routes/labels";
 import comments from "./routes/comments";
+import activity from "./routes/activity";
 import dev from "./routes/dev";
 
 // Durable Objects
@@ -58,6 +59,7 @@ app.route("/api/v1/projects", projects);
 app.route("/api/v1", cycles);
 app.route("/api/v1", labels);
 app.route("/api/v1", comments);
+app.route("/api/v1", activity);
 
 // Development routes (only enabled in development)
 app.route("/api/dev", dev);

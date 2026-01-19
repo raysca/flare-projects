@@ -17,12 +17,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import { getInitials } from '@/lib/issue-utils'
-import type { User } from '@/types/issues'
+import { useUsers } from '@/hooks/use-users'
 
 interface ProjectLeadSelectProps {
   value: string | undefined
   onValueChange: (value: string | undefined) => void
-  members: User[]
   disabled?: boolean
   size?: 'sm' | 'default'
   className?: string
@@ -31,13 +30,15 @@ interface ProjectLeadSelectProps {
 export function ProjectLeadSelect({
   value,
   onValueChange,
-  members,
   disabled,
   size = 'default',
   className,
 }: ProjectLeadSelectProps) {
   const [open, setOpen] = useState(false)
-  const selectedMember = members.find((m) => m.id === value)
+
+  const { data: users = [] } = useUsers()
+
+  const selectedMember = users.find((m) => m.id === value)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -94,7 +95,7 @@ export function ProjectLeadSelect({
                   )}
                 />
               </CommandItem>
-              {members.map((member) => (
+              {users.map((member) => (
                 <CommandItem
                   key={member.id}
                   value={member.name}
@@ -125,3 +126,4 @@ export function ProjectLeadSelect({
     </Popover>
   )
 }
+

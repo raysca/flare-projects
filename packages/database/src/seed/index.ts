@@ -4,10 +4,6 @@ import * as schema from "../schema";
 // Import all seed data
 import {
   users,
-  workspaces,
-  workspaceMembers,
-  teams,
-  teamMembers,
   labels,
   projects,
   cycles,
@@ -41,8 +37,6 @@ export interface SeedOptions {
   /** Only seed specific tables */
   tables?: Array<
     | "users"
-    | "workspaces"
-    | "teams"
     | "labels"
     | "projects"
     | "cycles"
@@ -83,15 +77,12 @@ export async function seed(
       await db.delete(schema.issueSubscribers).run();
       await db.delete(schema.issues).run();
       await db.delete(schema.cycles).run();
+      await db.delete(schema.projectMembers).run();
       await db.delete(schema.projects).run();
       await db.delete(schema.labels).run();
-      await db.delete(schema.teamMembers).run();
-      await db.delete(schema.teams).run();
       await db.delete(schema.notificationPreferences).run();
       await db.delete(schema.notifications).run();
       await db.delete(schema.activityLog).run();
-      await db.delete(schema.workspaceMembers).run();
-      await db.delete(schema.workspaces).run();
       await db.delete(schema.users).run();
       console.log("   ✓ Cleaned existing data\n");
     }
@@ -109,30 +100,48 @@ export async function seed(
       console.log(`   ✓ Created ${users.length} users`);
     }
 
-    // Seed workspaces
-    if (shouldSeed("workspaces")) {
-      console.log("🏢 Seeding workspaces...");
-      await batchInsert(db, schema.workspaces, workspaces);
-      log(`   Added ${workspaces.length} workspaces`);
+    // Seed projects and members (Moved before labels because labels depend on projects)
+    if (shouldSeed("projects")) {
+      console.log("📁 Seeding projects...");
+      await batchInsert(db, schema.projects, projects);
+      console.log(`   ✓ Created ${projects.length} projects`);
 
-      await batchInsert(db, schema.workspaceMembers, workspaceMembers);
-      log(`   Added ${workspaceMembers.length} workspace members`);
-      console.log(
-        `   ✓ Created ${workspaces.length} workspaces with ${workspaceMembers.length} members`
-      );
-    }
+      // Seed project members
+      console.log("   Seeding project members...");
+      const members = [];
+      for (const project of projects) {
+        // Add owner as a member
+        members.push({
+          projectId: project.id,
+          userId: project.ownerId,
+          role: "Owner",
+        });
 
-    // Seed teams
-    if (shouldSeed("teams")) {
-      console.log("👥 Seeding teams...");
-      await batchInsert(db, schema.teams, teams);
-      log(`   Added ${teams.length} teams`);
+        // Add lead if different from owner
+        if (project.leadId && project.leadId !== project.ownerId) {
+          members.push({
+            projectId: project.id,
+            userId: project.leadId,
+            role: "Lead",
+          });
+        }
 
-      await batchInsert(db, schema.teamMembers, teamMembers);
-      log(`   Added ${teamMembers.length} team members`);
-      console.log(
-        `   ✓ Created ${teams.length} teams with ${teamMembers.length} members`
-      );
+        // Add some random members (e.g. all other users as members or viewers)
+        // For simplicity, make everyone a member of the first few projects
+        if (project.name === "V1 Launch" || project.name === "Authentication System") {
+          for (const user of users) {
+            if (user.id !== project.ownerId && user.id !== project.leadId) {
+              members.push({
+                projectId: project.id,
+                userId: user.id,
+                role: "Member",
+              });
+            }
+          }
+        }
+      }
+      await batchInsert(db, schema.projectMembers, members);
+      console.log(`   ✓ Added ${members.length} project memberships`);
     }
 
     // Seed labels
@@ -140,13 +149,6 @@ export async function seed(
       console.log("🏷️  Seeding labels...");
       await batchInsert(db, schema.labels, labels);
       console.log(`   ✓ Created ${labels.length} labels`);
-    }
-
-    // Seed projects
-    if (shouldSeed("projects")) {
-      console.log("📁 Seeding projects...");
-      await batchInsert(db, schema.projects, projects);
-      console.log(`   ✓ Created ${projects.length} projects`);
     }
 
     // Seed cycles
@@ -197,8 +199,6 @@ export async function seed(
     console.log("=".repeat(50));
     console.log("\n📊 Seed data summary:");
     console.log(`   • ${users.length} users`);
-    console.log(`   • ${workspaces.length} workspaces`);
-    console.log(`   • ${teams.length} teams`);
     console.log(`   • ${labels.length} labels`);
     console.log(`   • ${projects.length} projects`);
     console.log(`   • ${cycles.length} cycles`);

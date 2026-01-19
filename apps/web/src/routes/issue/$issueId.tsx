@@ -22,7 +22,7 @@ import { useWorkspaceBySlug, useWorkspaceMembers, useWorkspaceLabels } from '@/h
 import { formatIssueIdentifier, getInitials } from '@/lib/issue-utils'
 import type { IssueStatus, IssuePriority } from '@/types/issues'
 
-export const Route = createFileRoute('/workspace/$slug/issue/$issueId')({
+export const Route = createFileRoute('/issue/$issueId')({
     component: IssueDetail,
 })
 

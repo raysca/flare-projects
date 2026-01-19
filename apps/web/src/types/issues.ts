@@ -83,8 +83,6 @@ export interface Issue {
   status: IssueStatus
   priority: IssuePriority
   type?: IssueType
-  workspaceId: string
-  teamId: string
   assignee?: User
   assigneeId?: string
   reporter?: User
@@ -144,15 +142,13 @@ export interface IssueSort {
 
 // Create/Update DTOs
 export interface CreateIssueInput {
-  workspaceId: string
-  teamId: string
   title: string
   description?: string
   status?: IssueStatus
   priority?: IssuePriority
   type?: IssueType
   assigneeId?: string
-  projectId?: string
+  projectId: string
   cycleId?: string
   labelIds?: string[]
   estimate?: number

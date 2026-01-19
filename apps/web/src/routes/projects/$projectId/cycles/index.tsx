@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
 import { apiFetch } from '@/lib/api'
 
-export const Route = createFileRoute('/workspace/$slug/cycles/')({
+export const Route = createFileRoute('/projects/$projectId/cycles/')({
     component: CyclesList,
 })
 
@@ -19,20 +19,15 @@ interface Cycle {
 }
 
 function CyclesList() {
-    const { slug } = Route.useParams()
-    const [workspace, setWorkspace] = useState<{ id: string } | null>(null)
+    const { projectId } = Route.useParams()
     const [cycles, setCycles] = useState<Cycle[]>([])
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
         const loadData = async () => {
             try {
-                const workspaces = await apiFetch<{ id: string, slug: string }[]>('/workspaces')
-                const activeWorkspace = workspaces.find(w => w.slug === slug)
-
-                if (activeWorkspace) {
-                    setWorkspace(activeWorkspace)
-                    const cyclesData = await apiFetch<Cycle[]>(`/cycles?workspaceId=${activeWorkspace.id}`)
+                if (projectId) {
+                    const cyclesData = await apiFetch<Cycle[]>(`/cycles?projectId=${projectId}`)
                     setCycles(cyclesData)
                 }
             } catch (err) {
@@ -42,7 +37,7 @@ function CyclesList() {
             }
         }
         loadData()
-    }, [slug])
+    }, [projectId])
 
     if (isLoading) return <div className="p-8">Loading cycles...</div>
 
@@ -51,14 +46,14 @@ function CyclesList() {
     const completedCycles = cycles.filter(c => c.status === 'completed')
 
     const CycleCard = ({ cycle }: { cycle: Cycle }) => (
-        <Link to="/workspace/$slug/cycles/$cycleId" params={{ slug, cycleId: cycle.id }}>
+        <Link to="/projects/$projectId/cycles/$cycleId" params={{ projectId, cycleId: cycle.id }}>
             <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
                 <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
                         <CardTitle className="text-base font-medium">{cycle.name}</CardTitle>
                         <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${cycle.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                                cycle.status === 'completed' ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400' :
-                                    'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                            cycle.status === 'completed' ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400' :
+                                'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                             }`}>
                             {cycle.status}
                         </span>
@@ -93,7 +88,7 @@ function CyclesList() {
                     <h1 className="text-3xl font-bold tracking-tight">Cycles</h1>
                     <p className="text-muted-foreground">Manage your team's sprints and work cycles.</p>
                 </div>
-                <Link to="/workspace/$slug/cycles/new" params={{ slug }}>
+                <Link to="/projects/$projectId/cycles/new" params={{ projectId }}>
                     <Button>
                         <Plus className="w-4 h-4 mr-2" />
                         New Cycle
@@ -110,7 +105,7 @@ function CyclesList() {
                     <p className="text-muted-foreground text-center max-w-sm mb-6">
                         Cycles help you group work into time-boxed periods like sprints. Create your first cycle to get started.
                     </p>
-                    <Link to="/workspace/$slug/cycles/new" params={{ slug }}>
+                    <Link to="/projects/$projectId/cycles/new" params={{ projectId }}>
                         <Button>Create Cycle</Button>
                     </Link>
                 </div>

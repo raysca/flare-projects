@@ -9,13 +9,11 @@ import type {
 } from '@/types/projects'
 import type { Issue } from '@/types/issues'
 
-// Fetch projects for a workspace
-export function useProjects(workspaceId: string | undefined) {
+// Fetch projects for the authenticated user
+export function useProjects() {
   return useQuery({
-    queryKey: projectKeys.list(workspaceId ?? ''),
-    queryFn: () =>
-      apiFetch<ProjectListItem[]>(`/projects?workspaceId=${workspaceId}`),
-    enabled: !!workspaceId,
+    queryKey: projectKeys.lists(),
+    queryFn: () => apiFetch<ProjectListItem[]>('/projects'),
   })
 }
 
@@ -33,12 +31,8 @@ export function useProjectIssues(projectId: string | undefined) {
   return useQuery({
     queryKey: projectKeys.issues(projectId ?? ''),
     queryFn: async () => {
-      // First get the project to get workspace ID
-      const project = await apiFetch<Project>(`/projects/${projectId}`)
-      // Then fetch issues filtered by project
-      return apiFetch<Issue[]>(
-        `/issues?workspaceId=${project.workspaceId}&projectId=${projectId}`
-      )
+      // Fetch issues filtered by project
+      return apiFetch<Issue[]>(`/issues?projectId=${projectId}`)
     },
     enabled: !!projectId,
   })
@@ -54,10 +48,10 @@ export function useCreateProject() {
         method: 'POST',
         body: JSON.stringify(input),
       }),
-    onSuccess: (newProject) => {
+    onSuccess: () => {
       // Invalidate projects list to refetch
       queryClient.invalidateQueries({
-        queryKey: projectKeys.list(newProject.workspaceId),
+        queryKey: projectKeys.lists(),
       })
     },
   })
@@ -99,7 +93,7 @@ export function useUpdateProject() {
         // Apply nullable fields
         if ('leadId' in input) {
           if (input.leadId === null) {
-            ;(merged as Project).lead = undefined
+            ; (merged as Project).lead = undefined
           }
         }
 
@@ -111,10 +105,10 @@ export function useUpdateProject() {
 
         // Date fields
         if ('description' in merged && input.description !== undefined) {
-          ;(merged as Project).description = input.description
+          ; (merged as Project).description = input.description
         }
         if ('startDate' in merged && input.startDate !== undefined) {
-          ;(merged as Project).startDate =
+          ; (merged as Project).startDate =
             input.startDate === null ? undefined : input.startDate
         }
         if (input.targetDate !== undefined) {

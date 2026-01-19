@@ -6,27 +6,20 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ProjectCard } from '@/components/projects/project-card'
 import { useProjects } from '@/hooks/use-projects'
-import { useWorkspaceBySlug } from '@/hooks/use-workspace'
+
 import type { ProjectStatus } from '@/types/projects'
 import { PROJECT_STATUS_CONFIG } from '@/lib/project-utils'
 import { cn } from '@/lib/utils'
 
-export const Route = createFileRoute('/workspace/$slug/projects/')({
+export const Route = createFileRoute('/projects/')({
   component: ProjectsList,
 })
 
 function ProjectsList() {
-  const { slug } = Route.useParams()
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all')
 
-  const { data: workspace, isLoading: isLoadingWorkspace } =
-    useWorkspaceBySlug(slug)
-  const { data: projects = [], isLoading: isLoadingProjects } = useProjects(
-    workspace?.id
-  )
-
-  const isLoading = isLoadingWorkspace || isLoadingProjects
+  const { data: projects = [], isLoading } = useProjects()
 
   // Filter projects
   const filteredProjects = projects.filter((project) => {
@@ -84,7 +77,7 @@ function ProjectsList() {
           </div>
 
           {/* Create button */}
-          <Link to="/workspace/$slug/projects/new" params={{ slug }}>
+          <Link to="/projects/new">
             <Button>
               <Plus className="w-4 h-4 mr-2" />
               New Project
@@ -92,7 +85,6 @@ function ProjectsList() {
           </Link>
         </div>
       </div>
-
       {/* Status filter tabs */}
       <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-2">
         <Button
@@ -122,7 +114,6 @@ function ProjectsList() {
           )
         })}
       </div>
-
       {/* Empty state */}
       {projects.length === 0 && !searchQuery ? (
         <div className="text-center py-20 bg-muted/30 rounded-lg border border-dashed">
@@ -133,7 +124,7 @@ function ProjectsList() {
           <p className="text-muted-foreground mb-6">
             Create your first project to organize issues and track progress.
           </p>
-          <Link to="/workspace/$slug/projects/new" params={{ slug }}>
+          <Link to="/projects/new">
             <Button>Create Project</Button>
           </Link>
         </div>
@@ -143,12 +134,11 @@ function ProjectsList() {
         </div>
       ) : statusFilter === 'all' ? (
         /* Grouped view */
-        <div className="space-y-8">
+        (<div className="space-y-8">
           {activeProjects.length > 0 && (
             <ProjectSection
               title="Active"
               projects={activeProjects}
-              workspaceSlug={slug}
               dotColor="bg-blue-500"
             />
           )}
@@ -156,7 +146,6 @@ function ProjectsList() {
             <ProjectSection
               title="Planned"
               projects={plannedProjects}
-              workspaceSlug={slug}
               dotColor="bg-slate-500"
             />
           )}
@@ -164,7 +153,6 @@ function ProjectsList() {
             <ProjectSection
               title="Paused"
               projects={pausedProjects}
-              workspaceSlug={slug}
               dotColor="bg-yellow-500"
             />
           )}
@@ -172,7 +160,6 @@ function ProjectsList() {
             <ProjectSection
               title="Completed"
               projects={completedProjects}
-              workspaceSlug={slug}
               dotColor="bg-green-500"
             />
           )}
@@ -180,22 +167,20 @@ function ProjectsList() {
             <ProjectSection
               title="Cancelled"
               projects={cancelledProjects}
-              workspaceSlug={slug}
               dotColor="bg-red-500"
             />
           )}
-        </div>
+        </div>)
       ) : (
         /* Flat filtered view */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        (<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProjects.map((project) => (
             <ProjectCard
               key={project.id}
               project={project}
-              workspaceSlug={slug}
             />
           ))}
-        </div>
+        </div>)
       )}
     </div>
   )
@@ -204,12 +189,10 @@ function ProjectsList() {
 function ProjectSection({
   title,
   projects,
-  workspaceSlug,
   dotColor,
 }: {
   title: string
-  projects: { id: string; name: string; identifier: string; status: string; progress: number; targetDate?: string; workspaceId: string; lead?: { id: string; name: string; avatarUrl?: string } }[]
-  workspaceSlug: string
+  projects: { id: string; name: string; identifier: string; status: string; progress: number; targetDate?: string; lead?: { id: string; name: string; avatarUrl?: string } }[]
   dotColor: string
 }) {
   return (
@@ -226,7 +209,6 @@ function ProjectSection({
           <ProjectCard
             key={project.id}
             project={project as any}
-            workspaceSlug={workspaceSlug}
           />
         ))}
       </div>

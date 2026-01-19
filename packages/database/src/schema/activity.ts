@@ -1,14 +1,14 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 import { users } from "./users";
-import { workspaces } from "./workspaces";
+import { projects } from "./projects";
 import { issues } from "./issues";
 
 export const activityLog = sqliteTable("activity_log", {
   id: text("id").primaryKey(),
-  workspaceId: text("workspace_id")
+  projectId: text("project_id")
     .notNull()
-    .references(() => workspaces.id, { onDelete: "cascade" }),
+    .references(() => projects.id, { onDelete: "cascade" }),
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
@@ -31,7 +31,7 @@ export const activityLog = sqliteTable("activity_log", {
     ],
   }).notNull(),
   entityType: text("entity_type", {
-    enum: ["issue", "comment", "project", "cycle", "workspace"],
+    enum: ["issue", "comment", "project", "cycle"],
   }).notNull(),
   entityId: text("entity_id").notNull(),
   metadata: text("metadata"), // JSON string with additional context

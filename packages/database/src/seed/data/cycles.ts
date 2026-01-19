@@ -1,20 +1,18 @@
 import { NewCycle } from "../../schema/cycles";
 import { stableId, daysFromNow, daysAgo } from "../utils";
-import { primaryWorkspace, acmeWorkspace, startupWorkspace } from "./workspaces";
-import { engineeringTeam, designTeam, devopsTeam, acmeBackendTeam, startupCoreTeam } from "./teams";
+import { v1LaunchProject, authProject, designSystemProject, infraProject, acmePlatformProject, startupMvpProject } from "./projects";
 
 export interface SeedCycle extends NewCycle {
   id: string;
 }
 
 export const cycles: SeedCycle[] = [
-  // LinearFlow Demo workspace cycles - Engineering
+  // LinearFlow Demo cycles - Engineering
   {
     id: stableId("cycle-eng-sprint-1"),
-    workspaceId: primaryWorkspace.id,
-    teamId: engineeringTeam.id,
+    projectId: v1LaunchProject.id,
     name: "Sprint 1",
-    description: "Foundation sprint - auth, workspace setup, basic issue CRUD",
+    description: "Foundation sprint - auth, setup, basic issue CRUD",
     number: 1,
     status: "completed",
     startDate: daysAgo(28),
@@ -24,10 +22,9 @@ export const cycles: SeedCycle[] = [
   },
   {
     id: stableId("cycle-eng-sprint-2"),
-    workspaceId: primaryWorkspace.id,
-    teamId: engineeringTeam.id,
+    projectId: v1LaunchProject.id,
     name: "Sprint 2",
-    description: "Current sprint - teams, projects, improved issue management",
+    description: "Current sprint - projects, improved issue management",
     number: 2,
     status: "active",
     startDate: daysAgo(14),
@@ -37,8 +34,7 @@ export const cycles: SeedCycle[] = [
   },
   {
     id: stableId("cycle-eng-sprint-3"),
-    workspaceId: primaryWorkspace.id,
-    teamId: engineeringTeam.id,
+    projectId: v1LaunchProject.id,
     name: "Sprint 3",
     description: "Upcoming sprint - real-time collaboration, notifications",
     number: 3,
@@ -50,8 +46,7 @@ export const cycles: SeedCycle[] = [
   },
   {
     id: stableId("cycle-eng-sprint-4"),
-    workspaceId: primaryWorkspace.id,
-    teamId: engineeringTeam.id,
+    projectId: v1LaunchProject.id,
     name: "Sprint 4",
     description: "Future sprint - integrations, API improvements",
     number: 4,
@@ -65,8 +60,7 @@ export const cycles: SeedCycle[] = [
   // Design team cycles
   {
     id: stableId("cycle-dsn-iteration-1"),
-    workspaceId: primaryWorkspace.id,
-    teamId: designTeam.id,
+    projectId: designSystemProject.id,
     name: "Design Iteration 1",
     description: "Core component library and style guide",
     number: 1,
@@ -78,8 +72,7 @@ export const cycles: SeedCycle[] = [
   },
   {
     id: stableId("cycle-dsn-iteration-2"),
-    workspaceId: primaryWorkspace.id,
-    teamId: designTeam.id,
+    projectId: designSystemProject.id,
     name: "Design Iteration 2",
     description: "Dashboard and issue views design",
     number: 2,
@@ -93,8 +86,7 @@ export const cycles: SeedCycle[] = [
   // DevOps cycles
   {
     id: stableId("cycle-ops-infra-1"),
-    workspaceId: primaryWorkspace.id,
-    teamId: devopsTeam.id,
+    projectId: infraProject.id,
     name: "Infrastructure Phase 1",
     description: "Set up D1, KV, R2, and Workers",
     number: 1,
@@ -106,8 +98,7 @@ export const cycles: SeedCycle[] = [
   },
   {
     id: stableId("cycle-ops-infra-2"),
-    workspaceId: primaryWorkspace.id,
-    teamId: devopsTeam.id,
+    projectId: infraProject.id,
     name: "Infrastructure Phase 2",
     description: "Durable Objects, Queues, and monitoring",
     number: 2,
@@ -118,11 +109,10 @@ export const cycles: SeedCycle[] = [
     progress: 80,
   },
 
-  // Acme workspace cycles
+  // Acme cycles
   {
     id: stableId("cycle-acme-q1"),
-    workspaceId: acmeWorkspace.id,
-    teamId: acmeBackendTeam.id,
+    projectId: acmePlatformProject.id,
     name: "Q1 2024",
     description: "Backend services migration",
     number: 1,
@@ -133,11 +123,10 @@ export const cycles: SeedCycle[] = [
     progress: 35,
   },
 
-  // Startup workspace cycles
+  // Startup cycles
   {
     id: stableId("cycle-startup-week-1"),
-    workspaceId: startupWorkspace.id,
-    teamId: startupCoreTeam.id,
+    projectId: startupMvpProject.id,
     name: "Week 1",
     description: "Initial MVP development",
     number: 1,
@@ -149,8 +138,7 @@ export const cycles: SeedCycle[] = [
   },
   {
     id: stableId("cycle-startup-week-2"),
-    workspaceId: startupWorkspace.id,
-    teamId: startupCoreTeam.id,
+    projectId: startupMvpProject.id,
     name: "Week 2",
     description: "MVP refinement and testing",
     number: 2,

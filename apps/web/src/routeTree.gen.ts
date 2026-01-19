@@ -10,25 +10,27 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as CreateWorkspaceRouteImport } from './routes/create-workspace'
+import { Route as CreateIssueRouteImport } from './routes/create-issue'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProjectsIndexRouteImport } from './routes/projects/index'
+import { Route as CyclesIndexRouteImport } from './routes/cycles/index'
 import { Route as WorkspaceSlugRouteImport } from './routes/workspace/$slug'
-import { Route as WorkspaceSlugIndexRouteImport } from './routes/workspace/$slug/index'
-import { Route as WorkspaceSlugTeamRouteImport } from './routes/workspace/$slug/team'
-import { Route as WorkspaceSlugSettingsRouteImport } from './routes/workspace/$slug/settings'
-import { Route as WorkspaceSlugCreateIssueRouteImport } from './routes/workspace/$slug/create-issue'
-import { Route as WorkspaceSlugProjectsIndexRouteImport } from './routes/workspace/$slug/projects/index'
-import { Route as WorkspaceSlugCyclesIndexRouteImport } from './routes/workspace/$slug/cycles/index'
-import { Route as WorkspaceSlugProjectsNewRouteImport } from './routes/workspace/$slug/projects/new'
-import { Route as WorkspaceSlugProjectsProjectIdRouteImport } from './routes/workspace/$slug/projects/$projectId'
-import { Route as WorkspaceSlugIssueIssueIdRouteImport } from './routes/workspace/$slug/issue/$issueId'
-import { Route as WorkspaceSlugCyclesNewRouteImport } from './routes/workspace/$slug/cycles/new'
-import { Route as WorkspaceSlugCyclesCycleIdRouteImport } from './routes/workspace/$slug/cycles/$cycleId'
+import { Route as ProjectsNewRouteImport } from './routes/projects/new'
+import { Route as ProjectsProjectIdRouteImport } from './routes/projects/$projectId'
+import { Route as IssueIssueIdRouteImport } from './routes/issue/$issueId'
+import { Route as CyclesNewRouteImport } from './routes/cycles/new'
+import { Route as CyclesCycleIdRouteImport } from './routes/cycles/$cycleId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -36,9 +38,9 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CreateWorkspaceRoute = CreateWorkspaceRouteImport.update({
-  id: '/create-workspace',
-  path: '/create-workspace',
+const CreateIssueRoute = CreateIssueRouteImport.update({
+  id: '/create-issue',
+  path: '/create-issue',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -46,190 +48,155 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CyclesIndexRoute = CyclesIndexRouteImport.update({
+  id: '/cycles/',
+  path: '/cycles/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WorkspaceSlugRoute = WorkspaceSlugRouteImport.update({
   id: '/workspace/$slug',
   path: '/workspace/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WorkspaceSlugIndexRoute = WorkspaceSlugIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => WorkspaceSlugRoute,
+const ProjectsNewRoute = ProjectsNewRouteImport.update({
+  id: '/projects/new',
+  path: '/projects/new',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const WorkspaceSlugTeamRoute = WorkspaceSlugTeamRouteImport.update({
-  id: '/team',
-  path: '/team',
-  getParentRoute: () => WorkspaceSlugRoute,
+const ProjectsProjectIdRoute = ProjectsProjectIdRouteImport.update({
+  id: '/projects/$projectId',
+  path: '/projects/$projectId',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const WorkspaceSlugSettingsRoute = WorkspaceSlugSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => WorkspaceSlugRoute,
+const IssueIssueIdRoute = IssueIssueIdRouteImport.update({
+  id: '/issue/$issueId',
+  path: '/issue/$issueId',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const WorkspaceSlugCreateIssueRoute =
-  WorkspaceSlugCreateIssueRouteImport.update({
-    id: '/create-issue',
-    path: '/create-issue',
-    getParentRoute: () => WorkspaceSlugRoute,
-  } as any)
-const WorkspaceSlugProjectsIndexRoute =
-  WorkspaceSlugProjectsIndexRouteImport.update({
-    id: '/projects/',
-    path: '/projects/',
-    getParentRoute: () => WorkspaceSlugRoute,
-  } as any)
-const WorkspaceSlugCyclesIndexRoute =
-  WorkspaceSlugCyclesIndexRouteImport.update({
-    id: '/cycles/',
-    path: '/cycles/',
-    getParentRoute: () => WorkspaceSlugRoute,
-  } as any)
-const WorkspaceSlugProjectsNewRoute =
-  WorkspaceSlugProjectsNewRouteImport.update({
-    id: '/projects/new',
-    path: '/projects/new',
-    getParentRoute: () => WorkspaceSlugRoute,
-  } as any)
-const WorkspaceSlugProjectsProjectIdRoute =
-  WorkspaceSlugProjectsProjectIdRouteImport.update({
-    id: '/projects/$projectId',
-    path: '/projects/$projectId',
-    getParentRoute: () => WorkspaceSlugRoute,
-  } as any)
-const WorkspaceSlugIssueIssueIdRoute =
-  WorkspaceSlugIssueIssueIdRouteImport.update({
-    id: '/issue/$issueId',
-    path: '/issue/$issueId',
-    getParentRoute: () => WorkspaceSlugRoute,
-  } as any)
-const WorkspaceSlugCyclesNewRoute = WorkspaceSlugCyclesNewRouteImport.update({
+const CyclesNewRoute = CyclesNewRouteImport.update({
   id: '/cycles/new',
   path: '/cycles/new',
-  getParentRoute: () => WorkspaceSlugRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-const WorkspaceSlugCyclesCycleIdRoute =
-  WorkspaceSlugCyclesCycleIdRouteImport.update({
-    id: '/cycles/$cycleId',
-    path: '/cycles/$cycleId',
-    getParentRoute: () => WorkspaceSlugRoute,
-  } as any)
+const CyclesCycleIdRoute = CyclesCycleIdRouteImport.update({
+  id: '/cycles/$cycleId',
+  path: '/cycles/$cycleId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/create-workspace': typeof CreateWorkspaceRoute
+  '/create-issue': typeof CreateIssueRoute
   '/login': typeof LoginRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
-  '/workspace/$slug': typeof WorkspaceSlugRouteWithChildren
-  '/workspace/$slug/create-issue': typeof WorkspaceSlugCreateIssueRoute
-  '/workspace/$slug/settings': typeof WorkspaceSlugSettingsRoute
-  '/workspace/$slug/team': typeof WorkspaceSlugTeamRoute
-  '/workspace/$slug/': typeof WorkspaceSlugIndexRoute
-  '/workspace/$slug/cycles/$cycleId': typeof WorkspaceSlugCyclesCycleIdRoute
-  '/workspace/$slug/cycles/new': typeof WorkspaceSlugCyclesNewRoute
-  '/workspace/$slug/issue/$issueId': typeof WorkspaceSlugIssueIssueIdRoute
-  '/workspace/$slug/projects/$projectId': typeof WorkspaceSlugProjectsProjectIdRoute
-  '/workspace/$slug/projects/new': typeof WorkspaceSlugProjectsNewRoute
-  '/workspace/$slug/cycles/': typeof WorkspaceSlugCyclesIndexRoute
-  '/workspace/$slug/projects/': typeof WorkspaceSlugProjectsIndexRoute
+  '/cycles/$cycleId': typeof CyclesCycleIdRoute
+  '/cycles/new': typeof CyclesNewRoute
+  '/issue/$issueId': typeof IssueIssueIdRoute
+  '/projects/$projectId': typeof ProjectsProjectIdRoute
+  '/projects/new': typeof ProjectsNewRoute
+  '/workspace/$slug': typeof WorkspaceSlugRoute
+  '/cycles/': typeof CyclesIndexRoute
+  '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/create-workspace': typeof CreateWorkspaceRoute
+  '/create-issue': typeof CreateIssueRoute
   '/login': typeof LoginRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
-  '/workspace/$slug/create-issue': typeof WorkspaceSlugCreateIssueRoute
-  '/workspace/$slug/settings': typeof WorkspaceSlugSettingsRoute
-  '/workspace/$slug/team': typeof WorkspaceSlugTeamRoute
-  '/workspace/$slug': typeof WorkspaceSlugIndexRoute
-  '/workspace/$slug/cycles/$cycleId': typeof WorkspaceSlugCyclesCycleIdRoute
-  '/workspace/$slug/cycles/new': typeof WorkspaceSlugCyclesNewRoute
-  '/workspace/$slug/issue/$issueId': typeof WorkspaceSlugIssueIssueIdRoute
-  '/workspace/$slug/projects/$projectId': typeof WorkspaceSlugProjectsProjectIdRoute
-  '/workspace/$slug/projects/new': typeof WorkspaceSlugProjectsNewRoute
-  '/workspace/$slug/cycles': typeof WorkspaceSlugCyclesIndexRoute
-  '/workspace/$slug/projects': typeof WorkspaceSlugProjectsIndexRoute
+  '/cycles/$cycleId': typeof CyclesCycleIdRoute
+  '/cycles/new': typeof CyclesNewRoute
+  '/issue/$issueId': typeof IssueIssueIdRoute
+  '/projects/$projectId': typeof ProjectsProjectIdRoute
+  '/projects/new': typeof ProjectsNewRoute
+  '/workspace/$slug': typeof WorkspaceSlugRoute
+  '/cycles': typeof CyclesIndexRoute
+  '/projects': typeof ProjectsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/create-workspace': typeof CreateWorkspaceRoute
+  '/create-issue': typeof CreateIssueRoute
   '/login': typeof LoginRoute
+  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
-  '/workspace/$slug': typeof WorkspaceSlugRouteWithChildren
-  '/workspace/$slug/create-issue': typeof WorkspaceSlugCreateIssueRoute
-  '/workspace/$slug/settings': typeof WorkspaceSlugSettingsRoute
-  '/workspace/$slug/team': typeof WorkspaceSlugTeamRoute
-  '/workspace/$slug/': typeof WorkspaceSlugIndexRoute
-  '/workspace/$slug/cycles/$cycleId': typeof WorkspaceSlugCyclesCycleIdRoute
-  '/workspace/$slug/cycles/new': typeof WorkspaceSlugCyclesNewRoute
-  '/workspace/$slug/issue/$issueId': typeof WorkspaceSlugIssueIssueIdRoute
-  '/workspace/$slug/projects/$projectId': typeof WorkspaceSlugProjectsProjectIdRoute
-  '/workspace/$slug/projects/new': typeof WorkspaceSlugProjectsNewRoute
-  '/workspace/$slug/cycles/': typeof WorkspaceSlugCyclesIndexRoute
-  '/workspace/$slug/projects/': typeof WorkspaceSlugProjectsIndexRoute
+  '/cycles/$cycleId': typeof CyclesCycleIdRoute
+  '/cycles/new': typeof CyclesNewRoute
+  '/issue/$issueId': typeof IssueIssueIdRoute
+  '/projects/$projectId': typeof ProjectsProjectIdRoute
+  '/projects/new': typeof ProjectsNewRoute
+  '/workspace/$slug': typeof WorkspaceSlugRoute
+  '/cycles/': typeof CyclesIndexRoute
+  '/projects/': typeof ProjectsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/create-workspace'
+    | '/create-issue'
     | '/login'
+    | '/settings'
     | '/signup'
+    | '/cycles/$cycleId'
+    | '/cycles/new'
+    | '/issue/$issueId'
+    | '/projects/$projectId'
+    | '/projects/new'
     | '/workspace/$slug'
-    | '/workspace/$slug/create-issue'
-    | '/workspace/$slug/settings'
-    | '/workspace/$slug/team'
-    | '/workspace/$slug/'
-    | '/workspace/$slug/cycles/$cycleId'
-    | '/workspace/$slug/cycles/new'
-    | '/workspace/$slug/issue/$issueId'
-    | '/workspace/$slug/projects/$projectId'
-    | '/workspace/$slug/projects/new'
-    | '/workspace/$slug/cycles/'
-    | '/workspace/$slug/projects/'
+    | '/cycles/'
+    | '/projects/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/create-workspace'
+    | '/create-issue'
     | '/login'
+    | '/settings'
     | '/signup'
-    | '/workspace/$slug/create-issue'
-    | '/workspace/$slug/settings'
-    | '/workspace/$slug/team'
+    | '/cycles/$cycleId'
+    | '/cycles/new'
+    | '/issue/$issueId'
+    | '/projects/$projectId'
+    | '/projects/new'
     | '/workspace/$slug'
-    | '/workspace/$slug/cycles/$cycleId'
-    | '/workspace/$slug/cycles/new'
-    | '/workspace/$slug/issue/$issueId'
-    | '/workspace/$slug/projects/$projectId'
-    | '/workspace/$slug/projects/new'
-    | '/workspace/$slug/cycles'
-    | '/workspace/$slug/projects'
+    | '/cycles'
+    | '/projects'
   id:
     | '__root__'
     | '/'
-    | '/create-workspace'
+    | '/create-issue'
     | '/login'
+    | '/settings'
     | '/signup'
+    | '/cycles/$cycleId'
+    | '/cycles/new'
+    | '/issue/$issueId'
+    | '/projects/$projectId'
+    | '/projects/new'
     | '/workspace/$slug'
-    | '/workspace/$slug/create-issue'
-    | '/workspace/$slug/settings'
-    | '/workspace/$slug/team'
-    | '/workspace/$slug/'
-    | '/workspace/$slug/cycles/$cycleId'
-    | '/workspace/$slug/cycles/new'
-    | '/workspace/$slug/issue/$issueId'
-    | '/workspace/$slug/projects/$projectId'
-    | '/workspace/$slug/projects/new'
-    | '/workspace/$slug/cycles/'
-    | '/workspace/$slug/projects/'
+    | '/cycles/'
+    | '/projects/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CreateWorkspaceRoute: typeof CreateWorkspaceRoute
+  CreateIssueRoute: typeof CreateIssueRoute
   LoginRoute: typeof LoginRoute
+  SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
-  WorkspaceSlugRoute: typeof WorkspaceSlugRouteWithChildren
+  CyclesCycleIdRoute: typeof CyclesCycleIdRoute
+  CyclesNewRoute: typeof CyclesNewRoute
+  IssueIssueIdRoute: typeof IssueIssueIdRoute
+  ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
+  ProjectsNewRoute: typeof ProjectsNewRoute
+  WorkspaceSlugRoute: typeof WorkspaceSlugRoute
+  CyclesIndexRoute: typeof CyclesIndexRoute
+  ProjectsIndexRoute: typeof ProjectsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -241,6 +208,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -248,11 +222,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/create-workspace': {
-      id: '/create-workspace'
-      path: '/create-workspace'
-      fullPath: '/create-workspace'
-      preLoaderRoute: typeof CreateWorkspaceRouteImport
+    '/create-issue': {
+      id: '/create-issue'
+      path: '/create-issue'
+      fullPath: '/create-issue'
+      preLoaderRoute: typeof CreateIssueRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -262,6 +236,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/projects/': {
+      id: '/projects/'
+      path: '/projects'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof ProjectsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cycles/': {
+      id: '/cycles/'
+      path: '/cycles'
+      fullPath: '/cycles/'
+      preLoaderRoute: typeof CyclesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/workspace/$slug': {
       id: '/workspace/$slug'
       path: '/workspace/$slug'
@@ -269,124 +257,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkspaceSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/workspace/$slug/': {
-      id: '/workspace/$slug/'
-      path: '/'
-      fullPath: '/workspace/$slug/'
-      preLoaderRoute: typeof WorkspaceSlugIndexRouteImport
-      parentRoute: typeof WorkspaceSlugRoute
-    }
-    '/workspace/$slug/team': {
-      id: '/workspace/$slug/team'
-      path: '/team'
-      fullPath: '/workspace/$slug/team'
-      preLoaderRoute: typeof WorkspaceSlugTeamRouteImport
-      parentRoute: typeof WorkspaceSlugRoute
-    }
-    '/workspace/$slug/settings': {
-      id: '/workspace/$slug/settings'
-      path: '/settings'
-      fullPath: '/workspace/$slug/settings'
-      preLoaderRoute: typeof WorkspaceSlugSettingsRouteImport
-      parentRoute: typeof WorkspaceSlugRoute
-    }
-    '/workspace/$slug/create-issue': {
-      id: '/workspace/$slug/create-issue'
-      path: '/create-issue'
-      fullPath: '/workspace/$slug/create-issue'
-      preLoaderRoute: typeof WorkspaceSlugCreateIssueRouteImport
-      parentRoute: typeof WorkspaceSlugRoute
-    }
-    '/workspace/$slug/projects/': {
-      id: '/workspace/$slug/projects/'
-      path: '/projects'
-      fullPath: '/workspace/$slug/projects/'
-      preLoaderRoute: typeof WorkspaceSlugProjectsIndexRouteImport
-      parentRoute: typeof WorkspaceSlugRoute
-    }
-    '/workspace/$slug/cycles/': {
-      id: '/workspace/$slug/cycles/'
-      path: '/cycles'
-      fullPath: '/workspace/$slug/cycles/'
-      preLoaderRoute: typeof WorkspaceSlugCyclesIndexRouteImport
-      parentRoute: typeof WorkspaceSlugRoute
-    }
-    '/workspace/$slug/projects/new': {
-      id: '/workspace/$slug/projects/new'
+    '/projects/new': {
+      id: '/projects/new'
       path: '/projects/new'
-      fullPath: '/workspace/$slug/projects/new'
-      preLoaderRoute: typeof WorkspaceSlugProjectsNewRouteImport
-      parentRoute: typeof WorkspaceSlugRoute
+      fullPath: '/projects/new'
+      preLoaderRoute: typeof ProjectsNewRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/workspace/$slug/projects/$projectId': {
-      id: '/workspace/$slug/projects/$projectId'
+    '/projects/$projectId': {
+      id: '/projects/$projectId'
       path: '/projects/$projectId'
-      fullPath: '/workspace/$slug/projects/$projectId'
-      preLoaderRoute: typeof WorkspaceSlugProjectsProjectIdRouteImport
-      parentRoute: typeof WorkspaceSlugRoute
+      fullPath: '/projects/$projectId'
+      preLoaderRoute: typeof ProjectsProjectIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/workspace/$slug/issue/$issueId': {
-      id: '/workspace/$slug/issue/$issueId'
+    '/issue/$issueId': {
+      id: '/issue/$issueId'
       path: '/issue/$issueId'
-      fullPath: '/workspace/$slug/issue/$issueId'
-      preLoaderRoute: typeof WorkspaceSlugIssueIssueIdRouteImport
-      parentRoute: typeof WorkspaceSlugRoute
+      fullPath: '/issue/$issueId'
+      preLoaderRoute: typeof IssueIssueIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/workspace/$slug/cycles/new': {
-      id: '/workspace/$slug/cycles/new'
+    '/cycles/new': {
+      id: '/cycles/new'
       path: '/cycles/new'
-      fullPath: '/workspace/$slug/cycles/new'
-      preLoaderRoute: typeof WorkspaceSlugCyclesNewRouteImport
-      parentRoute: typeof WorkspaceSlugRoute
+      fullPath: '/cycles/new'
+      preLoaderRoute: typeof CyclesNewRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/workspace/$slug/cycles/$cycleId': {
-      id: '/workspace/$slug/cycles/$cycleId'
+    '/cycles/$cycleId': {
+      id: '/cycles/$cycleId'
       path: '/cycles/$cycleId'
-      fullPath: '/workspace/$slug/cycles/$cycleId'
-      preLoaderRoute: typeof WorkspaceSlugCyclesCycleIdRouteImport
-      parentRoute: typeof WorkspaceSlugRoute
+      fullPath: '/cycles/$cycleId'
+      preLoaderRoute: typeof CyclesCycleIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface WorkspaceSlugRouteChildren {
-  WorkspaceSlugCreateIssueRoute: typeof WorkspaceSlugCreateIssueRoute
-  WorkspaceSlugSettingsRoute: typeof WorkspaceSlugSettingsRoute
-  WorkspaceSlugTeamRoute: typeof WorkspaceSlugTeamRoute
-  WorkspaceSlugIndexRoute: typeof WorkspaceSlugIndexRoute
-  WorkspaceSlugCyclesCycleIdRoute: typeof WorkspaceSlugCyclesCycleIdRoute
-  WorkspaceSlugCyclesNewRoute: typeof WorkspaceSlugCyclesNewRoute
-  WorkspaceSlugIssueIssueIdRoute: typeof WorkspaceSlugIssueIssueIdRoute
-  WorkspaceSlugProjectsProjectIdRoute: typeof WorkspaceSlugProjectsProjectIdRoute
-  WorkspaceSlugProjectsNewRoute: typeof WorkspaceSlugProjectsNewRoute
-  WorkspaceSlugCyclesIndexRoute: typeof WorkspaceSlugCyclesIndexRoute
-  WorkspaceSlugProjectsIndexRoute: typeof WorkspaceSlugProjectsIndexRoute
-}
-
-const WorkspaceSlugRouteChildren: WorkspaceSlugRouteChildren = {
-  WorkspaceSlugCreateIssueRoute: WorkspaceSlugCreateIssueRoute,
-  WorkspaceSlugSettingsRoute: WorkspaceSlugSettingsRoute,
-  WorkspaceSlugTeamRoute: WorkspaceSlugTeamRoute,
-  WorkspaceSlugIndexRoute: WorkspaceSlugIndexRoute,
-  WorkspaceSlugCyclesCycleIdRoute: WorkspaceSlugCyclesCycleIdRoute,
-  WorkspaceSlugCyclesNewRoute: WorkspaceSlugCyclesNewRoute,
-  WorkspaceSlugIssueIssueIdRoute: WorkspaceSlugIssueIssueIdRoute,
-  WorkspaceSlugProjectsProjectIdRoute: WorkspaceSlugProjectsProjectIdRoute,
-  WorkspaceSlugProjectsNewRoute: WorkspaceSlugProjectsNewRoute,
-  WorkspaceSlugCyclesIndexRoute: WorkspaceSlugCyclesIndexRoute,
-  WorkspaceSlugProjectsIndexRoute: WorkspaceSlugProjectsIndexRoute,
-}
-
-const WorkspaceSlugRouteWithChildren = WorkspaceSlugRoute._addFileChildren(
-  WorkspaceSlugRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CreateWorkspaceRoute: CreateWorkspaceRoute,
+  CreateIssueRoute: CreateIssueRoute,
   LoginRoute: LoginRoute,
+  SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
-  WorkspaceSlugRoute: WorkspaceSlugRouteWithChildren,
+  CyclesCycleIdRoute: CyclesCycleIdRoute,
+  CyclesNewRoute: CyclesNewRoute,
+  IssueIssueIdRoute: IssueIssueIdRoute,
+  ProjectsProjectIdRoute: ProjectsProjectIdRoute,
+  ProjectsNewRoute: ProjectsNewRoute,
+  WorkspaceSlugRoute: WorkspaceSlugRoute,
+  CyclesIndexRoute: CyclesIndexRoute,
+  ProjectsIndexRoute: ProjectsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

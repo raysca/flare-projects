@@ -1,12 +1,7 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { createDrizzleClient, issues, issueLabels, workspaceMembers, teams, comments, users, labels, projects, cycles } from "@linearflow/database";
-
-// ...
-// In GET /:id
-// ...
-
+import { createDrizzleClient, issues, issueLabels, projectMembers, comments, users, labels, projects, cycles } from "@linearflow/database";
 import { eq, and, desc, sql, inArray, aliasedTable } from "drizzle-orm";
 import type { Env } from "../index";
 import { authMiddleware, type Variables } from "../middleware/auth";
@@ -17,13 +12,11 @@ const app = new Hono<Env & { Variables: Variables }>();
 const createIssueSchema = z.object({
     title: z.string().min(1, "Title is required"),
     description: z.string().optional(),
-    teamId: z.string().uuid("Invalid Team ID"),
-    workspaceId: z.string().uuid("Invalid Workspace ID"),
+    projectId: z.string().uuid("Invalid Project ID"),
     status: z.enum(["backlog", "todo", "in_progress", "in_review", "done", "cancelled"]).default("backlog"),
     priority: z.enum(["urgent", "high", "medium", "low", "no_priority"]).default("no_priority"),
     type: z.enum(["bug", "feature", "improvement", "task"]).optional(),
     assigneeId: z.string().optional(),
-    projectId: z.string().uuid().optional(),
     cycleId: z.string().uuid().optional(),
     parentId: z.string().optional(),
 
@@ -59,40 +52,55 @@ app.get("/", async (c) => {
     const db = createDrizzleClient(c.env.DB);
 
     // Filters from query params
-    const workspaceId = c.req.query("workspaceId");
-    const teamId = c.req.query("teamId");
+    const projectId = c.req.query("projectId");
     const assigneeId = c.req.query("assigneeId");
     const status = c.req.query("status");
+    const cycleId = c.req.query("cycleId"); // Add support for cycle filtering
     const limit = parseInt(c.req.query("limit") || "50");
     const offset = parseInt(c.req.query("offset") || "0");
 
     const conditions = [];
 
-    // Required: User must have access to the workspace
-    // If workspaceId is provided, check access.
-    // If not, we theoretically should search across all workspaces user is in,
-    // but for performance/simplicity let's require workspaceId for now or filter by user's memberships.
-    // Let's require workspaceId for listing issues in this MPV iteration to keep it performant.
-    if (!workspaceId) {
-        return c.json({ error: "workspaceId query parameter is required" }, 400);
+    if (!projectId) {
+        // Optionally allow listing all issues assigned to user across all projects?
+        // For now, let's stick to project-scoped listing or user-assigned listing.
+        // If no projectId, maybe just return issues assigned to user?
+        if (!assigneeId) {
+            return c.json({ error: "projectId query parameter is required" }, 400);
+        }
+        // If assigneeId is provided (likely filter by "my issues"), strictly verify logic below or filter 
+        // by all projects user is member of.
     }
 
-    // Check membership
-    const member = await db
-        .select()
-        .from(workspaceMembers)
-        .where(and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.userId, user.id)))
-        .get();
+    if (projectId) {
+        // Check membership
+        const member = await db
+            .select()
+            .from(projectMembers)
+            .where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, user.id)))
+            .get();
 
-    if (!member) {
-        return c.json({ error: "Access denied to workspace" }, 403);
+        if (!member) {
+            return c.json({ error: "Access denied to project" }, 403);
+        }
+        conditions.push(eq(issues.projectId, projectId));
+    } else {
+        // If no projectId, ensure we filter by projects user has access to
+        // Or specific assignee check (e.g. issues assigned to me)
+        const memberships = await db
+            .select({ projectId: projectMembers.projectId })
+            .from(projectMembers)
+            .where(eq(projectMembers.userId, user.id));
+
+        const projectIds = memberships.map(m => m.projectId);
+        if (projectIds.length === 0) return c.json([]);
+
+        conditions.push(inArray(issues.projectId, projectIds));
     }
 
-    conditions.push(eq(issues.workspaceId, workspaceId));
-
-    if (teamId) conditions.push(eq(issues.teamId, teamId));
     if (assigneeId) conditions.push(eq(issues.assigneeId, assigneeId));
     if (status) conditions.push(eq(issues.status, status as any));
+    if (cycleId) conditions.push(eq(issues.cycleId, cycleId));
 
     // Aliases for users
     const assignee = aliasedTable(users, "assignee");
@@ -101,8 +109,7 @@ app.get("/", async (c) => {
     const result = await db
         .select({
             id: issues.id,
-            workspaceId: issues.workspaceId,
-            teamId: issues.teamId,
+            projectId: issues.projectId,
             number: issues.number,
             title: issues.title,
             description: issues.description,
@@ -113,6 +120,7 @@ app.get("/", async (c) => {
             reporterId: issues.reporterId,
             estimate: issues.estimate,
             dueDate: issues.dueDate,
+            cycleId: issues.cycleId,
             createdAt: issues.createdAt,
             updatedAt: issues.updatedAt,
             assignee: {
@@ -126,11 +134,24 @@ app.get("/", async (c) => {
                 name: reporter.name,
                 avatarUrl: reporter.avatarUrl,
                 email: reporter.email
+            },
+            project: { // return minimal project info
+                id: projects.id,
+                name: projects.name,
+                identifier: projects.identifier
+            },
+            cycle: {
+                id: cycles.id,
+                name: cycles.name,
+                startDate: cycles.startDate,
+                endDate: cycles.endDate
             }
         })
         .from(issues)
         .leftJoin(assignee, eq(issues.assigneeId, assignee.id))
         .leftJoin(reporter, eq(issues.reporterId, reporter.id))
+        .leftJoin(projects, eq(issues.projectId, projects.id))
+        .leftJoin(cycles, eq(issues.cycleId, cycles.id))
         .where(and(...conditions))
         .limit(limit)
         .offset(offset)
@@ -148,27 +169,22 @@ app.post("/", zValidator("json", createIssueSchema), async (c) => {
     const data = c.req.valid("json");
     const db = createDrizzleClient(c.env.DB);
 
-    // Check workspace access
+    // Check project access
     const member = await db
         .select()
-        .from(workspaceMembers)
-        .where(and(eq(workspaceMembers.workspaceId, data.workspaceId), eq(workspaceMembers.userId, user.id)))
+        .from(projectMembers)
+        .where(and(eq(projectMembers.projectId, data.projectId), eq(projectMembers.userId, user.id)))
         .get();
 
     if (!member) {
-        return c.json({ error: "Access denied to workspace" }, 403);
+        return c.json({ error: "Access denied to project" }, 403);
     }
 
-    // Get next issue number for the team/workspace
-    // Note: This relies on a sequential scan or a separate counter. 
-    // For MVP we can count existing issues + 1. 
-    // Racing conditions exist here but for MVP it's acceptable.
-    // Ideally use a Durable Object for atomic increment or atomic update on a counters table.
-    // Let's do a simple count for now.
+    // Get next issue number for the project
     const countResult = await db
         .select({ count: sql<number>`count(*)` })
         .from(issues)
-        .where(eq(issues.workspaceId, data.workspaceId))
+        .where(eq(issues.projectId, data.projectId))
         .get();
 
     const nextNumber = (countResult?.count || 0) + 1;
@@ -215,8 +231,7 @@ app.get("/:id", async (c) => {
     const issue = await db
         .select({
             id: issues.id,
-            workspaceId: issues.workspaceId,
-            teamId: issues.teamId,
+            projectId: issues.projectId,
             number: issues.number,
             title: issues.title,
             description: issues.description,
@@ -225,9 +240,9 @@ app.get("/:id", async (c) => {
             type: issues.type,
             assigneeId: issues.assigneeId,
             reporterId: issues.reporterId,
-            projectId: issues.projectId,
             estimate: issues.estimate,
             dueDate: issues.dueDate,
+            cycleId: issues.cycleId,
             createdAt: issues.createdAt,
             updatedAt: issues.updatedAt,
             assignee: {
@@ -267,11 +282,11 @@ app.get("/:id", async (c) => {
         return c.json({ error: "Issue not found" }, 404);
     }
 
-    // Check access to workspace
+    // Check access to project
     const member = await db
         .select()
-        .from(workspaceMembers)
-        .where(and(eq(workspaceMembers.workspaceId, issue.workspaceId), eq(workspaceMembers.userId, user.id)))
+        .from(projectMembers)
+        .where(and(eq(projectMembers.projectId, issue.projectId), eq(projectMembers.userId, user.id)))
         .get();
 
     if (!member) {
@@ -314,8 +329,8 @@ app.put("/:id", zValidator("json", updateIssueSchema), async (c) => {
     // Check access
     const member = await db
         .select()
-        .from(workspaceMembers)
-        .where(and(eq(workspaceMembers.workspaceId, issue.workspaceId), eq(workspaceMembers.userId, user.id)))
+        .from(projectMembers)
+        .where(and(eq(projectMembers.projectId, issue.projectId), eq(projectMembers.userId, user.id)))
         .get();
 
     if (!member) {
@@ -375,8 +390,8 @@ app.delete("/:id", async (c) => {
     // Check access
     const member = await db
         .select()
-        .from(workspaceMembers)
-        .where(and(eq(workspaceMembers.workspaceId, issue.workspaceId), eq(workspaceMembers.userId, user.id)))
+        .from(projectMembers)
+        .where(and(eq(projectMembers.projectId, issue.projectId), eq(projectMembers.userId, user.id)))
         .get();
 
     if (!member) {
@@ -406,11 +421,11 @@ app.get("/:id/comments", async (c) => {
         return c.json({ error: "Issue not found" }, 404);
     }
 
-    // Check workspace access
+    // Check project access
     const member = await db
         .select()
-        .from(workspaceMembers)
-        .where(and(eq(workspaceMembers.workspaceId, issue.workspaceId), eq(workspaceMembers.userId, user.id)))
+        .from(projectMembers)
+        .where(and(eq(projectMembers.projectId, issue.projectId), eq(projectMembers.userId, user.id)))
         .get();
 
     if (!member) {
@@ -427,6 +442,7 @@ app.get("/:id/comments", async (c) => {
                 id: users.id,
                 name: users.name,
                 avatarUrl: users.avatarUrl,
+                email: users.email // Add email if useful
             },
         })
         .from(comments)
@@ -453,11 +469,11 @@ app.post("/:id/comments", zValidator("json", z.object({ body: z.string().min(1) 
         return c.json({ error: "Issue not found" }, 404);
     }
 
-    // Check workspace access
+    // Check project access
     const member = await db
         .select()
-        .from(workspaceMembers)
-        .where(and(eq(workspaceMembers.workspaceId, issue.workspaceId), eq(workspaceMembers.userId, user.id)))
+        .from(projectMembers)
+        .where(and(eq(projectMembers.projectId, issue.projectId), eq(projectMembers.userId, user.id)))
         .get();
 
     if (!member) {
@@ -483,6 +499,7 @@ app.post("/:id/comments", zValidator("json", z.object({ body: z.string().min(1) 
                 id: users.id,
                 name: users.name,
                 avatarUrl: users.avatarUrl,
+                email: users.email
             },
         })
         .from(comments)

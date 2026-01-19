@@ -1,12 +1,12 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
-import { workspaces } from "./workspaces";
+import { projects } from "./projects";
 
 export const labels = sqliteTable("labels", {
   id: text("id").primaryKey(),
-  workspaceId: text("workspace_id")
+  projectId: text("project_id")
     .notNull()
-    .references(() => workspaces.id, { onDelete: "cascade" }),
+    .references(() => projects.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description"),
   color: text("color").notNull(), // Hex color

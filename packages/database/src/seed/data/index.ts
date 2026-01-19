@@ -1,7 +1,6 @@
 // Export all seed data
 export * from "./users";
-export * from "./workspaces";
-export * from "./teams";
+
 export * from "./labels";
 export * from "./projects";
 export * from "./cycles";

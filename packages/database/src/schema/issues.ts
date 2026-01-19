@@ -1,7 +1,5 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
-import { workspaces } from "./workspaces";
-import { teams } from "./teams";
 import { users } from "./users";
 import { projects } from "./projects";
 import { cycles } from "./cycles";
@@ -9,12 +7,9 @@ import { labels } from "./labels";
 
 export const issues = sqliteTable("issues", {
   id: text("id").primaryKey(),
-  workspaceId: text("workspace_id")
+  projectId: text("project_id")
     .notNull()
-    .references(() => workspaces.id, { onDelete: "cascade" }),
-  teamId: text("team_id")
-    .notNull()
-    .references(() => teams.id, { onDelete: "cascade" }),
+    .references(() => projects.id, { onDelete: "cascade" }),
   number: integer("number").notNull(), // Sequential issue number per workspace
   title: text("title").notNull(),
   description: text("description"), // Markdown content
@@ -35,9 +30,7 @@ export const issues = sqliteTable("issues", {
   reporterId: text("reporter_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  projectId: text("project_id").references(() => projects.id, {
-    onDelete: "set null",
-  }),
+
   cycleId: text("cycle_id").references(() => cycles.id, {
     onDelete: "set null",
   }),

@@ -1,13 +1,13 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
-import { workspaces } from "./workspaces";
+import { projects } from "./projects";
 import { users } from "./users";
 
 export const invitations = sqliteTable("invitations", {
     id: text("id").primaryKey(),
-    workspaceId: text("workspace_id")
+    projectId: text("project_id")
         .notNull()
-        .references(() => workspaces.id, { onDelete: "cascade" }),
+        .references(() => projects.id, { onDelete: "cascade" }),
     email: text("email").notNull(),
     role: text("role", { enum: ["admin", "member", "guest"] })
         .notNull()

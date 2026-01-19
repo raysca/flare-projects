@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { createDrizzleClient, cycles, workspaceMembers } from "@linearflow/database";
-import { eq, and, desc, asc } from "drizzle-orm";
+import { createDrizzleClient, cycles, projectMembers } from "@linearflow/database";
+import { eq, and, desc } from "drizzle-orm";
 import type { Env } from "../index";
 import { authMiddleware, type Variables } from "../middleware/auth";
 
@@ -11,7 +11,7 @@ const app = new Hono<Env & { Variables: Variables }>();
 app.use("*", authMiddleware);
 
 const createCycleSchema = z.object({
-    workspaceId: z.string().uuid(),
+    projectId: z.string().uuid(),
     name: z.string().min(1),
     description: z.string().optional(),
     startDate: z.string().datetime(),
@@ -31,32 +31,31 @@ const updateCycleSchema = z.object({
 
 /**
  * GET /
- * List cycles for a workspace
+ * List cycles for a project
  */
 app.get("/", async (c) => {
     const user = c.var.user;
-    const workspaceId = c.req.query("workspaceId");
+    const projectId = c.req.query("projectId");
     const status = c.req.query("status");
     const db = createDrizzleClient(c.env.DB);
 
-    if (!workspaceId) {
-        return c.json({ error: "workspaceId is required" }, 400);
+    if (!projectId) {
+        return c.json({ error: "projectId is required" }, 400);
     }
 
     // Check membership
     const member = await db
         .select()
-        .from(workspaceMembers)
-        .where(and(eq(workspaceMembers.workspaceId, workspaceId), eq(workspaceMembers.userId, user.id)))
+        .from(projectMembers)
+        .where(and(eq(projectMembers.projectId, projectId), eq(projectMembers.userId, user.id)))
         .get();
 
     if (!member) {
         return c.json({ error: "Access denied" }, 403);
     }
 
-    const conditions = [eq(cycles.workspaceId, workspaceId)];
+    const conditions = [eq(cycles.projectId, projectId)];
     if (status) {
-        // Allow querying multiple statuses if needed, but for now simple eq
         conditions.push(eq(cycles.status, status as any));
     }
 
@@ -64,8 +63,7 @@ app.get("/", async (c) => {
         .select()
         .from(cycles)
         .where(and(...conditions))
-        // Order by start date descending (newest first) or maybe we want active first?
-        // Let's standardise on start date desc for now
+        // Order by start date descending
         .orderBy(desc(cycles.startDate));
 
     return c.json(result);
@@ -83,8 +81,8 @@ app.post("/", zValidator("json", createCycleSchema), async (c) => {
     // Check membership
     const member = await db
         .select()
-        .from(workspaceMembers)
-        .where(and(eq(workspaceMembers.workspaceId, data.workspaceId), eq(workspaceMembers.userId, user.id)))
+        .from(projectMembers)
+        .where(and(eq(projectMembers.projectId, data.projectId), eq(projectMembers.userId, user.id)))
         .get();
 
     if (!member) {
@@ -93,12 +91,11 @@ app.post("/", zValidator("json", createCycleSchema), async (c) => {
 
     const cycleId = crypto.randomUUID();
 
-    // Determine cycle number
-    // Simple count+1 approach (subject to race conditions but acceptable for MVP)
+    // Determine cycle number for project
     const countResult = await db
         .select({ count: cycles.id })
         .from(cycles)
-        .where(eq(cycles.workspaceId, data.workspaceId))
+        .where(eq(cycles.projectId, data.projectId))
         .all();
 
     const nextNumber = countResult.length + 1;
@@ -147,8 +144,8 @@ app.get("/:id", async (c) => {
     // Check membership
     const member = await db
         .select()
-        .from(workspaceMembers)
-        .where(and(eq(workspaceMembers.workspaceId, cycle.workspaceId), eq(workspaceMembers.userId, user.id)))
+        .from(projectMembers)
+        .where(and(eq(projectMembers.projectId, cycle.projectId), eq(projectMembers.userId, user.id)))
         .get();
 
     if (!member) {
@@ -176,8 +173,8 @@ app.put("/:id", zValidator("json", updateCycleSchema), async (c) => {
 
     const member = await db
         .select()
-        .from(workspaceMembers)
-        .where(and(eq(workspaceMembers.workspaceId, cycle.workspaceId), eq(workspaceMembers.userId, user.id)))
+        .from(projectMembers)
+        .where(and(eq(projectMembers.projectId, cycle.projectId), eq(projectMembers.userId, user.id)))
         .get();
 
     if (!member) {
@@ -216,8 +213,8 @@ app.delete("/:id", async (c) => {
 
     const member = await db
         .select()
-        .from(workspaceMembers)
-        .where(and(eq(workspaceMembers.workspaceId, cycle.workspaceId), eq(workspaceMembers.userId, user.id)))
+        .from(projectMembers)
+        .where(and(eq(projectMembers.projectId, cycle.projectId), eq(projectMembers.userId, user.id)))
         .get();
 
     if (!member) {

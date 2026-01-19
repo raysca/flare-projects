@@ -1,7 +1,7 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 import { users } from "./users";
-import { workspaces } from "./workspaces";
+import { projects } from "./projects";
 import { issues } from "./issues";
 
 export const notifications = sqliteTable("notifications", {
@@ -9,9 +9,9 @@ export const notifications = sqliteTable("notifications", {
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  workspaceId: text("workspace_id")
+  projectId: text("project_id")
     .notNull()
-    .references(() => workspaces.id, { onDelete: "cascade" }),
+    .references(() => projects.id, { onDelete: "cascade" }),
   type: text("type", {
     enum: [
       "issue_assigned",
@@ -44,9 +44,9 @@ export const notificationPreferences = sqliteTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    workspaceId: text("workspace_id")
+    projectId: text("project_id")
       .notNull()
-      .references(() => workspaces.id, { onDelete: "cascade" }),
+      .references(() => projects.id, { onDelete: "cascade" }),
     emailNotifications: integer("email_notifications", { mode: "boolean" })
       .notNull()
       .default(true),

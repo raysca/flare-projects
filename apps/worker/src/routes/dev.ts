@@ -89,15 +89,12 @@ dev.post("/reset", async (c) => {
     await db.delete(schema.issueSubscribers).run();
     await db.delete(schema.issues).run();
     await db.delete(schema.cycles).run();
+    await db.delete(schema.projectMembers).run();
     await db.delete(schema.projects).run();
     await db.delete(schema.labels).run();
-    await db.delete(schema.teamMembers).run();
-    await db.delete(schema.teams).run();
     await db.delete(schema.notificationPreferences).run();
     await db.delete(schema.notifications).run();
     await db.delete(schema.activityLog).run();
-    await db.delete(schema.workspaceMembers).run();
-    await db.delete(schema.workspaces).run();
     await db.delete(schema.users).run();
 
     return c.json({
@@ -139,8 +136,6 @@ dev.get("/stats", async (c) => {
     // Get counts for each table
     const [
       usersResult,
-      workspacesResult,
-      teamsResult,
       projectsResult,
       cyclesResult,
       issuesResult,
@@ -148,8 +143,6 @@ dev.get("/stats", async (c) => {
       labelsResult,
     ] = await Promise.all([
       db.select({ count: schema.users.id }).from(schema.users),
-      db.select({ count: schema.workspaces.id }).from(schema.workspaces),
-      db.select({ count: schema.teams.id }).from(schema.teams),
       db.select({ count: schema.projects.id }).from(schema.projects),
       db.select({ count: schema.cycles.id }).from(schema.cycles),
       db.select({ count: schema.issues.id }).from(schema.issues),
@@ -161,8 +154,6 @@ dev.get("/stats", async (c) => {
       success: true,
       stats: {
         users: usersResult.length,
-        workspaces: workspacesResult.length,
-        teams: teamsResult.length,
         projects: projectsResult.length,
         cycles: cyclesResult.length,
         issues: issuesResult.length,

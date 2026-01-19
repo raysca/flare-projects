@@ -11,55 +11,7 @@ CREATE TABLE `users` (
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE `workspace_members` (
-	`id` text PRIMARY KEY NOT NULL,
-	`workspace_id` text NOT NULL,
-	`user_id` text NOT NULL,
-	`role` text DEFAULT 'member' NOT NULL,
-	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
-	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
-	FOREIGN KEY (`workspace_id`) REFERENCES `workspaces`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
-);
---> statement-breakpoint
-CREATE TABLE `workspaces` (
-	`id` text PRIMARY KEY NOT NULL,
-	`name` text NOT NULL,
-	`slug` text NOT NULL,
-	`logo_url` text,
-	`description` text,
-	`created_by` text NOT NULL,
-	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
-	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
-	FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
-);
---> statement-breakpoint
-CREATE TABLE `team_members` (
-	`id` text PRIMARY KEY NOT NULL,
-	`team_id` text NOT NULL,
-	`user_id` text NOT NULL,
-	`is_lead` integer DEFAULT false NOT NULL,
-	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
-	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
-	FOREIGN KEY (`team_id`) REFERENCES `teams`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
-);
---> statement-breakpoint
-CREATE TABLE `teams` (
-	`id` text PRIMARY KEY NOT NULL,
-	`workspace_id` text NOT NULL,
-	`name` text NOT NULL,
-	`identifier` text NOT NULL,
-	`description` text,
-	`color` text,
-	`icon` text,
-	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
-	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
-	FOREIGN KEY (`workspace_id`) REFERENCES `workspaces`(`id`) ON UPDATE no action ON DELETE cascade
-);
---> statement-breakpoint
+CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
 CREATE TABLE `issue_labels` (
 	`id` text PRIMARY KEY NOT NULL,
 	`issue_id` text NOT NULL,
@@ -80,8 +32,7 @@ CREATE TABLE `issue_subscribers` (
 --> statement-breakpoint
 CREATE TABLE `issues` (
 	`id` text PRIMARY KEY NOT NULL,
-	`workspace_id` text NOT NULL,
-	`team_id` text NOT NULL,
+	`project_id` text NOT NULL,
 	`number` integer NOT NULL,
 	`title` text NOT NULL,
 	`description` text,
@@ -90,7 +41,6 @@ CREATE TABLE `issues` (
 	`type` text,
 	`assignee_id` text,
 	`reporter_id` text NOT NULL,
-	`project_id` text,
 	`cycle_id` text,
 	`parent_id` text,
 	`estimate` integer,
@@ -102,19 +52,26 @@ CREATE TABLE `issues` (
 	`sort_order` integer DEFAULT 0 NOT NULL,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
-	FOREIGN KEY (`workspace_id`) REFERENCES `workspaces`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`team_id`) REFERENCES `teams`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`assignee_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null,
 	FOREIGN KEY (`reporter_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON UPDATE no action ON DELETE set null,
 	FOREIGN KEY (`cycle_id`) REFERENCES `cycles`(`id`) ON UPDATE no action ON DELETE set null,
 	FOREIGN KEY (`parent_id`) REFERENCES `issues`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
+CREATE TABLE `project_members` (
+	`project_id` text NOT NULL,
+	`user_id` text NOT NULL,
+	`role` text DEFAULT 'Member' NOT NULL,
+	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
+	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
+	PRIMARY KEY(`project_id`, `user_id`),
+	FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
 CREATE TABLE `projects` (
 	`id` text PRIMARY KEY NOT NULL,
-	`workspace_id` text NOT NULL,
-	`team_id` text,
 	`name` text NOT NULL,
 	`identifier` text NOT NULL,
 	`description` text,
@@ -122,21 +79,20 @@ CREATE TABLE `projects` (
 	`icon` text,
 	`status` text DEFAULT 'planned' NOT NULL,
 	`lead_id` text,
+	`owner_id` text NOT NULL,
 	`start_date` integer,
 	`target_date` integer,
 	`completed_at` integer,
 	`progress` integer DEFAULT 0 NOT NULL,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
-	FOREIGN KEY (`workspace_id`) REFERENCES `workspaces`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`team_id`) REFERENCES `teams`(`id`) ON UPDATE no action ON DELETE set null,
-	FOREIGN KEY (`lead_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null
+	FOREIGN KEY (`lead_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null,
+	FOREIGN KEY (`owner_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `cycles` (
 	`id` text PRIMARY KEY NOT NULL,
-	`workspace_id` text NOT NULL,
-	`team_id` text,
+	`project_id` text NOT NULL,
 	`name` text NOT NULL,
 	`description` text,
 	`number` integer NOT NULL,
@@ -147,19 +103,18 @@ CREATE TABLE `cycles` (
 	`progress` integer DEFAULT 0 NOT NULL,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
-	FOREIGN KEY (`workspace_id`) REFERENCES `workspaces`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`team_id`) REFERENCES `teams`(`id`) ON UPDATE no action ON DELETE set null
+	FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `labels` (
 	`id` text PRIMARY KEY NOT NULL,
-	`workspace_id` text NOT NULL,
+	`project_id` text NOT NULL,
 	`name` text NOT NULL,
 	`description` text,
 	`color` text NOT NULL,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
-	FOREIGN KEY (`workspace_id`) REFERENCES `workspaces`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `comment_reactions` (
@@ -210,7 +165,7 @@ CREATE TABLE `attachments` (
 CREATE TABLE `notification_preferences` (
 	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text NOT NULL,
-	`workspace_id` text NOT NULL,
+	`project_id` text NOT NULL,
 	`email_notifications` integer DEFAULT true NOT NULL,
 	`issue_assigned` integer DEFAULT true NOT NULL,
 	`issue_mentioned` integer DEFAULT true NOT NULL,
@@ -220,13 +175,13 @@ CREATE TABLE `notification_preferences` (
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`workspace_id`) REFERENCES `workspaces`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `notifications` (
 	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text NOT NULL,
-	`workspace_id` text NOT NULL,
+	`project_id` text NOT NULL,
 	`type` text NOT NULL,
 	`title` text NOT NULL,
 	`message` text NOT NULL,
@@ -236,13 +191,13 @@ CREATE TABLE `notifications` (
 	`read_at` integer,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`workspace_id`) REFERENCES `workspaces`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`issue_id`) REFERENCES `issues`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `activity_log` (
 	`id` text PRIMARY KEY NOT NULL,
-	`workspace_id` text NOT NULL,
+	`project_id` text NOT NULL,
 	`user_id` text NOT NULL,
 	`issue_id` text,
 	`action` text NOT NULL,
@@ -252,10 +207,24 @@ CREATE TABLE `activity_log` (
 	`old_value` text,
 	`new_value` text,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
-	FOREIGN KEY (`workspace_id`) REFERENCES `workspaces`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`issue_id`) REFERENCES `issues`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
-CREATE UNIQUE INDEX `workspaces_slug_unique` ON `workspaces` (`slug`);
+CREATE TABLE `invitations` (
+	`id` text PRIMARY KEY NOT NULL,
+	`project_id` text NOT NULL,
+	`email` text NOT NULL,
+	`role` text DEFAULT 'member' NOT NULL,
+	`token` text NOT NULL,
+	`invited_by` text NOT NULL,
+	`status` text DEFAULT 'pending' NOT NULL,
+	`expires_at` integer NOT NULL,
+	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
+	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
+	FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`invited_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `invitations_token_unique` ON `invitations` (`token`);

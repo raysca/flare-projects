@@ -1,6 +1,6 @@
 import { NewNotificationPreference } from "../../schema/notifications";
 import { stableId } from "../utils";
-import { primaryWorkspace, acmeWorkspace, startupWorkspace } from "./workspaces";
+import { v1LaunchProject, acmePlatformProject, startupMvpProject } from "./projects";
 import { adminUser, johnDoe, janeSmith, mikeWilson, sarahChen, davidKim } from "./users";
 
 export interface SeedNotificationPreference extends NewNotificationPreference {
@@ -8,11 +8,11 @@ export interface SeedNotificationPreference extends NewNotificationPreference {
 }
 
 export const notificationPreferences: SeedNotificationPreference[] = [
-  // Primary workspace notification preferences
+  // Primary project notification preferences
   {
     id: stableId("notif-pref-admin"),
     userId: adminUser.id,
-    workspaceId: primaryWorkspace.id,
+    projectId: v1LaunchProject.id,
     emailNotifications: true,
     issueAssigned: true,
     issueMentioned: true,
@@ -23,7 +23,7 @@ export const notificationPreferences: SeedNotificationPreference[] = [
   {
     id: stableId("notif-pref-john"),
     userId: johnDoe.id,
-    workspaceId: primaryWorkspace.id,
+    projectId: v1LaunchProject.id,
     emailNotifications: true,
     issueAssigned: true,
     issueMentioned: true,
@@ -34,7 +34,7 @@ export const notificationPreferences: SeedNotificationPreference[] = [
   {
     id: stableId("notif-pref-jane"),
     userId: janeSmith.id,
-    workspaceId: primaryWorkspace.id,
+    projectId: v1LaunchProject.id,
     emailNotifications: true,
     issueAssigned: true,
     issueMentioned: true,
@@ -45,7 +45,7 @@ export const notificationPreferences: SeedNotificationPreference[] = [
   {
     id: stableId("notif-pref-mike"),
     userId: mikeWilson.id,
-    workspaceId: primaryWorkspace.id,
+    projectId: v1LaunchProject.id,
     emailNotifications: false, // Prefers in-app only
     issueAssigned: true,
     issueMentioned: true,
@@ -56,7 +56,7 @@ export const notificationPreferences: SeedNotificationPreference[] = [
   {
     id: stableId("notif-pref-sarah"),
     userId: sarahChen.id,
-    workspaceId: primaryWorkspace.id,
+    projectId: v1LaunchProject.id,
     emailNotifications: true,
     issueAssigned: true,
     issueMentioned: true,
@@ -67,7 +67,7 @@ export const notificationPreferences: SeedNotificationPreference[] = [
   {
     id: stableId("notif-pref-david"),
     userId: davidKim.id,
-    workspaceId: primaryWorkspace.id,
+    projectId: v1LaunchProject.id,
     emailNotifications: true,
     issueAssigned: true,
     issueMentioned: true,
@@ -76,22 +76,22 @@ export const notificationPreferences: SeedNotificationPreference[] = [
     commentMentioned: true,
   },
 
-  // Acme workspace preferences
+  // Acme project preferences
   {
     id: stableId("notif-pref-john-acme"),
     userId: johnDoe.id,
-    workspaceId: acmeWorkspace.id,
+    projectId: acmePlatformProject.id,
     emailNotifications: true,
     issueAssigned: true,
     issueMentioned: true,
-    issueUpdated: true, // Admin in this workspace
+    issueUpdated: true, // Admin in this project
     commentCreated: true,
     commentMentioned: true,
   },
   {
     id: stableId("notif-pref-mike-acme"),
     userId: mikeWilson.id,
-    workspaceId: acmeWorkspace.id,
+    projectId: acmePlatformProject.id,
     emailNotifications: false,
     issueAssigned: true,
     issueMentioned: true,
@@ -100,11 +100,11 @@ export const notificationPreferences: SeedNotificationPreference[] = [
     commentMentioned: true,
   },
 
-  // Startup workspace preferences
+  // Startup project preferences
   {
     id: stableId("notif-pref-sarah-startup"),
     userId: sarahChen.id,
-    workspaceId: startupWorkspace.id,
+    projectId: startupMvpProject.id,
     emailNotifications: true,
     issueAssigned: true,
     issueMentioned: true,
@@ -115,7 +115,7 @@ export const notificationPreferences: SeedNotificationPreference[] = [
   {
     id: stableId("notif-pref-jane-startup"),
     userId: janeSmith.id,
-    workspaceId: startupWorkspace.id,
+    projectId: startupMvpProject.id,
     emailNotifications: true,
     issueAssigned: true,
     issueMentioned: true,

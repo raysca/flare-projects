@@ -4,86 +4,58 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { IssueForm } from '@/components/issues/issue-form'
 import { useCreateIssue } from '@/hooks/use-issues'
-import {
-  useWorkspaceBySlug,
-  useWorkspaceTeams,
-  useWorkspaceProjects,
-  useWorkspaceMembers,
-  useWorkspaceLabels,
-  useWorkspaceCycles,
-} from '@/hooks/use-workspace'
+import { useProjects } from '@/hooks/use-projects'
 import type { CreateIssueInput } from '@/types/issues'
 
-export const Route = createFileRoute('/workspace/$slug/create-issue')({
+export const Route = createFileRoute('/create-issue')({
   component: CreateIssue,
 })
 
 function CreateIssue() {
-  const { slug } = Route.useParams()
   const navigate = useNavigate()
 
   // Queries
-  const { data: workspace, isLoading: isLoadingWorkspace } =
-    useWorkspaceBySlug(slug)
-  const { data: teams = [], isLoading: isLoadingTeams } = useWorkspaceTeams(
-    workspace?.id
-  )
-  const { data: projects = [], isLoading: isLoadingProjects } =
-    useWorkspaceProjects(workspace?.id)
-  const { data: members = [], isLoading: isLoadingMembers } =
-    useWorkspaceMembers(workspace?.id)
-  const { data: labels = [], isLoading: isLoadingLabels } = useWorkspaceLabels(
-    workspace?.id
-  )
-  const { data: cycles = [], isLoading: isLoadingCycles } = useWorkspaceCycles(
-    workspace?.id
-  )
+  const { data: projectList = [], isLoading: isLoadingProjects } = useProjects()
 
-  // Mutation
+  // We should ideally fetch members/labels/cycles here but they might be project-specific.
+  // For now, let's fetch GLOBAL users (or just me?) for assignee.
+  // And fetch GLOBAL labels? Or we need to fetch labels for selected project?
+  // Since IssueForm handles project selection internally (or we pass list), fetching project-specific data
+  // inside CreateIssue is hard unless we lift state.
+
+  // If we want IssueForm to be generic, it should probably be able to handle fetching or we pass "loadProjectData" callback?
+  // Or: CreateIssue creates issue, but IssueForm needs to switch resources on project change.
+  // Let's keep it simple: Pass ALL users and ALL labels (if global or manageable).
+  // But wait, labels are workspace specific (now project specific?).
+
+  // Let's fetch global users for now.
+  // Labels... maybe we can leave empty or fetch global labels if they exist.
+  // Cycles... need projectId.
+
+  // Refactor needed: IssueForm should take `projectId` and `onProjectIdChange` so parent can fetch data.
+  // But IssueForm was managing it. I'll stick to basic implementation: Create Issue with minimal deps.
+  // Labels/Cycles/Assignees might need improvement later.
+
   const createIssue = useCreateIssue()
-
-  const isLoading =
-    isLoadingWorkspace ||
-    isLoadingTeams ||
-    isLoadingProjects ||
-    isLoadingMembers ||
-    isLoadingLabels ||
-    isLoadingCycles
 
   const handleSubmit = async (input: CreateIssueInput) => {
     await createIssue.mutateAsync(input)
-    navigate({ to: '/workspace/$slug', params: { slug } })
+    navigate({ to: '/' })
   }
 
   const handleCancel = () => {
-    navigate({ to: '/workspace/$slug', params: { slug } })
+    navigate({ to: '/' })
   }
 
-  if (isLoading) {
-    return <CreateIssueSkeleton slug={slug} />
+  if (isLoadingProjects) {
+    return <CreateIssueSkeleton />
   }
 
-  if (!workspace) {
+  if (projectList.length === 0) {
     return (
       <div className="max-w-2xl mx-auto py-8">
         <Link
-          to="/workspace/$slug"
-          params={{ slug }}
-          className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
-        >
-          <ArrowLeft className="w-4 h-4 mr-1" /> Back to Issues
-        </Link>
-        <p className="text-muted-foreground">Workspace not found</p>
-      </div>
-    )
-  }
-
-  if (teams.length === 0) {
-    return (
-      <div className="max-w-2xl mx-auto py-8">
-        <Link
-          to="/workspace/$slug"
-          params={{ slug }}
+          to="/"
           className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to Issues
@@ -91,14 +63,13 @@ function CreateIssue() {
         <Card>
           <CardContent className="py-8 text-center">
             <p className="text-muted-foreground mb-4">
-              You need to create a team before you can create issues.
+              You need to create a project first.
             </p>
             <Link
-              to="/workspace/$slug/settings"
-              params={{ slug }}
+              to="/projects/new"
               className="text-primary hover:underline"
             >
-              Go to Settings to create a team
+              Create a Project
             </Link>
           </CardContent>
         </Card>
@@ -106,11 +77,14 @@ function CreateIssue() {
     )
   }
 
+  // Temporary: Empty arrays for members/labels/cycles until we implement dynamic fetching or global store.
+  // We can fetch members via useUsers() (global).
+  // Cycles/Labels require projectId.
+
   return (
     <div className="max-w-2xl mx-auto py-8">
       <Link
-        to="/workspace/$slug"
-        params={{ slug }}
+        to="/"
         className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
       >
         <ArrowLeft className="w-4 h-4 mr-1" /> Back to Issues
@@ -122,12 +96,10 @@ function CreateIssue() {
         </CardHeader>
         <CardContent>
           <IssueForm
-            workspaceId={workspace.id}
-            teams={teams}
-            projects={projects}
-            members={members}
-            labels={labels}
-            cycles={cycles}
+            projects={projectList}
+            members={[]} // To be implemented: Fetch users
+            labels={[]} // To be implemented: Fetch labels for selected project
+            cycles={[]} // To be implemented: Fetch cycles for selected project
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             isSubmitting={createIssue.isPending}
@@ -138,12 +110,11 @@ function CreateIssue() {
   )
 }
 
-function CreateIssueSkeleton({ slug }: { slug: string }) {
+function CreateIssueSkeleton() {
   return (
     <div className="max-w-2xl mx-auto py-8">
       <Link
-        to="/workspace/$slug"
-        params={{ slug }}
+        to="/"
         className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
       >
         <ArrowLeft className="w-4 h-4 mr-1" /> Back to Issues

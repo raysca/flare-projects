@@ -1,7 +1,5 @@
 import { NewProject } from "../../schema/projects";
 import { stableId, daysFromNow, daysAgo } from "../utils";
-import { primaryWorkspace, acmeWorkspace, startupWorkspace } from "./workspaces";
-import { engineeringTeam, designTeam, productTeam, devopsTeam, acmeBackendTeam, startupCoreTeam } from "./teams";
 import { adminUser, johnDoe, janeSmith, sarahChen, mikeWilson } from "./users";
 
 export interface SeedProject extends NewProject {
@@ -9,14 +7,13 @@ export interface SeedProject extends NewProject {
 }
 
 export const projects: SeedProject[] = [
-  // LinearFlow Demo workspace projects
+  // LinearFlow Demo projects
   {
     id: stableId("project-v1-launch"),
-    workspaceId: primaryWorkspace.id,
-    teamId: engineeringTeam.id,
+    ownerId: adminUser.id,
     name: "V1 Launch",
     identifier: "V1",
-    description: "Initial product launch with core features including authentication, workspaces, and issue tracking",
+    description: "Initial product launch with core features including authentication and issue tracking",
     color: "#8b5cf6",
     icon: "rocket",
     status: "active",
@@ -27,8 +24,7 @@ export const projects: SeedProject[] = [
   },
   {
     id: stableId("project-auth-system"),
-    workspaceId: primaryWorkspace.id,
-    teamId: engineeringTeam.id,
+    ownerId: adminUser.id,
     name: "Authentication System",
     identifier: "AUTH",
     description: "Complete authentication and authorization system with SSO support",
@@ -42,8 +38,7 @@ export const projects: SeedProject[] = [
   },
   {
     id: stableId("project-design-system"),
-    workspaceId: primaryWorkspace.id,
-    teamId: designTeam.id,
+    ownerId: janeSmith.id,
     name: "Design System",
     identifier: "DS",
     description: "Comprehensive design system with reusable components and design tokens",
@@ -57,8 +52,7 @@ export const projects: SeedProject[] = [
   },
   {
     id: stableId("project-api-v2"),
-    workspaceId: primaryWorkspace.id,
-    teamId: engineeringTeam.id,
+    ownerId: adminUser.id,
     name: "API v2",
     identifier: "API2",
     description: "Next generation API with GraphQL support and improved performance",
@@ -72,8 +66,7 @@ export const projects: SeedProject[] = [
   },
   {
     id: stableId("project-mobile-app"),
-    workspaceId: primaryWorkspace.id,
-    teamId: engineeringTeam.id,
+    ownerId: adminUser.id,
     name: "Mobile App",
     identifier: "MOB",
     description: "Native mobile application for iOS and Android",
@@ -87,8 +80,7 @@ export const projects: SeedProject[] = [
   },
   {
     id: stableId("project-infrastructure"),
-    workspaceId: primaryWorkspace.id,
-    teamId: devopsTeam.id,
+    ownerId: mikeWilson.id,
     name: "Infrastructure Modernization",
     identifier: "INFRA",
     description: "Migrate to edge-first infrastructure with Cloudflare Workers",
@@ -102,8 +94,7 @@ export const projects: SeedProject[] = [
   },
   {
     id: stableId("project-completed"),
-    workspaceId: primaryWorkspace.id,
-    teamId: productTeam.id,
+    ownerId: sarahChen.id,
     name: "Product Discovery",
     identifier: "PD",
     description: "Initial product discovery and user research phase",
@@ -117,11 +108,10 @@ export const projects: SeedProject[] = [
     progress: 100,
   },
 
-  // Acme workspace projects
+  // Acme projects
   {
     id: stableId("project-acme-platform"),
-    workspaceId: acmeWorkspace.id,
-    teamId: acmeBackendTeam.id,
+    ownerId: johnDoe.id,
     name: "Platform Rewrite",
     identifier: "PLAT",
     description: "Rewrite legacy platform with modern architecture",
@@ -134,11 +124,10 @@ export const projects: SeedProject[] = [
     progress: 40,
   },
 
-  // Startup workspace projects
+  // Startup projects
   {
     id: stableId("project-startup-mvp"),
-    workspaceId: startupWorkspace.id,
-    teamId: startupCoreTeam.id,
+    ownerId: sarahChen.id,
     name: "MVP Launch",
     identifier: "MVP",
     description: "Minimum viable product for initial launch",

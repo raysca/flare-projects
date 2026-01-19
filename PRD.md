@@ -18,7 +18,7 @@
 ### Cloudflare Services Utilization
 
 **D1 (SQLite)** - Primary data store
-- Issues, projects, teams, users, comments, cycles
+- Issues, projects, users, comments, cycles
 - Optimized for read-heavy workloads with intelligent caching
 - Global replication for low-latency reads
 
@@ -71,17 +71,7 @@
 
 ## Core Features & Functionality
 
-### 1. Workspace & Teams
 
-**Features:**
-- Multi-tenant workspaces with team hierarchy
-- Role-based access control (Admin, Member, Guest)
-- Team-based issue filtering and views
-- Custom workspace settings and branding
-
-**AI Enhancement:**
-- Automatic team member suggestion for issues based on expertise
-- Team workload balancing recommendations
 
 ### 2. Issues
 
@@ -252,7 +242,7 @@
 - *Duration: 2 days*
 
 **M1.2: Database Schema Design** *(Depends on: M1.1)*
-- Design Drizzle schema for users, workspaces, teams
+- Design Drizzle schema for users, projects (with members)
 - Design schema for issues, projects, cycles, labels
 - Design schema for comments, attachments, notifications
 - Create initial migrations
@@ -267,12 +257,11 @@
 - Auth middleware for Hono
 - *Duration: 3 days*
 
-**M1.4: User & Workspace Management** *(Depends on: M1.3)*
+**M1.4: User & Project Management** *(Depends on: M1.3)*
 - User CRUD operations
-- Workspace creation and settings
-- Team management within workspaces
+- Project creation and settings
+- Project membership with flexible roles (e.g. "Designer", "Lead")
 - User invitation system
-- RBAC implementation (Admin, Member, Guest)
 - *Duration: 4 days*
 
 **M1.5: Basic Frontend Setup** *(Depends on: M1.1)*

@@ -19,7 +19,6 @@ import { ProjectStatusSelect } from '@/components/projects/project-status-select
 import { ProjectLeadSelect } from '@/components/projects/project-lead-select'
 import { StatusSelect } from '@/components/issues/status-select'
 import { useProject, useUpdateProject, useProjectIssues } from '@/hooks/use-projects'
-import { useWorkspaceBySlug, useWorkspaceMembers } from '@/hooks/use-workspace'
 import {
   getProgressColor,
   formatTargetDate,
@@ -28,18 +27,15 @@ import { getInitials } from '@/lib/issue-utils'
 import { cn } from '@/lib/utils'
 import type { ProjectStatus } from '@/types/projects'
 
-export const Route = createFileRoute('/workspace/$slug/projects/$projectId')({
+export const Route = createFileRoute('/projects/$projectId/')({
   component: ProjectDetail,
 })
 
 function ProjectDetail() {
-  const { slug, projectId } = Route.useParams()
+  const { projectId } = Route.useParams()
 
   // Queries
-  const { data: workspace, isLoading: isLoadingWorkspace } =
-    useWorkspaceBySlug(slug)
   const { data: project, isLoading: isLoadingProject } = useProject(projectId)
-  const { data: members = [] } = useWorkspaceMembers(workspace?.id)
   const { data: issues = [], isLoading: isLoadingIssues } =
     useProjectIssues(projectId)
 
@@ -62,18 +58,17 @@ function ProjectDetail() {
     }
   }, [isEditingName])
 
-  const isLoading = isLoadingWorkspace || isLoadingProject
+  const isLoading = isLoadingProject
 
   if (isLoading) {
-    return <ProjectDetailSkeleton slug={slug} />
+    return <ProjectDetailSkeleton />
   }
 
-  if (!project || !workspace) {
+  if (!project) {
     return (
       <div className="max-w-5xl mx-auto py-6">
         <Link
-          to="/workspace/$slug/projects"
-          params={{ slug }}
+          to="/projects"
           className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-1" /> Back to Projects
@@ -145,8 +140,7 @@ function ProjectDetail() {
   return (
     <div className="max-w-5xl mx-auto py-6">
       <Link
-        to="/workspace/$slug/projects"
-        params={{ slug }}
+        to="/projects"
         className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
       >
         <ArrowLeft className="w-4 h-4 mr-1" /> Back to Projects
@@ -291,8 +285,7 @@ function ProjectDetail() {
                   No issues assigned to this project yet.
                 </p>
                 <Link
-                  to="/workspace/$slug/create-issue"
-                  params={{ slug }}
+                  to="/create-issue"
                   search={{ projectId: project.id }}
                 >
                   <Button variant="outline" size="sm">
@@ -305,8 +298,8 @@ function ProjectDetail() {
                 {issues.slice(0, 10).map((issue) => (
                   <Link
                     key={issue.id}
-                    to="/workspace/$slug/issue/$issueId"
-                    params={{ slug, issueId: issue.id }}
+                    to="/issue/$issueId"
+                    params={{ issueId: issue.id }}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-colors"
                   >
                     <StatusSelect
@@ -318,7 +311,7 @@ function ProjectDetail() {
                       disabled
                     />
                     <span className="text-sm font-mono text-muted-foreground">
-                      {slug.toUpperCase()}-{issue.number}
+                      {project.identifier}-{issue.number}
                     </span>
                     <span className="text-sm truncate flex-1">
                       {issue.title}
@@ -370,7 +363,6 @@ function ProjectDetail() {
                   <ProjectLeadSelect
                     value={project.lead?.id}
                     onValueChange={handleLeadChange}
-                    members={members}
                     size="sm"
                     disabled={updateProject.isPending}
                   />
@@ -477,12 +469,11 @@ function ProjectDetail() {
   )
 }
 
-function ProjectDetailSkeleton({ slug }: { slug: string }) {
+function ProjectDetailSkeleton() {
   return (
     <div className="max-w-5xl mx-auto py-6">
       <Link
-        to="/workspace/$slug/projects"
-        params={{ slug }}
+        to="/projects"
         className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
       >
         <ArrowLeft className="w-4 h-4 mr-1" /> Back to Projects

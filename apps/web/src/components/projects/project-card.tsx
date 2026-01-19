@@ -12,17 +12,16 @@ import type { ProjectListItem } from '@/types/projects'
 
 interface ProjectCardProps {
   project: ProjectListItem
-  workspaceSlug: string
 }
 
-export function ProjectCard({ project, workspaceSlug }: ProjectCardProps) {
+export function ProjectCard({ project }: ProjectCardProps) {
   const statusConfig = PROJECT_STATUS_CONFIG[project.status]
   const StatusIcon = statusConfig.icon
 
   return (
     <Link
-      to="/workspace/$slug/projects/$projectId"
-      params={{ slug: workspaceSlug, projectId: project.id }}
+      to="/projects/$projectId"
+      params={{ projectId: project.id }}
     >
       <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full group">
         <CardHeader className="pb-3">

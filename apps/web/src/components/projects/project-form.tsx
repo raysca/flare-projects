@@ -6,11 +6,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { ProjectStatusSelect } from './project-status-select'
 import { ProjectLeadSelect } from './project-lead-select'
 import type { ProjectStatus, CreateProjectInput } from '@/types/projects'
-import type { User } from '@/types/issues'
+
 
 interface ProjectFormProps {
-  workspaceId: string
-  members: User[]
   onSubmit: (input: CreateProjectInput) => Promise<void>
   onCancel: () => void
   isSubmitting?: boolean
@@ -18,8 +16,6 @@ interface ProjectFormProps {
 }
 
 export function ProjectForm({
-  workspaceId,
-  members,
   onSubmit,
   onCancel,
   isSubmitting,
@@ -66,7 +62,6 @@ export function ProjectForm({
 
     try {
       await onSubmit({
-        workspaceId,
         name: name.trim(),
         identifier: identifier.toUpperCase(),
         description: description || undefined,
@@ -147,7 +142,6 @@ export function ProjectForm({
           <ProjectLeadSelect
             value={leadId}
             onValueChange={setLeadId}
-            members={members}
           />
         </div>
       </div>

@@ -55,7 +55,6 @@ export interface ProjectWithStats extends Project {
 
 // Create project input
 export interface CreateProjectInput {
-  workspaceId: string
   name: string
   identifier: string
   description?: string

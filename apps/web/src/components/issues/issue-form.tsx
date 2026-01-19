@@ -17,7 +17,6 @@ import { LabelSelect } from './label-select'
 import type {
   IssueStatus,
   IssuePriority,
-  Team,
   Project,
   User,
   Label,
@@ -26,8 +25,6 @@ import type {
 } from '@/types/issues'
 
 interface IssueFormProps {
-  workspaceId: string
-  teams: Team[]
   projects: Project[]
   members: User[]
   labels: Label[]
@@ -39,8 +36,6 @@ interface IssueFormProps {
 }
 
 export function IssueForm({
-  workspaceId,
-  teams,
   projects,
   members,
   labels,
@@ -54,8 +49,7 @@ export function IssueForm({
   const [description, setDescription] = useState(
     initialValues?.description ?? ''
   )
-  const [teamId, setTeamId] = useState(initialValues?.teamId ?? teams[0]?.id ?? '')
-  const [projectId, setProjectId] = useState(initialValues?.projectId ?? '')
+  const [projectId, setProjectId] = useState(initialValues?.projectId ?? projects[0]?.id ?? '')
   const [cycleId, setCycleId] = useState(initialValues?.cycleId ?? '')
   const [status, setStatus] = useState<IssueStatus>(
     initialValues?.status ?? 'backlog'
@@ -79,8 +73,8 @@ export function IssueForm({
       return
     }
 
-    if (!teamId) {
-      setError('Team is required')
+    if (!projectId) {
+      setError('Project is required')
       return
     }
 
@@ -88,14 +82,12 @@ export function IssueForm({
 
     try {
       await onSubmit({
-        workspaceId,
-        teamId,
         title: title.trim(),
         description: description || undefined,
         status,
         priority,
         assigneeId,
-        projectId: projectId || undefined,
+        projectId,
         cycleId: cycleId || undefined,
         labelIds: labelIds.length > 0 ? labelIds : undefined,
       })
@@ -106,40 +98,21 @@ export function IssueForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Team and Project */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <FormLabel htmlFor="team">Team</FormLabel>
-          <Select value={teamId} onValueChange={setTeamId}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select team" />
-            </SelectTrigger>
-            <SelectContent>
-              {teams.map((team) => (
-                <SelectItem key={team.id} value={team.id}>
-                  {team.name} ({team.identifier})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <FormLabel htmlFor="project">Project (Optional)</FormLabel>
-          <Select value={projectId || 'no_project'} onValueChange={(val) => setProjectId(val === 'no_project' ? '' : val)}>
-            <SelectTrigger>
-              <SelectValue placeholder="No project" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="no_project">No Project</SelectItem>
-              {projects.map((project) => (
-                <SelectItem key={project.id} value={project.id}>
-                  {project.name} ({project.identifier})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Project */}
+      <div className="space-y-2">
+        <FormLabel htmlFor="project">Project</FormLabel>
+        <Select value={projectId} onValueChange={setProjectId}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select project" />
+          </SelectTrigger>
+          <SelectContent>
+            {projects.map((project) => (
+              <SelectItem key={project.id} value={project.id}>
+                {project.name} ({project.identifier})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Cycle (Optional) */}
@@ -222,7 +195,7 @@ export function IssueForm({
         <Button type="button" variant="ghost" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" disabled={isSubmitting || teams.length === 0}>
+        <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Creating...' : 'Create Issue'}
         </Button>
       </div>

@@ -1,140 +1,206 @@
-import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
-import { apiFetch, clearAuthToken } from '../lib/api'
-import { Button } from '../components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card'
-import { Plus, LogOut, ArrowRight, Layout } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { LayoutDashboard, Plus, Search, HelpCircle, Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { IssueTable } from '@/components/issues/issue-table'
+import { IssueBoard } from '@/components/issues/issue-board'
+import { ViewToggle } from '@/components/issues/view-toggle'
+import { KeyboardShortcutsDialog } from '@/components/keyboard-shortcuts-dialog'
+import { useIssues, useUpdateIssue } from '@/hooks/use-issues'
+import { useMe } from '@/hooks/use-users'
+import { useViewMode } from '@/hooks/use-view-mode'
+import {
+  useKeyboardShortcuts,
+  useIssueListNavigation,
+} from '@/hooks/use-keyboard-shortcuts'
+import type { IssueStatus, IssueFilters } from '@/types/issues'
 
 export const Route = createFileRoute('/')({
-  component: Dashboard,
+  component: MyIssuesPage,
 })
 
-interface Workspace {
-  id: string
-  name: string
-  slug: string
-  role: string
-}
+function MyIssuesPage() {
+  const navigate = useNavigate()
+  const { data: user, isLoading: isLoadingUser } = useMe()
 
-function Dashboard() {
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [user, setUser] = useState<any>(null)
-  const router = useRouter()
+  // Filters
+  const [filters, _setFilters] = useState<IssueFilters>({})
+  const [searchQuery, setSearchQuery] = useState('')
 
-  useEffect(() => {
-    const checkAuthAndFetch = async () => {
-      try {
-        // Fetch user profile first to verify token
-        const userProfile = await apiFetch<any>('/auth/me');
-        setUser(userProfile);
+  // Fetch issues assigned to me
+  const { data: issues = [], isLoading: isLoadingIssues } = useIssues({
+    assigneeId: user?.id,
+    ...filters,
+    search: searchQuery || undefined
+  })
 
-        // Fetch workspaces
-        const data = await apiFetch<Workspace[]>('/workspaces');
-        setWorkspaces(data);
-      } catch (err) {
-        // If auth fails, redirect to login
-        clearAuthToken();
-        router.navigate({ to: '/login' });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // View mode
+  const { viewMode, setViewMode } = useViewMode('global')
 
-    checkAuthAndFetch();
-  }, [router]);
+  // Selection state
+  const [selectedIssueId, setSelectedIssueId] = useState<string | undefined>()
+  const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false)
 
-  const handleLogout = () => {
-    clearAuthToken();
-    router.navigate({ to: '/login' });
-  };
+  // Mutations
+  const updateIssue = useUpdateIssue()
 
-  if (isLoading) {
+  // Navigation handler
+  const handleOpenIssue = useCallback(
+    (issueId: string) => {
+      navigate({
+        to: '/issue/$issueId',
+        params: { issueId },
+      })
+    },
+    [navigate]
+  )
+
+  useIssueListNavigation({
+    issues,
+    selectedId: selectedIssueId,
+    onSelect: setSelectedIssueId,
+    onOpen: handleOpenIssue,
+    enabled: viewMode === 'table',
+  })
+
+  // Quick status change for keyboard shortcuts
+  const handleQuickStatusChange = useCallback(
+    async (status: IssueStatus) => {
+      if (!selectedIssueId) return
+      await updateIssue.mutateAsync({
+        issueId: selectedIssueId,
+        input: { status },
+      })
+    },
+    [selectedIssueId, updateIssue]
+  )
+
+  useKeyboardShortcuts({
+    shortcuts: [
+      {
+        key: '/',
+        handler: () => document.getElementById('search-input')?.focus(),
+      },
+      { key: '1', handler: () => handleQuickStatusChange('backlog') },
+      { key: '2', handler: () => handleQuickStatusChange('todo') },
+      { key: '3', handler: () => handleQuickStatusChange('in_progress') },
+      { key: '4', handler: () => handleQuickStatusChange('in_review') },
+      { key: '5', handler: () => handleQuickStatusChange('done') },
+      { key: '6', handler: () => handleQuickStatusChange('cancelled') },
+    ],
+    enabled: true,
+  })
+
+  if (isLoadingUser) {
+    return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
+  }
+
+  // Loaded but no user? (Should be handled by auth guard)
+  if (!user) return null
+
+  // Empty state
+  if (!isLoadingIssues && issues.length === 0 && !searchQuery) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="max-w-4xl mx-auto text-center py-20">
+        <div className="inline-flex items-center justify-center p-4 bg-slate-100 dark:bg-slate-800 rounded-full mb-6">
+          <LayoutDashboard className="w-12 h-12 text-slate-400" />
+        </div>
+        <h2 className="text-3xl font-bold mb-4">Welcome, {user.name}</h2>
+        <p className="text-muted-foreground max-w-lg mx-auto mb-8">
+          You don't have any issues assigned to you yet.
+          Create a new issue to get started.
+        </p>
+        <div className="flex justify-center gap-4">
+          <Link to="/create-issue">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Issue
+            </Button>
+          </Link>
+        </div>
+        <KeyboardShortcutsDialog
+          open={shortcutsDialogOpen}
+          onOpenChange={setShortcutsDialogOpen}
+        />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="bg-blue-600 p-1.5 rounded-md">
-            <Layout className="w-5 h-5 text-white" />
-          </div>
-          <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-            LinearFlow
-          </h1>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">
-            {user?.name}
-          </span>
-          <Button variant="ghost" size="sm" onClick={handleLogout}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign out
-          </Button>
-        </div>
-      </header>
+    <div className="max-w-full mx-auto">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <h2 className="text-2xl font-bold">My Issues</h2>
 
-      <main className="max-w-5xl mx-auto px-6 py-12">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight mb-2">Your Workspaces</h2>
-            <p className="text-muted-foreground">Manage your projects and teams.</p>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="relative flex-1 sm:flex-none sm:w-64">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <Input
+              id="search-input"
+              placeholder="Search issues..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8"
+            />
           </div>
-          <Link to="/create-workspace">
+
+          <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 w-9 p-0"
+                  onClick={() => setShortcutsDialogOpen(true)}
+                >
+                  <HelpCircle className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Keyboard shortcuts (?)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <Link to="/create-issue">
             <Button>
               <Plus className="w-4 h-4 mr-2" />
-              New Workspace
+              New Issue
             </Button>
           </Link>
         </div>
+      </div>
 
-        {workspaces.length === 0 ? (
-          <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-xl border border-dashed border-slate-300 dark:border-slate-700">
-            <div className="bg-slate-100 dark:bg-slate-700 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Layout className="w-8 h-8 text-slate-500 dark:text-slate-400" />
-            </div>
-            <h3 className="text-xl font-semibold mb-2">No workspaces yet</h3>
-            <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-              Create your first workspace to start managing issues and building great products.
-            </p>
-            <Link to="/create-workspace">
-              <Button size="lg">Create Workspace</Button>
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {workspaces.map((workspace) => (
-              <Link
-                key={workspace.id}
-                to="/workspace/$slug"
-                params={{ slug: workspace.slug }}
-                className="block group"
-              >
-                <Card className="h-full transition-all duration-200 hover:shadow-lg hover:border-blue-500/50">
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      {workspace.name}
-                      <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0" />
-                    </CardTitle>
-                    <CardDescription>{workspace.slug}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {/* Can add stats here later */}
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 capitalize">
-                      {workspace.role}
-                    </span>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        )}
-      </main>
+      {viewMode === 'table' ? (
+        <IssueTable
+          issues={issues}
+          workspaceSlug="global"
+          selectedId={selectedIssueId}
+          onSelectIssue={setSelectedIssueId}
+          isLoading={isLoadingIssues}
+        />
+      ) : (
+        <IssueBoard
+          issues={issues}
+          workspaceSlug="global"
+          onQuickCreate={() => navigate({ to: '/create-issue' })}
+          isLoading={isLoadingIssues}
+        />
+      )}
+
+      <KeyboardShortcutsDialog
+        open={shortcutsDialogOpen}
+        onOpenChange={setShortcutsDialogOpen}
+      />
     </div>
   )
 }

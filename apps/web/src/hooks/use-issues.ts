@@ -10,12 +10,11 @@ import type {
 } from '@/types/issues'
 
 // Build query string from filters
+// Build query string from filters
 function buildQueryString(
-  workspaceId: string,
   filters?: IssueFilters
 ): string {
   const params = new URLSearchParams()
-  params.set('workspaceId', workspaceId)
 
   if (filters?.status?.length) {
     filters.status.forEach((s) => params.append('status', s))
@@ -39,13 +38,12 @@ function buildQueryString(
   return params.toString()
 }
 
-// Fetch issues for a workspace with optional filters
-export function useIssues(workspaceId: string | undefined, filters?: IssueFilters) {
+// Fetch issues with optional filters
+export function useIssues(filters?: IssueFilters) {
   return useQuery({
-    queryKey: issueKeys.list(workspaceId ?? '', filters),
+    queryKey: issueKeys.list(filters),
     queryFn: () =>
-      apiFetch<Issue[]>(`/issues?${buildQueryString(workspaceId!, filters)}`),
-    enabled: !!workspaceId,
+      apiFetch<Issue[]>(`/issues?${buildQueryString(filters)}`),
   })
 }
 

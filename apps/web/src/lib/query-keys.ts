@@ -48,6 +48,8 @@ export const projectKeys = {
     [...projectKeys.lists(), workspaceId] as const,
   details: () => [...projectKeys.all, 'detail'] as const,
   detail: (id: string) => [...projectKeys.details(), id] as const,
+  issues: (projectId: string) =>
+    [...projectKeys.detail(projectId), 'issues'] as const,
 }
 
 export const teamKeys = {

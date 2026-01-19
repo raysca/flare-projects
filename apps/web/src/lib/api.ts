@@ -16,7 +16,36 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
 
     if (!response.ok) {
         const errorBody = await response.json().catch(() => ({}));
-        throw new Error(errorBody.error || `Request failed with status ${response.status}`);
+
+        // Handle different error response formats
+        let errorMessage: string;
+        if (typeof errorBody.error === 'string') {
+            // Standard API error: { error: "message" }
+            errorMessage = errorBody.error;
+        } else if (errorBody.error?.name === 'ZodError' && errorBody.error?.message) {
+            // Hono zod-validator error: { success: false, error: { name: "ZodError", message: "[...issues JSON...]" } }
+            try {
+                const issues = JSON.parse(errorBody.error.message);
+                errorMessage = issues.map((i: { message: string; path?: string[] }) =>
+                    i.path?.length ? `${i.path.join('.')}: ${i.message}` : i.message
+                ).join(', ');
+            } catch {
+                errorMessage = errorBody.error.message;
+            }
+        } else if (errorBody.error?.issues) {
+            // Direct Zod validation error: { error: { issues: [...] } }
+            const issues = errorBody.error.issues;
+            errorMessage = issues.map((i: { message: string; path?: string[] }) =>
+                i.path?.length ? `${i.path.join('.')}: ${i.message}` : i.message
+            ).join(', ');
+        } else if (errorBody.message) {
+            // Generic error: { message: "..." }
+            errorMessage = errorBody.message;
+        } else {
+            errorMessage = `Request failed with status ${response.status}`;
+        }
+
+        throw new Error(errorMessage);
     }
 
     // Handle 204 No Content

@@ -10,14 +10,35 @@ export function seedId(prefix: string, index: number): string {
 
 /**
  * Generate a stable UUID for seeding (deterministic based on name)
+ * Creates a valid UUID v4 format from a deterministic hash
  */
 export function stableId(name: string): string {
-  // Create a deterministic ID based on the name
-  const hash = name.split("").reduce((acc, char) => {
-    return ((acc << 5) - acc + char.charCodeAt(0)) | 0;
-  }, 0);
-  const hex = Math.abs(hash).toString(16).padStart(8, "0");
-  return `seed-${hex}-${name.toLowerCase().replace(/[^a-z0-9]/g, "-").slice(0, 20)}`;
+  // Create a deterministic hash based on the name
+  let hash1 = 0;
+  let hash2 = 0;
+  let hash3 = 0;
+  let hash4 = 0;
+
+  for (let i = 0; i < name.length; i++) {
+    const char = name.charCodeAt(i);
+    hash1 = ((hash1 << 5) - hash1 + char) | 0;
+    hash2 = ((hash2 << 7) - hash2 + char * 31) | 0;
+    hash3 = ((hash3 << 11) - hash3 + char * 37) | 0;
+    hash4 = ((hash4 << 13) - hash4 + char * 41) | 0;
+  }
+
+  // Convert to hex strings
+  const hex1 = Math.abs(hash1).toString(16).padStart(8, "0").slice(0, 8);
+  const hex2 = Math.abs(hash2).toString(16).padStart(4, "0").slice(0, 4);
+  const hex3 = Math.abs(hash3).toString(16).padStart(4, "0").slice(0, 4);
+  const hex4 = Math.abs(hash4).toString(16).padStart(12, "0").slice(0, 12);
+
+  // Format as UUID v4: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+  // Set version (4) and variant bits (8, 9, a, or b)
+  const version = "4";
+  const variant = ["8", "9", "a", "b"][Math.abs(hash1) % 4];
+
+  return `${hex1}-${hex2}-${version}${hex3.slice(1)}-${variant}${hex4.slice(0, 3)}-${hex4.slice(3)}${hex2}`;
 }
 
 /**

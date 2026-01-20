@@ -325,4 +325,80 @@ app.get("/:id/members", async (c) => {
     return c.json(members);
 });
 
+/**
+ * DELETE /:id/members/:userId
+ * Remove a member from the project
+ */
+app.delete("/:id/members/:userId", async (c) => {
+    const projectId = c.req.param("id");
+    const targetUserId = c.req.param("userId");
+    const user = c.var.user;
+    const db = createDrizzleClient(c.env.DB);
+
+    // Check requester membership
+    const member = await db
+        .select()
+        .from(projectMembers)
+        .where(and(
+            eq(projectMembers.projectId, projectId),
+            eq(projectMembers.userId, user.id)
+        ))
+        .get();
+
+    if (!member) {
+        return c.json({ error: "Access denied" }, 403);
+    }
+
+    // TODO: Check if requester has permission (e.g. Owner/Lead)
+
+    await db
+        .delete(projectMembers)
+        .where(and(
+            eq(projectMembers.projectId, projectId),
+            eq(projectMembers.userId, targetUserId)
+        ));
+
+    return c.json({ message: "Member removed" });
+});
+
+/**
+ * PUT /:id/members/:userId
+ * Update a member's role
+ */
+const updateMemberSchema = z.object({
+    role: z.string(),
+});
+
+app.put("/:id/members/:userId", zValidator("json", updateMemberSchema), async (c) => {
+    const projectId = c.req.param("id");
+    const targetUserId = c.req.param("userId");
+    const { role } = c.req.valid("json");
+    const user = c.var.user;
+    const db = createDrizzleClient(c.env.DB);
+
+    // Check requester membership
+    const member = await db
+        .select()
+        .from(projectMembers)
+        .where(and(
+            eq(projectMembers.projectId, projectId),
+            eq(projectMembers.userId, user.id)
+        ))
+        .get();
+
+    if (!member) {
+        return c.json({ error: "Access denied" }, 403);
+    }
+
+    await db
+        .update(projectMembers)
+        .set({ role })
+        .where(and(
+            eq(projectMembers.projectId, projectId),
+            eq(projectMembers.userId, targetUserId)
+        ));
+
+    return c.json({ message: "Member role updated" });
+});
+
 export default app;

@@ -6,6 +6,9 @@ import type {
   ProjectListItem,
   CreateProjectInput,
   UpdateProjectInput,
+  ProjectMember,
+  Invitation,
+  CreateInvitationInput,
 } from '@/types/projects'
 import type { Issue } from '@/types/issues'
 
@@ -34,6 +37,15 @@ export function useProjectIssues(projectId: string | undefined) {
       // Fetch issues filtered by project
       return apiFetch<Issue[]>(`/issues?projectId=${projectId}`)
     },
+    enabled: !!projectId,
+  })
+}
+
+// Fetch project members
+export function useProjectMembers(projectId: string | undefined) {
+  return useQuery({
+    queryKey: projectKeys.members(projectId ?? ''),
+    queryFn: () => apiFetch<ProjectMember[]>(`/projects/${projectId}/members`),
     enabled: !!projectId,
   })
 }
@@ -178,6 +190,67 @@ export function useDeleteProject() {
       queryClient.invalidateQueries({ queryKey: projectKeys.lists() })
       // Also invalidate issues that might reference this project
       queryClient.invalidateQueries({ queryKey: issueKeys.lists() })
+    },
+  })
+}
+
+// Add a member directly (requires user to exist)
+export function useAddMember() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ projectId, email, role }: { projectId: string; email: string; role?: string }) =>
+      apiFetch(`/projects/${projectId}/members`, {
+        method: 'POST',
+        body: JSON.stringify({ email, role }),
+      }),
+    onSuccess: (_data, { projectId }) => {
+      queryClient.invalidateQueries({ queryKey: projectKeys.members(projectId) })
+    },
+  })
+}
+
+// Invite a member (creates invitation)
+export function useInviteMember() {
+  return useMutation({
+    mutationFn: (input: CreateInvitationInput) =>
+      apiFetch<Invitation>('/invitations', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      }),
+    // We don't necessarily update members list until they accept, 
+    // but we might want to refetch invitations list if we had one.
+    // For now do nothing or optimistically notify.
+  })
+}
+
+// Remove a member
+export function useRemoveMember() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ projectId, userId }: { projectId: string; userId: string }) =>
+      apiFetch(`/projects/${projectId}/members/${userId}`, {
+        method: 'DELETE',
+      }),
+    onSuccess: (_data, { projectId }) => {
+      queryClient.invalidateQueries({ queryKey: projectKeys.members(projectId) })
+    },
+  })
+}
+
+// Update member role
+export function useUpdateMemberRole() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ projectId, userId, role }: { projectId: string; userId: string; role: string }) =>
+      apiFetch(`/projects/${projectId}/members/${userId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ role }),
+      }),
+    onSuccess: (_data, { projectId }) => {
+      queryClient.invalidateQueries({ queryKey: projectKeys.members(projectId) })
     },
   })
 }

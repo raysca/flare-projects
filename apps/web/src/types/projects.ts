@@ -82,3 +82,29 @@ export interface ProjectFilters {
   leadId?: string
   search?: string
 }
+
+// Project member
+export interface ProjectMember {
+  userId: string
+  name: string
+  email: string
+  avatarUrl?: string
+  role: string
+}
+
+// Invitation
+export interface Invitation {
+  id: string
+  projectId: string
+  email: string
+  role: string
+  status: 'pending' | 'accepted' | 'expired'
+  token: string
+  expiresAt: string
+}
+
+export interface CreateInvitationInput {
+  projectId: string
+  email: string
+  role?: string
+}

@@ -10,22 +10,21 @@ function ProjectLayout() {
 
     const navItems = [
         {
-            to: '/_layout/projects/$projectId',
+            to: '/projects/$projectId',
             params: { projectId },
             label: 'Overview',
             icon: LayoutDashboard,
             exact: true
         },
         {
-            to: '/_layout/projects/$projectId/cycles',
+            to: '/projects/$projectId/cycles',
             params: { projectId },
             label: 'Cycles',
             icon: Repeat,
         },
         {
-            to: '/_layout/settings',
-            // Pointing to global settings for now as project settings don't exist yet.
-            params: {},
+            to: '/projects/$projectId/settings',
+            params: { projectId },
             label: 'Settings',
             icon: Settings,
         }

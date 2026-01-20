@@ -28,6 +28,8 @@ export const projectKeys = {
   detail: (id: string) => [...projectKeys.details(), id] as const,
   issues: (projectId: string) =>
     [...projectKeys.detail(projectId), 'issues'] as const,
+  members: (projectId: string) =>
+    [...projectKeys.detail(projectId), 'members'] as const,
 }
 
 export const labelKeys = {

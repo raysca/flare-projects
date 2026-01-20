@@ -19,7 +19,7 @@ import { apiFetch } from '@/lib/api'
 import { } from '@/lib/query-keys'
 import { useQueryClient } from '@tanstack/react-query'
 
-export const Route = createFileRoute('/projects/$projectId/cycles/new')({
+export const Route = createFileRoute('/_layout/projects/$projectId/cycles/new')({
     component: NewCycle,
 })
 
@@ -79,7 +79,7 @@ function NewCycle() {
     return (
         <div className="max-w-2xl mx-auto py-8">
             <Link
-                to="/projects/$projectId/cycles"
+                to="/_layout/projects/$projectId/cycles"
                 params={{ projectId }}
                 className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
             >
@@ -160,12 +160,10 @@ function NewCycle() {
                             {error && <p className="text-sm text-destructive">{error}</p>}
 
                             <div className="flex justify-end gap-2">
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    onClick={() => navigate({ to: '/projects/$projectId/cycles', params: { projectId } })}
-                                >
-                                    Cancel
+                                <Button variant="ghost" type="button" asChild>
+                                    <Link to="/_layout/projects/$projectId/cycles" params={{ projectId }}>
+                                        Cancel
+                                    </Link>
                                 </Button>
                                 <Button type="submit" disabled={form.formState.isSubmitting}>
                                     {form.formState.isSubmitting ? 'Creating...' : 'Create Cycle'}

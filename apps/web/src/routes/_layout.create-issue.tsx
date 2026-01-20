@@ -7,7 +7,7 @@ import { useCreateIssue } from '@/hooks/use-issues'
 import { useProjects } from '@/hooks/use-projects'
 import type { CreateIssueInput } from '@/types/issues'
 
-export const Route = createFileRoute('/create-issue')({
+export const Route = createFileRoute('/_layout/create-issue')({
   component: CreateIssue,
 })
 

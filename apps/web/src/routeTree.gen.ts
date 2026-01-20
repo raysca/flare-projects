@@ -10,27 +10,22 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
-import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as CreateIssueRouteImport } from './routes/create-issue'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as ProjectsIndexRouteImport } from './routes/projects/index'
-import { Route as CyclesIndexRouteImport } from './routes/cycles/index'
-import { Route as WorkspaceSlugRouteImport } from './routes/workspace/$slug'
-import { Route as ProjectsNewRouteImport } from './routes/projects/new'
-import { Route as ProjectsProjectIdRouteImport } from './routes/projects/$projectId'
-import { Route as IssueIssueIdRouteImport } from './routes/issue/$issueId'
-import { Route as CyclesNewRouteImport } from './routes/cycles/new'
-import { Route as CyclesCycleIdRouteImport } from './routes/cycles/$cycleId'
+import { Route as LayoutRouteImport } from './routes/_layout'
+import { Route as LayoutIndexRouteImport } from './routes/_layout.index'
+import { Route as LayoutSettingsRouteImport } from './routes/_layout.settings'
+import { Route as LayoutCreateIssueRouteImport } from './routes/_layout.create-issue'
+import { Route as LayoutProjectsNewRouteImport } from './routes/_layout.projects/new'
+import { Route as LayoutIssueIssueIdRouteImport } from './routes/_layout.issue/$issueId'
+import { Route as LayoutProjectsProjectIdRouteRouteImport } from './routes/_layout.projects/$projectId/route'
+import { Route as LayoutProjectsProjectIdIndexRouteImport } from './routes/_layout.projects/$projectId/index'
+import { Route as LayoutProjectsProjectIdCyclesIndexRouteImport } from './routes/_layout.projects/$projectId/cycles/index'
+import { Route as LayoutProjectsProjectIdCyclesNewRouteImport } from './routes/_layout.projects/$projectId/cycles/new'
+import { Route as LayoutProjectsProjectIdCyclesCycleIdRouteImport } from './routes/_layout.projects/$projectId/cycles/$cycleId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -38,165 +33,158 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CreateIssueRoute = CreateIssueRouteImport.update({
-  id: '/create-issue',
-  path: '/create-issue',
+const LayoutRoute = LayoutRouteImport.update({
+  id: '/_layout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
+const LayoutIndexRoute = LayoutIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => LayoutRoute,
 } as any)
-const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
-  id: '/projects/',
-  path: '/projects/',
-  getParentRoute: () => rootRouteImport,
+const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const CyclesIndexRoute = CyclesIndexRouteImport.update({
-  id: '/cycles/',
-  path: '/cycles/',
-  getParentRoute: () => rootRouteImport,
+const LayoutCreateIssueRoute = LayoutCreateIssueRouteImport.update({
+  id: '/create-issue',
+  path: '/create-issue',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const WorkspaceSlugRoute = WorkspaceSlugRouteImport.update({
-  id: '/workspace/$slug',
-  path: '/workspace/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProjectsNewRoute = ProjectsNewRouteImport.update({
+const LayoutProjectsNewRoute = LayoutProjectsNewRouteImport.update({
   id: '/projects/new',
   path: '/projects/new',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => LayoutRoute,
 } as any)
-const ProjectsProjectIdRoute = ProjectsProjectIdRouteImport.update({
-  id: '/projects/$projectId',
-  path: '/projects/$projectId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IssueIssueIdRoute = IssueIssueIdRouteImport.update({
+const LayoutIssueIssueIdRoute = LayoutIssueIssueIdRouteImport.update({
   id: '/issue/$issueId',
   path: '/issue/$issueId',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => LayoutRoute,
 } as any)
-const CyclesNewRoute = CyclesNewRouteImport.update({
-  id: '/cycles/new',
-  path: '/cycles/new',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CyclesCycleIdRoute = CyclesCycleIdRouteImport.update({
-  id: '/cycles/$cycleId',
-  path: '/cycles/$cycleId',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const LayoutProjectsProjectIdRouteRoute =
+  LayoutProjectsProjectIdRouteRouteImport.update({
+    id: '/projects/$projectId',
+    path: '/projects/$projectId',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutProjectsProjectIdIndexRoute =
+  LayoutProjectsProjectIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => LayoutProjectsProjectIdRouteRoute,
+  } as any)
+const LayoutProjectsProjectIdCyclesIndexRoute =
+  LayoutProjectsProjectIdCyclesIndexRouteImport.update({
+    id: '/cycles/',
+    path: '/cycles/',
+    getParentRoute: () => LayoutProjectsProjectIdRouteRoute,
+  } as any)
+const LayoutProjectsProjectIdCyclesNewRoute =
+  LayoutProjectsProjectIdCyclesNewRouteImport.update({
+    id: '/cycles/new',
+    path: '/cycles/new',
+    getParentRoute: () => LayoutProjectsProjectIdRouteRoute,
+  } as any)
+const LayoutProjectsProjectIdCyclesCycleIdRoute =
+  LayoutProjectsProjectIdCyclesCycleIdRouteImport.update({
+    id: '/cycles/$cycleId',
+    path: '/cycles/$cycleId',
+    getParentRoute: () => LayoutProjectsProjectIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/create-issue': typeof CreateIssueRoute
+  '/': typeof LayoutIndexRoute
   '/login': typeof LoginRoute
-  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
-  '/cycles/$cycleId': typeof CyclesCycleIdRoute
-  '/cycles/new': typeof CyclesNewRoute
-  '/issue/$issueId': typeof IssueIssueIdRoute
-  '/projects/$projectId': typeof ProjectsProjectIdRoute
-  '/projects/new': typeof ProjectsNewRoute
-  '/workspace/$slug': typeof WorkspaceSlugRoute
-  '/cycles/': typeof CyclesIndexRoute
-  '/projects/': typeof ProjectsIndexRoute
+  '/create-issue': typeof LayoutCreateIssueRoute
+  '/settings': typeof LayoutSettingsRoute
+  '/projects/$projectId': typeof LayoutProjectsProjectIdRouteRouteWithChildren
+  '/issue/$issueId': typeof LayoutIssueIssueIdRoute
+  '/projects/new': typeof LayoutProjectsNewRoute
+  '/projects/$projectId/': typeof LayoutProjectsProjectIdIndexRoute
+  '/projects/$projectId/cycles/$cycleId': typeof LayoutProjectsProjectIdCyclesCycleIdRoute
+  '/projects/$projectId/cycles/new': typeof LayoutProjectsProjectIdCyclesNewRoute
+  '/projects/$projectId/cycles/': typeof LayoutProjectsProjectIdCyclesIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/create-issue': typeof CreateIssueRoute
   '/login': typeof LoginRoute
-  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
-  '/cycles/$cycleId': typeof CyclesCycleIdRoute
-  '/cycles/new': typeof CyclesNewRoute
-  '/issue/$issueId': typeof IssueIssueIdRoute
-  '/projects/$projectId': typeof ProjectsProjectIdRoute
-  '/projects/new': typeof ProjectsNewRoute
-  '/workspace/$slug': typeof WorkspaceSlugRoute
-  '/cycles': typeof CyclesIndexRoute
-  '/projects': typeof ProjectsIndexRoute
+  '/create-issue': typeof LayoutCreateIssueRoute
+  '/settings': typeof LayoutSettingsRoute
+  '/': typeof LayoutIndexRoute
+  '/issue/$issueId': typeof LayoutIssueIssueIdRoute
+  '/projects/new': typeof LayoutProjectsNewRoute
+  '/projects/$projectId': typeof LayoutProjectsProjectIdIndexRoute
+  '/projects/$projectId/cycles/$cycleId': typeof LayoutProjectsProjectIdCyclesCycleIdRoute
+  '/projects/$projectId/cycles/new': typeof LayoutProjectsProjectIdCyclesNewRoute
+  '/projects/$projectId/cycles': typeof LayoutProjectsProjectIdCyclesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/create-issue': typeof CreateIssueRoute
+  '/_layout': typeof LayoutRouteWithChildren
   '/login': typeof LoginRoute
-  '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
-  '/cycles/$cycleId': typeof CyclesCycleIdRoute
-  '/cycles/new': typeof CyclesNewRoute
-  '/issue/$issueId': typeof IssueIssueIdRoute
-  '/projects/$projectId': typeof ProjectsProjectIdRoute
-  '/projects/new': typeof ProjectsNewRoute
-  '/workspace/$slug': typeof WorkspaceSlugRoute
-  '/cycles/': typeof CyclesIndexRoute
-  '/projects/': typeof ProjectsIndexRoute
+  '/_layout/create-issue': typeof LayoutCreateIssueRoute
+  '/_layout/settings': typeof LayoutSettingsRoute
+  '/_layout/': typeof LayoutIndexRoute
+  '/_layout/projects/$projectId': typeof LayoutProjectsProjectIdRouteRouteWithChildren
+  '/_layout/issue/$issueId': typeof LayoutIssueIssueIdRoute
+  '/_layout/projects/new': typeof LayoutProjectsNewRoute
+  '/_layout/projects/$projectId/': typeof LayoutProjectsProjectIdIndexRoute
+  '/_layout/projects/$projectId/cycles/$cycleId': typeof LayoutProjectsProjectIdCyclesCycleIdRoute
+  '/_layout/projects/$projectId/cycles/new': typeof LayoutProjectsProjectIdCyclesNewRoute
+  '/_layout/projects/$projectId/cycles/': typeof LayoutProjectsProjectIdCyclesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/create-issue'
     | '/login'
-    | '/settings'
     | '/signup'
-    | '/cycles/$cycleId'
-    | '/cycles/new'
-    | '/issue/$issueId'
+    | '/create-issue'
+    | '/settings'
     | '/projects/$projectId'
+    | '/issue/$issueId'
     | '/projects/new'
-    | '/workspace/$slug'
-    | '/cycles/'
-    | '/projects/'
+    | '/projects/$projectId/'
+    | '/projects/$projectId/cycles/$cycleId'
+    | '/projects/$projectId/cycles/new'
+    | '/projects/$projectId/cycles/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
-    | '/create-issue'
     | '/login'
-    | '/settings'
     | '/signup'
-    | '/cycles/$cycleId'
-    | '/cycles/new'
+    | '/create-issue'
+    | '/settings'
+    | '/'
     | '/issue/$issueId'
-    | '/projects/$projectId'
     | '/projects/new'
-    | '/workspace/$slug'
-    | '/cycles'
-    | '/projects'
+    | '/projects/$projectId'
+    | '/projects/$projectId/cycles/$cycleId'
+    | '/projects/$projectId/cycles/new'
+    | '/projects/$projectId/cycles'
   id:
     | '__root__'
-    | '/'
-    | '/create-issue'
+    | '/_layout'
     | '/login'
-    | '/settings'
     | '/signup'
-    | '/cycles/$cycleId'
-    | '/cycles/new'
-    | '/issue/$issueId'
-    | '/projects/$projectId'
-    | '/projects/new'
-    | '/workspace/$slug'
-    | '/cycles/'
-    | '/projects/'
+    | '/_layout/create-issue'
+    | '/_layout/settings'
+    | '/_layout/'
+    | '/_layout/projects/$projectId'
+    | '/_layout/issue/$issueId'
+    | '/_layout/projects/new'
+    | '/_layout/projects/$projectId/'
+    | '/_layout/projects/$projectId/cycles/$cycleId'
+    | '/_layout/projects/$projectId/cycles/new'
+    | '/_layout/projects/$projectId/cycles/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  CreateIssueRoute: typeof CreateIssueRoute
+  LayoutRoute: typeof LayoutRouteWithChildren
   LoginRoute: typeof LoginRoute
-  SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
-  CyclesCycleIdRoute: typeof CyclesCycleIdRoute
-  CyclesNewRoute: typeof CyclesNewRoute
-  IssueIssueIdRoute: typeof IssueIssueIdRoute
-  ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
-  ProjectsNewRoute: typeof ProjectsNewRoute
-  WorkspaceSlugRoute: typeof WorkspaceSlugRoute
-  CyclesIndexRoute: typeof CyclesIndexRoute
-  ProjectsIndexRoute: typeof ProjectsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -208,13 +196,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -222,93 +203,135 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/create-issue': {
-      id: '/create-issue'
-      path: '/create-issue'
-      fullPath: '/create-issue'
-      preLoaderRoute: typeof CreateIssueRouteImport
+    '/_layout': {
+      id: '/_layout'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof LayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
+    '/_layout/': {
+      id: '/_layout/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof LayoutIndexRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/projects/': {
-      id: '/projects/'
-      path: '/projects'
-      fullPath: '/projects/'
-      preLoaderRoute: typeof ProjectsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/settings': {
+      id: '/_layout/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof LayoutSettingsRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/cycles/': {
-      id: '/cycles/'
-      path: '/cycles'
-      fullPath: '/cycles/'
-      preLoaderRoute: typeof CyclesIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/create-issue': {
+      id: '/_layout/create-issue'
+      path: '/create-issue'
+      fullPath: '/create-issue'
+      preLoaderRoute: typeof LayoutCreateIssueRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/workspace/$slug': {
-      id: '/workspace/$slug'
-      path: '/workspace/$slug'
-      fullPath: '/workspace/$slug'
-      preLoaderRoute: typeof WorkspaceSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/projects/new': {
-      id: '/projects/new'
+    '/_layout/projects/new': {
+      id: '/_layout/projects/new'
       path: '/projects/new'
       fullPath: '/projects/new'
-      preLoaderRoute: typeof ProjectsNewRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof LayoutProjectsNewRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/projects/$projectId': {
-      id: '/projects/$projectId'
-      path: '/projects/$projectId'
-      fullPath: '/projects/$projectId'
-      preLoaderRoute: typeof ProjectsProjectIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/issue/$issueId': {
-      id: '/issue/$issueId'
+    '/_layout/issue/$issueId': {
+      id: '/_layout/issue/$issueId'
       path: '/issue/$issueId'
       fullPath: '/issue/$issueId'
-      preLoaderRoute: typeof IssueIssueIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof LayoutIssueIssueIdRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/cycles/new': {
-      id: '/cycles/new'
+    '/_layout/projects/$projectId': {
+      id: '/_layout/projects/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/projects/$projectId'
+      preLoaderRoute: typeof LayoutProjectsProjectIdRouteRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/projects/$projectId/': {
+      id: '/_layout/projects/$projectId/'
+      path: '/'
+      fullPath: '/projects/$projectId/'
+      preLoaderRoute: typeof LayoutProjectsProjectIdIndexRouteImport
+      parentRoute: typeof LayoutProjectsProjectIdRouteRoute
+    }
+    '/_layout/projects/$projectId/cycles/': {
+      id: '/_layout/projects/$projectId/cycles/'
+      path: '/cycles'
+      fullPath: '/projects/$projectId/cycles/'
+      preLoaderRoute: typeof LayoutProjectsProjectIdCyclesIndexRouteImport
+      parentRoute: typeof LayoutProjectsProjectIdRouteRoute
+    }
+    '/_layout/projects/$projectId/cycles/new': {
+      id: '/_layout/projects/$projectId/cycles/new'
       path: '/cycles/new'
-      fullPath: '/cycles/new'
-      preLoaderRoute: typeof CyclesNewRouteImport
-      parentRoute: typeof rootRouteImport
+      fullPath: '/projects/$projectId/cycles/new'
+      preLoaderRoute: typeof LayoutProjectsProjectIdCyclesNewRouteImport
+      parentRoute: typeof LayoutProjectsProjectIdRouteRoute
     }
-    '/cycles/$cycleId': {
-      id: '/cycles/$cycleId'
+    '/_layout/projects/$projectId/cycles/$cycleId': {
+      id: '/_layout/projects/$projectId/cycles/$cycleId'
       path: '/cycles/$cycleId'
-      fullPath: '/cycles/$cycleId'
-      preLoaderRoute: typeof CyclesCycleIdRouteImport
-      parentRoute: typeof rootRouteImport
+      fullPath: '/projects/$projectId/cycles/$cycleId'
+      preLoaderRoute: typeof LayoutProjectsProjectIdCyclesCycleIdRouteImport
+      parentRoute: typeof LayoutProjectsProjectIdRouteRoute
     }
   }
 }
 
+interface LayoutProjectsProjectIdRouteRouteChildren {
+  LayoutProjectsProjectIdIndexRoute: typeof LayoutProjectsProjectIdIndexRoute
+  LayoutProjectsProjectIdCyclesCycleIdRoute: typeof LayoutProjectsProjectIdCyclesCycleIdRoute
+  LayoutProjectsProjectIdCyclesNewRoute: typeof LayoutProjectsProjectIdCyclesNewRoute
+  LayoutProjectsProjectIdCyclesIndexRoute: typeof LayoutProjectsProjectIdCyclesIndexRoute
+}
+
+const LayoutProjectsProjectIdRouteRouteChildren: LayoutProjectsProjectIdRouteRouteChildren =
+  {
+    LayoutProjectsProjectIdIndexRoute: LayoutProjectsProjectIdIndexRoute,
+    LayoutProjectsProjectIdCyclesCycleIdRoute:
+      LayoutProjectsProjectIdCyclesCycleIdRoute,
+    LayoutProjectsProjectIdCyclesNewRoute:
+      LayoutProjectsProjectIdCyclesNewRoute,
+    LayoutProjectsProjectIdCyclesIndexRoute:
+      LayoutProjectsProjectIdCyclesIndexRoute,
+  }
+
+const LayoutProjectsProjectIdRouteRouteWithChildren =
+  LayoutProjectsProjectIdRouteRoute._addFileChildren(
+    LayoutProjectsProjectIdRouteRouteChildren,
+  )
+
+interface LayoutRouteChildren {
+  LayoutCreateIssueRoute: typeof LayoutCreateIssueRoute
+  LayoutSettingsRoute: typeof LayoutSettingsRoute
+  LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutProjectsProjectIdRouteRoute: typeof LayoutProjectsProjectIdRouteRouteWithChildren
+  LayoutIssueIssueIdRoute: typeof LayoutIssueIssueIdRoute
+  LayoutProjectsNewRoute: typeof LayoutProjectsNewRoute
+}
+
+const LayoutRouteChildren: LayoutRouteChildren = {
+  LayoutCreateIssueRoute: LayoutCreateIssueRoute,
+  LayoutSettingsRoute: LayoutSettingsRoute,
+  LayoutIndexRoute: LayoutIndexRoute,
+  LayoutProjectsProjectIdRouteRoute:
+    LayoutProjectsProjectIdRouteRouteWithChildren,
+  LayoutIssueIssueIdRoute: LayoutIssueIssueIdRoute,
+  LayoutProjectsNewRoute: LayoutProjectsNewRoute,
+}
+
+const LayoutRouteWithChildren =
+  LayoutRoute._addFileChildren(LayoutRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  CreateIssueRoute: CreateIssueRoute,
+  LayoutRoute: LayoutRouteWithChildren,
   LoginRoute: LoginRoute,
-  SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
-  CyclesCycleIdRoute: CyclesCycleIdRoute,
-  CyclesNewRoute: CyclesNewRoute,
-  IssueIssueIdRoute: IssueIssueIdRoute,
-  ProjectsProjectIdRoute: ProjectsProjectIdRoute,
-  ProjectsNewRoute: ProjectsNewRoute,
-  WorkspaceSlugRoute: WorkspaceSlugRoute,
-  CyclesIndexRoute: CyclesIndexRoute,
-  ProjectsIndexRoute: ProjectsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

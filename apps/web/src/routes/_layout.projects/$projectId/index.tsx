@@ -27,7 +27,7 @@ import { getInitials } from '@/lib/issue-utils'
 import { cn } from '@/lib/utils'
 import type { ProjectStatus } from '@/types/projects'
 
-export const Route = createFileRoute('/projects/$projectId/')({
+export const Route = createFileRoute('/_layout/projects/$projectId/')({
   component: ProjectDetail,
 })
 

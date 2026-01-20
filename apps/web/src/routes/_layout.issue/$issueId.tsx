@@ -22,8 +22,12 @@ import { useWorkspaceBySlug, useWorkspaceMembers, useWorkspaceLabels } from '@/h
 import { formatIssueIdentifier, getInitials } from '@/lib/issue-utils'
 import type { IssueStatus, IssuePriority } from '@/types/issues'
 
-export const Route = createFileRoute('/issue/$issueId')({
+export const Route = createFileRoute('/_layout/issue/$issueId')({
     component: IssueDetail,
+    loader: async ({ context: { queryClient }, params: { issueId } }) => {
+        // ... loader logic can stay same if valid
+        return
+    }
 })
 
 function IssueDetail() {

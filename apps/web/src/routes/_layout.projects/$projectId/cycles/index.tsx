@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
 import { apiFetch } from '@/lib/api'
 
-export const Route = createFileRoute('/projects/$projectId/cycles/')({
+export const Route = createFileRoute('/_layout/projects/$projectId/cycles/')({
     component: CyclesList,
 })
 
@@ -46,7 +46,11 @@ function CyclesList() {
     const completedCycles = cycles.filter(c => c.status === 'completed')
 
     const CycleCard = ({ cycle }: { cycle: Cycle }) => (
-        <Link to="/projects/$projectId/cycles/$cycleId" params={{ projectId, cycleId: cycle.id }}>
+        <Link
+            to="/_layout/projects/$projectId/cycles/$cycleId"
+            params={{ projectId, cycleId: cycle.id }}
+            className="block h-full"
+        >
             <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
                 <CardHeader className="pb-2">
                     <div className="flex justify-between items-start">
@@ -88,7 +92,7 @@ function CyclesList() {
                     <h1 className="text-3xl font-bold tracking-tight">Cycles</h1>
                     <p className="text-muted-foreground">Manage your team's sprints and work cycles.</p>
                 </div>
-                <Link to="/projects/$projectId/cycles/new" params={{ projectId }}>
+                <Link to="/_layout/projects/$projectId/cycles/new" params={{ projectId }}>
                     <Button>
                         <Plus className="w-4 h-4 mr-2" />
                         New Cycle

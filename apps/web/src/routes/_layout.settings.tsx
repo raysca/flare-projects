@@ -20,7 +20,7 @@ import { userKeys } from '@/lib/query-keys'
 import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 
-export const Route = createFileRoute('/settings')({
+export const Route = createFileRoute('/_layout/settings')({
     component: SettingsPage,
 })
 

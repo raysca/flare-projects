@@ -3,7 +3,6 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { LayoutDashboard, Plus, Search, HelpCircle, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Skeleton } from '@/components/ui/skeleton'
 import {
   Tooltip,
   TooltipContent,
@@ -23,7 +22,7 @@ import {
 } from '@/hooks/use-keyboard-shortcuts'
 import type { IssueStatus, IssueFilters } from '@/types/issues'
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute('/_layout/')({
   component: MyIssuesPage,
 })
 

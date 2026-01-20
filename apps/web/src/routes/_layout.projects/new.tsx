@@ -6,7 +6,7 @@ import { ProjectForm } from '@/components/projects/project-form'
 import { useCreateProject } from '@/hooks/use-projects'
 import type { CreateProjectInput } from '@/types/projects'
 
-export const Route = createFileRoute('/projects/new')({
+export const Route = createFileRoute('/_layout/projects/new')({
   component: NewProject,
 })
 
@@ -47,4 +47,5 @@ function NewProject() {
       </Card>
     </div>
   )
+}
 

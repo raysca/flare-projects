@@ -47,7 +47,7 @@ function CyclesList() {
 
     const CycleCard = ({ cycle }: { cycle: Cycle }) => (
         <Link
-            to="/_layout/projects/$projectId/cycles/$cycleId"
+            to="/projects/$projectId/cycles/$cycleId"
             params={{ projectId, cycleId: cycle.id }}
             className="block h-full"
         >
@@ -92,7 +92,7 @@ function CyclesList() {
                     <h1 className="text-3xl font-bold tracking-tight">Cycles</h1>
                     <p className="text-muted-foreground">Manage your team's sprints and work cycles.</p>
                 </div>
-                <Link to="/_layout/projects/$projectId/cycles/new" params={{ projectId }}>
+                <Link to="/projects/$projectId/cycles/new" params={{ projectId }}>
                     <Button>
                         <Plus className="w-4 h-4 mr-2" />
                         New Cycle

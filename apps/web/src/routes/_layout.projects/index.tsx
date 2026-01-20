@@ -11,9 +11,11 @@ import type { ProjectStatus } from '@/types/projects'
 import { PROJECT_STATUS_CONFIG } from '@/lib/project-utils'
 import { cn } from '@/lib/utils'
 
-component: ProjectsList,
+export const Route = createFileRoute('/_layout/projects/')({
+  component: ProjectsList,
+})
 
-  function ProjectsList() {
+function ProjectsList() {
     const [searchQuery, setSearchQuery] = useState('')
     const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all')
 

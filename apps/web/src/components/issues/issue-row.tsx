@@ -10,7 +10,6 @@ import {
 import {
   STATUS_CONFIG,
   PRIORITY_CONFIG,
-  formatIssueIdentifier,
   formatRelativeTime,
   getInitials,
 } from '@/lib/issue-utils'
@@ -19,14 +18,13 @@ import type { Issue } from '@/types/issues'
 
 interface IssueRowProps {
   issue: Issue
-  workspaceSlug: string
+  workspaceSlug?: string
   isSelected?: boolean
   onSelect?: () => void
 }
 
 export function IssueRow({
   issue,
-  workspaceSlug,
   isSelected,
   onSelect,
 }: IssueRowProps) {
@@ -35,10 +33,15 @@ export function IssueRow({
   const StatusIcon = statusConfig.icon
   const PriorityIcon = priorityConfig.icon
 
+  // Format identifier based on project if available
+  const identifier = issue.project
+    ? `${issue.project.identifier}-${issue.number}`
+    : `#${issue.number}`
+
   return (
     <Link
-      to="/workspace/$slug/issue/$issueId"
-      params={{ slug: workspaceSlug, issueId: issue.id }}
+      to="/issue/$issueId"
+      params={{ issueId: issue.id }}
       onClick={onSelect}
       className={cn(
         'group flex items-center gap-3 px-4 py-2.5 border-b border-border hover:bg-accent/50 transition-colors cursor-pointer',
@@ -47,7 +50,7 @@ export function IssueRow({
     >
       {/* Issue ID */}
       <span className="text-xs font-mono text-muted-foreground w-20 shrink-0">
-        {formatIssueIdentifier(workspaceSlug, issue.number)}
+        {identifier}
       </span>
 
       {/* Status icon */}

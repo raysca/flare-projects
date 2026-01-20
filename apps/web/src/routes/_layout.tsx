@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useLocation } from '@tanstack/react-router'
-import { LayoutDashboard, Settings, Network, Repeat, Search, Plus } from 'lucide-react'
+import { LayoutDashboard, Settings, Network, Search, Plus } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { cn } from '../lib/utils'
 import { useProjects } from '../hooks/use-projects'
@@ -18,11 +18,6 @@ function AppLayout() {
       icon: LayoutDashboard,
       label: 'My Issues',
       exact: true,
-    },
-    {
-      to: '/cycles',
-      icon: Repeat,
-      label: 'Cycles',
     },
     {
       to: '/settings',

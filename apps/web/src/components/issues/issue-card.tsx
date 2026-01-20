@@ -4,7 +4,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import {
   PRIORITY_CONFIG,
-  formatIssueIdentifier,
   getInitials,
 } from '@/lib/issue-utils'
 import { cn } from '@/lib/utils'
@@ -12,17 +11,22 @@ import type { Issue } from '@/types/issues'
 
 interface IssueCardProps {
   issue: Issue
-  workspaceSlug: string
+  workspaceSlug?: string
 }
 
-export function IssueCard({ issue, workspaceSlug }: IssueCardProps) {
+export function IssueCard({ issue }: IssueCardProps) {
   const priorityConfig = PRIORITY_CONFIG[issue.priority]
   const PriorityIcon = priorityConfig.icon
 
+  // Format identifier based on project if available
+  const identifier = issue.project
+    ? `${issue.project.identifier}-${issue.number}`
+    : `#${issue.number}`
+
   return (
     <Link
-      to="/workspace/$slug/issue/$issueId"
-      params={{ slug: workspaceSlug, issueId: issue.id }}
+      to="/issue/$issueId"
+      params={{ issueId: issue.id }}
       className="block"
     >
       <Card className="hover:bg-accent/50 hover:shadow-md transition-all cursor-pointer group">
@@ -30,7 +34,7 @@ export function IssueCard({ issue, workspaceSlug }: IssueCardProps) {
           {/* Top row: ID and Priority */}
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono text-muted-foreground">
-              {formatIssueIdentifier(workspaceSlug, issue.number)}
+              {identifier}
             </span>
             <PriorityIcon className={cn('size-3.5', priorityConfig.color)} />
           </div>

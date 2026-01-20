@@ -16,8 +16,6 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { apiFetch } from '@/lib/api'
-import { } from '@/lib/query-keys'
-import { useQueryClient } from '@tanstack/react-query'
 
 export const Route = createFileRoute('/_layout/projects/$projectId/cycles/new')({
     component: NewCycle,
@@ -35,7 +33,6 @@ type CreateCycleInput = z.infer<typeof createCycleSchema>
 function NewCycle() {
     const { projectId } = Route.useParams()
     const navigate = useNavigate()
-    const queryClient = useQueryClient()
 
     const [error, setError] = useState('')
 
@@ -79,7 +76,7 @@ function NewCycle() {
     return (
         <div className="max-w-2xl mx-auto py-8">
             <Link
-                to="/_layout/projects/$projectId/cycles"
+                to="/projects/$projectId/cycles"
                 params={{ projectId }}
                 className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
             >
@@ -161,7 +158,7 @@ function NewCycle() {
 
                             <div className="flex justify-end gap-2">
                                 <Button variant="ghost" type="button" asChild>
-                                    <Link to="/_layout/projects/$projectId/cycles" params={{ projectId }}>
+                                    <Link to="/projects/$projectId/cycles" params={{ projectId }}>
                                         Cancel
                                     </Link>
                                 </Button>

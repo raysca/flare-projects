@@ -49,8 +49,25 @@ app.get("/", async (c) => {
  * Get current user profile
  */
 app.get("/me", async (c) => {
-    const user = c.var.user;
-    return c.json(user); // user is already populated by authMiddleware
+    const authUser = c.var.user;
+    const db = createDrizzleClient(c.env.DB);
+
+    const user = await db
+        .select({
+            id: users.id,
+            name: users.name,
+            email: users.email,
+            avatarUrl: users.avatarUrl,
+        })
+        .from(users)
+        .where(eq(users.id, authUser.id))
+        .get();
+
+    if (!user) {
+        return c.json({ error: "User not found" }, 404);
+    }
+
+    return c.json(user);
 });
 
 

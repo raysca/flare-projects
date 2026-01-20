@@ -5,7 +5,8 @@ import { Label } from '../components/ui/label'
 import { Link, useRouter } from '@tanstack/react-router'
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { apiFetch, setAuthToken } from '../lib/api'
+import { apiFetch } from '../lib/api'
+import { useAuth } from '../context/auth-context'
 
 export const Route = createFileRoute('/login')({
     component: Login,
@@ -17,6 +18,7 @@ function Login() {
     const [error, setError] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
+    const { login } = useAuth()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -29,7 +31,7 @@ function Login() {
                 body: JSON.stringify({ email, password }),
             })
 
-            setAuthToken(data.token)
+            login(data.token, data.user, data.sessionId)
             // Redirect to dashboard or workspaces
             router.navigate({ to: '/' })
         } catch (err: any) {

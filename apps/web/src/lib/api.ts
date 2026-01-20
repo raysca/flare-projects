@@ -1,7 +1,10 @@
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787/api/v1';
 
 export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const token = localStorage.getItem('auth_token');
+    let token: string | null = null;
+    if (typeof window !== 'undefined') {
+        token = localStorage.getItem('auth_token');
+    }
 
     const headers = {
         'Content-Type': 'application/json',
@@ -57,13 +60,20 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
 }
 
 export function setAuthToken(token: string) {
-    localStorage.setItem('auth_token', token);
+    if (typeof window !== 'undefined') {
+        localStorage.setItem('auth_token', token);
+    }
 }
 
 export function clearAuthToken() {
-    localStorage.removeItem('auth_token');
+    if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+    }
 }
 
 export function getAuthToken() {
-    return localStorage.getItem('auth_token');
+    if (typeof window !== 'undefined') {
+        return localStorage.getItem('auth_token');
+    }
+    return null;
 }

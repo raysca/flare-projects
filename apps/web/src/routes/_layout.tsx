@@ -1,5 +1,7 @@
-import { createFileRoute, Link, Outlet, useLocation } from '@tanstack/react-router'
-import { LayoutDashboard, Settings, Network, Search, Plus } from 'lucide-react'
+import { useAuth } from '../context/auth-context'
+import { useEffect } from 'react'
+import { createFileRoute, Link, Outlet, useLocation, useRouter } from '@tanstack/react-router'
+import { LayoutDashboard, Settings, Network, Search, Plus, User as UserIcon, LogOut } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { cn } from '../lib/utils'
 import { useProjects } from '../hooks/use-projects'
@@ -9,8 +11,26 @@ export const Route = createFileRoute('/_layout')({
 })
 
 function AppLayout() {
+  const { isAuthenticated, isLoading, user, logout } = useAuth()
   const { data: projects = [] } = useProjects()
   const location = useLocation()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.navigate({ to: '/login' })
+    }
+  }, [isLoading, isAuthenticated, router])
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) return null
 
   const navItems = [
     {
@@ -110,16 +130,33 @@ function AppLayout() {
         </nav>
 
         {/* User Profile */}
-        <div className="p-2 border-t border-sidebar-border">
-          <Link to="/settings">
+        <div className="p-2 border-t border-sidebar-border space-y-1">
+          <Link to="/settings" className="block">
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start text-muted-foreground hover:text-foreground text-sm h-8"
+              className="w-full justify-start gap-2 px-2 h-auto py-1.5"
             >
-              User Settings
+              {user?.avatarUrl ? (
+                <img src={user.avatarUrl} alt={user.name} className="w-5 h-5 rounded-full object-cover" />
+              ) : (
+                <UserIcon className="w-4 h-4" />
+              )}
+              <div className="flex flex-col items-start overflow-hidden">
+                <span className="text-sm font-medium truncate w-full text-left">{user?.name || 'User'}</span>
+                <span className="text-xs text-muted-foreground truncate w-full text-left">{user?.email}</span>
+              </div>
             </Button>
           </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start gap-2 px-2 text-muted-foreground hover:text-destructive h-8"
+            onClick={() => logout()}
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Logout</span>
+          </Button>
         </div>
       </aside>
 

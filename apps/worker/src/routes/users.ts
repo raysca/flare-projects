@@ -24,23 +24,27 @@ app.get("/", async (c) => {
     const { q } = c.req.query();
     const db = createDrizzleClient(c.env.DB);
 
-    let query = db
+    const allUsers = await db
         .select({
             id: users.id,
             name: users.name,
             avatarUrl: users.avatarUrl,
             email: users.email,
         })
-        .from(users);
+        .from(users)
+        .all();
 
+    // Filter in memory for case-insensitive search (D1/SQLite LIKE is case-sensitive)
     if (q) {
-        // Simple search by name or email
-        // Note: D1/SQLite doesn't support ILIKE, so we might need a workaround or just use LIKE
-        // For simplicity, let's just return all and filter in memory if list is small, or strictly use LIKE
-        // But for this task, I'll just return all for now as dataset is small.
+        const searchTerm = q.toLowerCase();
+        const filteredUsers = allUsers.filter(
+            (user) =>
+                user.name?.toLowerCase().includes(searchTerm) ||
+                user.email?.toLowerCase().includes(searchTerm)
+        );
+        return c.json(filteredUsers);
     }
 
-    const allUsers = await query.all();
     return c.json(allUsers);
 });
 

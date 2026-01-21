@@ -38,3 +38,11 @@ export function useMe() {
     queryFn: () => apiFetch<User>('/users/me'),
   })
 }
+
+export function useSearchUsers(query: string) {
+  return useQuery({
+    queryKey: userKeys.list(query),
+    queryFn: () => apiFetch<User[]>(`/users?q=${encodeURIComponent(query)}`),
+    enabled: query.length >= 1,
+  })
+}

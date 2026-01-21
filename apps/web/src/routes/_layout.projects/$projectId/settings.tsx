@@ -40,6 +40,8 @@ import {
 } from '@/hooks/use-projects'
 import { UserPlus, X } from 'lucide-react'
 import { PROJECT_STATUSES } from '@/types/projects'
+import { UserSearchCombobox } from '@/components/user-search-combobox'
+import type { User } from '@/hooks/use-users'
 
 export const Route = createFileRoute('/_layout/projects/$projectId/settings')({
   component: ProjectSettings,
@@ -192,26 +194,44 @@ function MembersSettings({ projectId }: { projectId: string }) {
   const removeMember = useRemoveMember()
   const updateRole = useUpdateMemberRole()
 
-  const [inviteEmail, setInviteEmail] = useState('')
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [manualEmail, setManualEmail] = useState<string | null>(null)
   const [inviteRole, setInviteRole] = useState('member')
   const [isInviteOpen, setIsInviteOpen] = useState(false)
 
+  const handleUserSelect = (user: User | null) => {
+    setSelectedUser(user)
+    setManualEmail(null)
+  }
+
+  const handleEmailEntered = (email: string) => {
+    console.log('User not found in system, inviting by email:', email)
+    setManualEmail(email)
+    setSelectedUser(null)
+  }
+
   const handleInvite = (e: React.FormEvent) => {
     e.preventDefault()
+    const emailToInvite = selectedUser?.email || manualEmail
+    if (!emailToInvite) return
+
     inviteMember.mutate(
       {
         projectId,
-        email: inviteEmail,
+        email: emailToInvite,
         role: inviteRole,
       },
       {
         onSuccess: () => {
           setIsInviteOpen(false)
-          setInviteEmail('')
+          setSelectedUser(null)
+          setManualEmail(null)
         },
       },
     )
   }
+
+  const canInvite = selectedUser !== null || manualEmail !== null
 
   if (isLoading) return <div>Loading members...</div>
 
@@ -240,15 +260,18 @@ function MembersSettings({ projectId }: { projectId: string }) {
             </DialogHeader>
             <form onSubmit={handleInvite} className="space-y-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="colleague@example.com"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  required
+                <Label>Find User</Label>
+                <UserSearchCombobox
+                  value={selectedUser}
+                  onSelect={handleUserSelect}
+                  onEmailEntered={handleEmailEntered}
+                  placeholder="Search by name or email..."
                 />
+                {manualEmail && (
+                  <p className="text-sm text-muted-foreground">
+                    Will invite: <span className="font-medium">{manualEmail}</span>
+                  </p>
+                )}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="role">Role</Label>
@@ -264,7 +287,10 @@ function MembersSettings({ projectId }: { projectId: string }) {
                 </Select>
               </div>
               <DialogFooter>
-                <Button type="submit" disabled={inviteMember.isPending}>
+                <Button
+                  type="submit"
+                  disabled={inviteMember.isPending || !canInvite}
+                >
                   {inviteMember.isPending ? 'Sending...' : 'Send Invitation'}
                 </Button>
               </DialogFooter>

@@ -19,6 +19,17 @@ export function useSocket(
     const [isConnected, setIsConnected] = useState(false);
     const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+    // Use refs for callbacks to prevent re-connection on callback change
+    const onConnectRef = useRef(onConnect);
+    const onDisconnectRef = useRef(onDisconnect);
+    const onMessageRef = useRef(onMessage);
+
+    useEffect(() => {
+        onConnectRef.current = onConnect;
+        onDisconnectRef.current = onDisconnect;
+        onMessageRef.current = onMessage;
+    }, [onConnect, onDisconnect, onMessage]);
+
     const connect = useCallback(() => {
         if (!enabled) return;
 
@@ -49,7 +60,7 @@ export function useSocket(
         ws.onopen = () => {
             console.log("WebSocket connected");
             setIsConnected(true);
-            if (onConnect) onConnect();
+            if (onConnectRef.current) onConnectRef.current();
             // Clear reconnect timeout if any
             if (reconnectTimeoutRef.current) {
                 clearTimeout(reconnectTimeoutRef.current);
@@ -61,7 +72,7 @@ export function useSocket(
             console.log("WebSocket disconnected", event.code, event.reason);
             setIsConnected(false);
             socketRef.current = null;
-            if (onDisconnect) onDisconnect();
+            if (onDisconnectRef.current) onDisconnectRef.current();
 
             // Auto-reconnect if not manually disabled and enabled is still true
             if (enabled && event.code !== 1000) { // 1000 is normal closure
@@ -76,14 +87,14 @@ export function useSocket(
         ws.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data) as WebSocketMessage;
-                if (onMessage) onMessage(data);
+                if (onMessageRef.current) onMessageRef.current(data);
             } catch (err) {
                 console.error("Failed to parse WebSocket message", err);
             }
         };
 
         socketRef.current = ws;
-    }, [enabled, path, onConnect, onDisconnect, onMessage]);
+    }, [enabled, path]);
 
     useEffect(() => {
         if (enabled) {
@@ -95,6 +106,8 @@ export function useSocket(
         }
 
         return () => {
+            // Only close if enabled is changing to false or path changing (unmount handled by component unmount)
+            // Actually, we want to close on unmount or deps change.
             if (socketRef.current) {
                 socketRef.current.close(1000, "Component unmounted");
             }

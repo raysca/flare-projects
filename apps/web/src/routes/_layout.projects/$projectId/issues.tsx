@@ -29,6 +29,7 @@ import {
   useIssueListNavigation,
 } from '@/hooks/use-keyboard-shortcuts'
 import { useWorkspaceSocket } from '@/hooks/use-workspace-socket'
+import { UserAvatarStack } from '@/components/common/user-avatar-stack'
 import { STATUS_CONFIG, PRIORITY_CONFIG } from '@/lib/issue-utils'
 import type { IssueStatus, IssuePriority } from '@/types/issues'
 
@@ -184,7 +185,10 @@ function ProjectIssuesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-bold">{project.name} Issues</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold">{project.name} Issues</h2>
+            <UserAvatarStack contextId={projectId} />
+          </div>
           <p className="text-sm text-muted-foreground">
             {openIssues} open · {totalIssues} total
           </p>

@@ -47,3 +47,13 @@ export interface UserLeftEvent extends WebSocketMessage {
     type: "user_left" | "user_left_issue";
     payload: { userId: string };
 }
+
+export interface TypingEvent extends WebSocketMessage {
+    type: "user_typing";
+    payload: { userId: string; isTyping: boolean };
+}
+
+export interface CurrentUsersEvent extends WebSocketMessage {
+    type: "current_users";
+    payload: UserPresence[];
+}

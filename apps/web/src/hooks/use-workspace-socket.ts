@@ -7,8 +7,11 @@ import {
     WebSocketMessage,
     IssueCreatedEvent,
     IssueUpdatedEvent,
-    IssueDeletedEvent
+    IssueDeletedEvent,
+    UserJoinedEvent,
+    UserLeftEvent
 } from "../types/websocket";
+import { usePresenceStore } from "../stores/presence-store";
 
 export function useWorkspaceSocket(projectId: string | undefined) {
     const queryClient = useQueryClient();
@@ -62,10 +65,17 @@ export function useWorkspaceSocket(projectId: string | undefined) {
                 );
                 break;
             }
-            case "user_joined":
-            case "user_left":
-                // Handle presence if needed
+            case "user_joined": {
+                const event = message as UserJoinedEvent;
+                // Add minimal delay to ensure store is ready? No, synchronous.
+                usePresenceStore.getState().setUserOnline(currentProjectId, event.payload);
                 break;
+            }
+            case "user_left": {
+                const event = message as UserLeftEvent;
+                usePresenceStore.getState().setUserOffline(currentProjectId, event.payload.userId);
+                break;
+            }
             default:
                 break;
         }

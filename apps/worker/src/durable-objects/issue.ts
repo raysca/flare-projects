@@ -30,6 +30,34 @@ export class IssueDO extends DurableObject {
 
       server.serializeAttachment(presence);
 
+      // Send list of currently active users to the new user
+      const activeUsers: UserPresence[] = [];
+      const sockets = this.ctx.getWebSockets();
+      if (sockets) { // Durable Object state.getWebSockets() returns array
+        for (const ws of sockets) {
+          try {
+            // Attachments are only available on 'server' socket after accept,
+            // but for EXISTING sockets in this.ctx.getWebSockets(), they should have attachments.
+            // Wait, deserializeAttachment returns null if not set.
+            // We set it on accept.
+            const user = ws.deserializeAttachment() as UserPresence;
+            if (user) {
+              activeUsers.push(user);
+            }
+          } catch (e) {
+            // ignore
+          }
+        }
+      }
+
+      // Send initial state to the connecting client
+      server.send(JSON.stringify({
+        type: "current_users",
+        payload: activeUsers,
+        timestamp: Date.now()
+      }));
+
+
       this.broadcast({
         type: "user_viewing_issue",
         payload: presence,

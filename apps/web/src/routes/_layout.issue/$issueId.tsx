@@ -28,6 +28,8 @@ import {
 import { useUsers } from '@/hooks/use-users'
 import { useIssueSocket } from '@/hooks/use-issue-socket'
 import { getInitials } from '@/lib/issue-utils'
+import { UserAvatarStack } from '@/components/common/user-avatar-stack'
+import { TypingIndicator } from '@/components/common/typing-indicator'
 import type { IssueStatus, IssuePriority } from '@/types/issues'
 
 export const Route = createFileRoute('/_layout/issue/$issueId')({
@@ -38,7 +40,7 @@ function IssueDetail() {
   const { issueId } = Route.useParams()
 
   // Enable real-time updates
-  useIssueSocket(issueId)
+  const { sendTyping } = useIssueSocket(issueId)
 
   // Queries
   const { data: issue, isLoading: isLoadingIssue } = useIssue(issueId)
@@ -56,6 +58,7 @@ function IssueDetail() {
   const [isEditingDescription, setIsEditingDescription] = useState(false)
   const [editedDescription, setEditedDescription] = useState('')
   const [newComment, setNewComment] = useState('')
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const titleInputRef = useRef<HTMLInputElement>(null)
 
@@ -66,6 +69,23 @@ function IssueDetail() {
       titleInputRef.current.select()
     }
   }, [isEditingTitle])
+
+  const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNewComment(e.target.value)
+
+    // Handle typing indicator
+    if (sendTyping) {
+      sendTyping(true)
+
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current)
+      }
+
+      typingTimeoutRef.current = setTimeout(() => {
+        sendTyping(false)
+      }, 3000)
+    }
+  }
 
   if (isLoadingIssue) {
     return <IssueDetailSkeleton />
@@ -165,10 +185,13 @@ function IssueDetail() {
         <div className="lg:col-span-2 space-y-8">
           {/* Header */}
           <div className="space-y-4">
-            <div className="flex items-center gap-3 text-muted-foreground text-sm font-mono">
-              <span>{issueIdentifier}</span>
-              <span>·</span>
-              <span>{new Date(issue.createdAt).toLocaleDateString()}</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 text-muted-foreground text-sm font-mono">
+                <span>{issueIdentifier}</span>
+                <span>·</span>
+                <span>{new Date(issue.createdAt).toLocaleDateString()}</span>
+              </div>
+              <UserAvatarStack contextId={issueId} />
             </div>
 
             {/* Editable Title */}
@@ -285,14 +308,19 @@ function IssueDetail() {
                   <Textarea
                     placeholder="Leave a comment..."
                     value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
+                    onChange={handleCommentChange}
+                    onBlur={() => sendTyping && sendTyping(false)}
                     className="min-h-[100px]"
                   />
-                  <div className="flex justify-end">
+                  <div className="flex justify-between items-center">
+                    <TypingIndicator contextId={issueId} />
                     <Button
                       type="submit"
                       size="sm"
                       disabled={createComment.isPending || !newComment.trim()}
+                      onClick={() => {
+                        if (sendTyping) sendTyping(false);
+                      }}
                     >
                       {createComment.isPending ? 'Posting...' : 'Comment'}
                     </Button>

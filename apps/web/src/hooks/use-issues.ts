@@ -220,17 +220,15 @@ export function useCreateComment() {
       }),
     onSuccess: (newComment, { issueId }) => {
       // Add to comments cache
-      const previousComments = queryClient.getQueryData<Comment[]>(
+      queryClient.setQueryData<Comment[]>(
         issueKeys.comments(issueId),
+        (previousComments = []) => {
+          if (previousComments.some((c) => c.id === newComment.id)) {
+            return previousComments
+          }
+          return [newComment, ...previousComments]
+        },
       )
-      if (previousComments) {
-        queryClient.setQueryData<Comment[]>(issueKeys.comments(issueId), [
-          newComment,
-          ...previousComments,
-        ])
-      } else {
-        queryClient.invalidateQueries({ queryKey: issueKeys.comments(issueId) })
-      }
     },
   })
 }

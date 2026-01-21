@@ -14,6 +14,7 @@ export const userKeys = {
     list: (filters: string) => [...userKeys.lists(), { filters }] as const,
     details: () => [...userKeys.all, "detail"] as const,
     detail: (id: string) => [...userKeys.details(), id] as const,
+    me: () => [...userKeys.all, "me"] as const,
 };
 
 export function useUsers() {
@@ -31,9 +32,9 @@ export function useUser(userId: string | undefined) {
     });
 }
 
-export function useCurrentUser() {
+export function useMe() {
     return useQuery({
-        queryKey: ["currentUser"],
+        queryKey: userKeys.me(),
         queryFn: () => apiFetch<User>("/users/me")
     });
 }

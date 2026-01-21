@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { Plus, Repeat, Calendar } from 'lucide-react'
+import { Plus, Repeat, Calendar, Loader2 } from 'lucide-react'
 import {
   Card,
   CardContent,
@@ -8,98 +8,88 @@ import {
   CardDescription,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { useEffect, useState } from 'react'
-import { apiFetch } from '@/lib/api'
+import { Progress } from '@/components/ui/progress'
+import { useProjectCycles } from '@/hooks/use-cycles'
+import type { Cycle } from '@/types/issues'
 
 export const Route = createFileRoute('/_layout/projects/$projectId/cycles/')({
   component: CyclesList,
 })
 
-interface Cycle {
-  id: string
-  name: string
-  startDate: string
-  endDate: string
-  status: 'upcoming' | 'active' | 'completed'
-  progress: number
-}
-
 function CyclesList() {
   const { projectId } = Route.useParams()
-  const [cycles, setCycles] = useState<Cycle[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { data: cycles = [], isLoading } = useProjectCycles(projectId)
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        if (projectId) {
-          const cyclesData = await apiFetch<Cycle[]>(
-            `/cycles?projectId=${projectId}`,
-          )
-          setCycles(cyclesData)
-        }
-      } catch (err) {
-        console.error('Failed to load cycles', err)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    loadData()
-  }, [projectId])
-
-  if (isLoading) return <div className="p-8">Loading cycles...</div>
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <Loader2 className="animate-spin size-6" />
+      </div>
+    )
+  }
 
   const activeCycles = cycles.filter((c) => c.status === 'active')
   const upcomingCycles = cycles.filter((c) => c.status === 'upcoming')
   const completedCycles = cycles.filter((c) => c.status === 'completed')
 
-  const CycleCard = ({ cycle }: { cycle: Cycle }) => (
-    <Link
-      to="/projects/$projectId/cycles/$cycleId"
-      params={{ projectId, cycleId: cycle.id }}
-      className="block h-full"
-    >
-      <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-start">
-            <CardTitle className="text-base font-medium">
-              {cycle.name}
-            </CardTitle>
-            <span
-              className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${
-                cycle.status === 'active'
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                  : cycle.status === 'completed'
-                    ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
-                    : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-              }`}
-            >
-              {cycle.status}
-            </span>
-          </div>
-          <CardDescription className="flex items-center gap-1.5 text-xs">
-            <Calendar className="w-3 h-3" />
-            {new Date(cycle.startDate).toLocaleDateString()} -{' '}
-            {new Date(cycle.endDate).toLocaleDateString()}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Progress</span>
-              <span>{Math.round(cycle.progress)}%</span>
+  const CycleCard = ({ cycle }: { cycle: Cycle }) => {
+    const startDate = new Date(cycle.startDate)
+    const endDate = new Date(cycle.endDate)
+    const now = new Date()
+
+    // Calculate days remaining for active cycles
+    const daysRemaining = Math.max(
+      0,
+      Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
+    )
+
+    return (
+      <Link
+        to="/projects/$projectId/cycles/$cycleId"
+        params={{ projectId, cycleId: cycle.id }}
+        className="block h-full"
+      >
+        <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
+          <CardHeader className="pb-2">
+            <div className="flex justify-between items-start">
+              <CardTitle className="text-base font-medium">
+                {cycle.name}
+              </CardTitle>
+              <span
+                className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${
+                  cycle.status === 'active'
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                    : cycle.status === 'completed'
+                      ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+                      : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                }`}
+              >
+                {cycle.status}
+              </span>
             </div>
-            <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary transition-all duration-500"
-                style={{ width: `${cycle.progress}%` }}
-              />
+            <CardDescription className="flex items-center gap-1.5 text-xs">
+              <Calendar className="w-3 h-3" />
+              {startDate.toLocaleDateString()} - {endDate.toLocaleDateString()}
+              {cycle.status === 'active' && (
+                <span className="ml-2 text-yellow-600 dark:text-yellow-400">
+                  {daysRemaining}d left
+                </span>
+              )}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Progress</span>
+                <span>{Math.round(cycle.progress)}%</span>
+              </div>
+              <Progress value={cycle.progress} className="h-1.5" />
             </div>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
-  )
+          </CardContent>
+        </Card>
+      </Link>
+    )
+  }
 
   return (
     <div className="container mx-auto py-6 max-w-5xl space-y-8">

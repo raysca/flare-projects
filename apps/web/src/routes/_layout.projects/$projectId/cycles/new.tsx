@@ -1,11 +1,16 @@
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
-import { useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, Calendar } from 'lucide-react'
+import { ArrowLeft, Calendar, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
 import {
   Form,
   FormControl,
@@ -13,9 +18,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { apiFetch } from '@/lib/api'
+import { Textarea } from '@/components/ui/textarea'
+import { useCreateCycle } from '@/hooks/use-cycles'
 
 export const Route = createFileRoute('/_layout/projects/$projectId/cycles/new')(
   {
@@ -23,20 +30,31 @@ export const Route = createFileRoute('/_layout/projects/$projectId/cycles/new')(
   },
 )
 
-const createCycleSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  description: z.string().optional(),
-  startDate: z.string().min(1, 'Start date is required'),
-  endDate: z.string().min(1, 'End date is required'),
-})
+const createCycleSchema = z
+  .object({
+    name: z.string().min(1, 'Name is required'),
+    description: z.string().optional(),
+    startDate: z.string().min(1, 'Start date is required'),
+    endDate: z.string().min(1, 'End date is required'),
+  })
+  .refine(
+    (data) => {
+      const start = new Date(data.startDate)
+      const end = new Date(data.endDate)
+      return end > start
+    },
+    {
+      message: 'End date must be after start date',
+      path: ['endDate'],
+    },
+  )
 
 type CreateCycleInput = z.infer<typeof createCycleSchema>
 
 function NewCycle() {
   const { projectId } = Route.useParams()
   const navigate = useNavigate()
-
-  const [error, setError] = useState('')
+  const createCycle = useCreateCycle()
 
   // Default dates: Start today, End in 2 weeks
   const today = new Date()
@@ -53,26 +71,29 @@ function NewCycle() {
     },
   })
 
+  const watchStartDate = form.watch('startDate')
+  const watchEndDate = form.watch('endDate')
+
+  // Calculate duration
+  const duration = (() => {
+    if (!watchStartDate || !watchEndDate) return null
+    const start = new Date(watchStartDate)
+    const end = new Date(watchEndDate)
+    const days = Math.ceil(
+      (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+    )
+    return days > 0 ? days : null
+  })()
+
   const onSubmit = async (values: CreateCycleInput) => {
-    try {
-      await apiFetch('/cycles', {
-        method: 'POST',
-        body: JSON.stringify({
-          projectId,
-          ...values,
-          startDate: new Date(values.startDate).toISOString(),
-          endDate: new Date(values.endDate).toISOString(),
-        }),
-      })
+    await createCycle.mutateAsync({
+      projectId,
+      ...values,
+      startDate: new Date(values.startDate).toISOString(),
+      endDate: new Date(values.endDate).toISOString(),
+    })
 
-      // Invalidate cycles query (we can clean up invalidation later or use a project-based key)
-      // queryClient.invalidateQueries({ queryKey: projectKeys.cycles(projectId) })
-      // For now just navigate, usually sufficient if we don't have cached data yet or cache time is low
-
-      navigate({ to: '/projects/$projectId/cycles', params: { projectId } })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create cycle')
-    }
+    navigate({ to: '/projects/$projectId/cycles', params: { projectId } })
   }
 
   return (
@@ -88,6 +109,9 @@ function NewCycle() {
       <Card>
         <CardHeader>
           <CardTitle>Create New Cycle</CardTitle>
+          <CardDescription>
+            Cycles help you organize work into time-boxed sprints or iterations
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -101,6 +125,9 @@ function NewCycle() {
                     <FormControl>
                       <Input placeholder="Sprint 1" {...field} />
                     </FormControl>
+                    <FormDescription>
+                      A unique name for this cycle
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -113,7 +140,11 @@ function NewCycle() {
                   <FormItem>
                     <FormLabel>Description (Optional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="Goal for this cycle..." {...field} />
+                      <Textarea
+                        placeholder="Goals and focus areas for this cycle..."
+                        rows={3}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -156,7 +187,23 @@ function NewCycle() {
                 />
               </div>
 
-              {error && <p className="text-sm text-destructive">{error}</p>}
+              {duration && (
+                <p className="text-sm text-muted-foreground">
+                  Duration: <span className="font-medium">{duration} days</span>
+                  {duration === 14 && ' (2 weeks)'}
+                  {duration === 7 && ' (1 week)'}
+                  {duration === 21 && ' (3 weeks)'}
+                  {duration === 28 && ' (4 weeks)'}
+                </p>
+              )}
+
+              {createCycle.error && (
+                <p className="text-sm text-destructive">
+                  {createCycle.error instanceof Error
+                    ? createCycle.error.message
+                    : 'Failed to create cycle'}
+                </p>
+              )}
 
               <div className="flex justify-end gap-2">
                 <Button variant="ghost" type="button" asChild>
@@ -164,8 +211,15 @@ function NewCycle() {
                     Cancel
                   </Link>
                 </Button>
-                <Button type="submit" disabled={form.formState.isSubmitting}>
-                  {form.formState.isSubmitting ? 'Creating...' : 'Create Cycle'}
+                <Button type="submit" disabled={createCycle.isPending}>
+                  {createCycle.isPending ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin mr-2" />
+                      Creating...
+                    </>
+                  ) : (
+                    'Create Cycle'
+                  )}
                 </Button>
               </div>
             </form>

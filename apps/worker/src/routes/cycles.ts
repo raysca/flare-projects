@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { createDrizzleClient, cycles, projectMembers } from "@linearflow/database";
-import { eq, and, desc } from "drizzle-orm";
+import { createDrizzleClient, cycles, projectMembers, issues } from "@linearflow/database";
+import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import type { Env } from "../index";
 import { authMiddleware, type Variables } from "../middleware/auth";
 
@@ -153,6 +153,59 @@ app.get("/:id", async (c) => {
     }
 
     return c.json(cycle);
+});
+
+/**
+ * GET /:id/stats
+ * Get cycle with issue statistics and computed progress
+ */
+app.get("/:id/stats", async (c) => {
+    const cycleId = c.req.param("id");
+    const user = c.var.user;
+    const db = createDrizzleClient(c.env.DB);
+
+    const cycle = await db.select().from(cycles).where(eq(cycles.id, cycleId)).get();
+
+    if (!cycle) {
+        return c.json({ error: "Cycle not found" }, 404);
+    }
+
+    // Check membership
+    const member = await db
+        .select()
+        .from(projectMembers)
+        .where(and(eq(projectMembers.projectId, cycle.projectId), eq(projectMembers.userId, user.id)))
+        .get();
+
+    if (!member) {
+        return c.json({ error: "Access denied" }, 403);
+    }
+
+    // Get issue statistics for this cycle
+    const cycleIssues = await db
+        .select({ status: issues.status })
+        .from(issues)
+        .where(eq(issues.cycleId, cycleId));
+
+    const totalIssues = cycleIssues.length;
+    const completedIssues = cycleIssues.filter(i => i.status === "done").length;
+    const inProgressIssues = cycleIssues.filter(i => i.status === "in_progress" || i.status === "in_review").length;
+
+    // Calculate progress percentage
+    const progress = totalIssues > 0 ? Math.round((completedIssues / totalIssues) * 100) : 0;
+
+    // Update cycle progress if it differs
+    if (cycle.progress !== progress) {
+        await db.update(cycles).set({ progress, updatedAt: new Date() }).where(eq(cycles.id, cycleId));
+    }
+
+    return c.json({
+        ...cycle,
+        progress,
+        totalIssues,
+        completedIssues,
+        inProgressIssues,
+    });
 });
 
 /**

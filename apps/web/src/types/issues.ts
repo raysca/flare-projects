@@ -41,14 +41,51 @@ export interface Label {
   color: string
 }
 
+// Cycle status values
+export const CYCLE_STATUSES = ['upcoming', 'active', 'completed'] as const
+
+export type CycleStatus = (typeof CYCLE_STATUSES)[number]
+
 // Cycle type
 export interface Cycle {
   id: string
   name: string
+  description?: string
+  number: number
   projectId: string
   startDate: string
   endDate: string
-  status: 'upcoming' | 'active' | 'completed'
+  status: CycleStatus
+  progress: number
+  autoArchive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+// Cycle with computed stats
+export interface CycleWithStats extends Cycle {
+  totalIssues: number
+  completedIssues: number
+  inProgressIssues: number
+}
+
+// Cycle CRUD DTOs
+export interface CreateCycleInput {
+  name: string
+  description?: string
+  startDate: string
+  endDate: string
+  projectId: string
+  autoArchive?: boolean
+}
+
+export interface UpdateCycleInput {
+  name?: string
+  description?: string
+  startDate?: string
+  endDate?: string
+  status?: CycleStatus
+  autoArchive?: boolean
 }
 
 // Project type

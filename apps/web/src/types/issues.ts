@@ -141,6 +141,15 @@ export interface Issue {
   updatedAt: string
 }
 
+// Comment reaction type
+export interface CommentReaction {
+  id: string
+  commentId: string
+  userId: string
+  emoji: string
+  createdAt: string
+}
+
 // Comment type
 export interface Comment {
   id: string
@@ -149,6 +158,7 @@ export interface Comment {
   updatedAt?: string
   user: User
   issueId: string
+  reactions?: CommentReaction[]
 }
 
 // Issue filters for list views

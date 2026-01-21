@@ -354,7 +354,7 @@
 - *Duration: 3 days*
 
 **M3.4: Frontend WebSocket Integration** *(Depends on: M3.2, M2.4)*
-- WebSocket client setup in Next.js
+- WebSocket client setup
 - Connection state management
 - Reconnection logic with exponential backoff
 - Message queue for offline support

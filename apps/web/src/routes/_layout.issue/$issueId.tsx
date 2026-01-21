@@ -30,6 +30,7 @@ import { useIssueSocket } from '@/hooks/use-issue-socket'
 import { getInitials } from '@/lib/issue-utils'
 import { UserAvatarStack } from '@/components/common/user-avatar-stack'
 import { TypingIndicator } from '@/components/common/typing-indicator'
+import { CommentReactions } from '@/components/issues/comment-reactions'
 import type { IssueStatus, IssuePriority } from '@/types/issues'
 
 export const Route = createFileRoute('/_layout/issue/$issueId')({
@@ -357,6 +358,11 @@ function IssueDetail() {
                       <div className="text-sm prose dark:prose-invert">
                         <p>{comment.body}</p>
                       </div>
+                      <CommentReactions
+                        issueId={issue.id}
+                        commentId={comment.id}
+                        reactions={comment.reactions || []}
+                      />
                     </div>
                   </div>
                 ))

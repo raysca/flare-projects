@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { createDrizzleClient, issues, issueLabels, issueSubscribers, projectMembers, comments, users, labels, projects, cycles, activityLog } from "@linearflow/database";
+import { createDrizzleClient, issues, issueLabels, issueSubscribers, projectMembers, comments, commentReactions, users, labels, projects, cycles, activityLog, notifications } from "@linearflow/database";
 import { eq, and, desc, sql, inArray, aliasedTable } from "drizzle-orm";
 import type { Env } from "../index";
 import { authMiddleware, type Variables } from "../middleware/auth";
@@ -875,7 +875,7 @@ app.get("/:id/comments", async (c) => {
                 id: users.id,
                 name: users.name,
                 avatarUrl: users.avatarUrl,
-                email: users.email // Add email if useful
+                email: users.email
             },
         })
         .from(comments)
@@ -883,7 +883,22 @@ app.get("/:id/comments", async (c) => {
         .where(eq(comments.issueId, issueId))
         .orderBy(desc(comments.createdAt));
 
-    return c.json(result);
+    const commentIds = result.map(c => c.id);
+    let reactions: any[] = [];
+
+    if (commentIds.length > 0) {
+        reactions = await db
+            .select()
+            .from(commentReactions)
+            .where(inArray(commentReactions.commentId, commentIds));
+    }
+
+    const commentsWithReactions = result.map(comment => ({
+        ...comment,
+        reactions: reactions.filter(r => r.commentId === comment.id)
+    }));
+
+    return c.json(commentsWithReactions);
 });
 
 /**
@@ -932,6 +947,41 @@ app.post("/:id/comments", zValidator("json", z.object({ body: z.string().min(1) 
         entityId: commentId,
     });
 
+    // Mention detection (simple email matching)
+    const mentionRegex = /@([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g;
+    const mentions = new Set<string>();
+    let match;
+    while ((match = mentionRegex.exec(body)) !== null) {
+        mentions.add(match[1]);
+    }
+
+    if (mentions.size > 0) {
+        // Fetch sender details
+        const sender = await db.select({ name: users.name }).from(users).where(eq(users.id, user.id)).get();
+        const senderName = sender?.name || user.email;
+
+        const mentionedUsers = await db
+            .select()
+            .from(users)
+            .where(inArray(users.email, Array.from(mentions)));
+
+        for (const mentionedUser of mentionedUsers) {
+            if (mentionedUser.id === user.id) continue;
+
+            await db.insert(notifications).values({
+                id: crypto.randomUUID(),
+                userId: mentionedUser.id,
+                projectId: issue.projectId,
+                type: "comment_mentioned",
+                title: `New mention in issue #${issue.number}`,
+                message: `${senderName} mentioned you in a comment`,
+                issueId: issue.id,
+                createdAt: new Date(),
+                isRead: false
+            });
+        }
+    }
+
     const newComment = await db
         .select({
             id: comments.id,
@@ -960,6 +1010,106 @@ app.post("/:id/comments", zValidator("json", z.object({ body: z.string().min(1) 
     }
 
     return c.json(newComment, 201);
+});
+
+/**
+ * POST /:id/comments/:commentId/reactions
+ * Toggle a reaction on a comment
+ */
+app.post("/:id/comments/:commentId/reactions", zValidator("json", z.object({ emoji: z.string().min(1) })), async (c) => {
+    const issueId = c.req.param("id");
+    const commentId = c.req.param("commentId");
+    const user = c.var.user;
+    const { emoji } = c.req.valid("json");
+    const db = createDrizzleClient(c.env.DB);
+
+    const issue = await db.select().from(issues).where(eq(issues.id, issueId)).get();
+
+    if (!issue) {
+        return c.json({ error: "Issue not found" }, 404);
+    }
+
+    // Check project access
+    const member = await db
+        .select()
+        .from(projectMembers)
+        .where(and(eq(projectMembers.projectId, issue.projectId), eq(projectMembers.userId, user.id)))
+        .get();
+
+    if (!member) {
+        return c.json({ error: "Access denied" }, 403);
+    }
+
+    // Check if comment exists
+    const comment = await db
+        .select()
+        .from(comments)
+        .where(and(eq(comments.id, commentId), eq(comments.issueId, issueId)))
+        .get();
+
+    if (!comment) {
+        return c.json({ error: "Comment not found" }, 404);
+    }
+
+    // Check for existing reaction
+    const existingReaction = await db
+        .select()
+        .from(commentReactions)
+        .where(
+            and(
+                eq(commentReactions.commentId, commentId),
+                eq(commentReactions.userId, user.id),
+                eq(commentReactions.emoji, emoji)
+            )
+        )
+        .get();
+
+    if (existingReaction) {
+        // Remove reaction
+        await db
+            .delete(commentReactions)
+            .where(eq(commentReactions.id, existingReaction.id));
+
+        // Broadcast removal
+        await broadcastToIssue(c, issueId, {
+            type: "comment_reaction_removed",
+            payload: {
+                commentId,
+                reactionId: existingReaction.id,
+                userId: user.id,
+                emoji
+            },
+            senderId: user.id,
+            timestamp: Date.now()
+        });
+
+        return c.json({ message: "Reaction removed" });
+    } else {
+        // Add reaction
+        const reactionId = crypto.randomUUID();
+        await db.insert(commentReactions).values({
+            id: reactionId,
+            commentId,
+            userId: user.id,
+            emoji
+        });
+
+        // Broadcast addition
+        await broadcastToIssue(c, issueId, {
+            type: "comment_reaction_added",
+            payload: {
+                commentId,
+                reactionId,
+                userId: user.id,
+                emoji,
+                createdAt: new Date().toISOString()
+            },
+            senderId: user.id,
+            timestamp: Date.now()
+        });
+
+        return c.json({ message: "Reaction added", id: reactionId }, 201);
+    }
 });
 
 /**

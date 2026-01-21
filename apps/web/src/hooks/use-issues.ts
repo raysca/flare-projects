@@ -232,3 +232,31 @@ export function useCreateComment() {
     },
   })
 }
+
+// Toggle comment reaction
+export function useToggleReaction() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      issueId,
+      commentId,
+      emoji,
+    }: {
+      issueId: string
+      commentId: string
+      emoji: string
+    }) =>
+      apiFetch<{ message: string; id?: string }>(
+        `/issues/${issueId}/comments/${commentId}/reactions`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ emoji }),
+        },
+      ),
+    onSuccess: (_, { issueId }) => {
+      // Invalidate comments to sync reactions if needed
+      // But we mostly rely on WebSocket updates
+    },
+  })
+}

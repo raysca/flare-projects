@@ -68,15 +68,18 @@ function ProjectIssuesPage() {
   const createIssue = useCreateIssue()
 
   // Handle inline create from board
-  const handleInlineCreate = useCallback(async (title: string, status: IssueStatus) => {
-    if (!projectId) return;
-    await createIssue.mutateAsync({
-      title,
-      status,
-      projectId,
-      priority: 'no_priority'
-    });
-  }, [createIssue, projectId]);
+  const handleInlineCreate = useCallback(
+    async (title: string, status: IssueStatus) => {
+      if (!projectId) return
+      await createIssue.mutateAsync({
+        title,
+        status,
+        projectId,
+        priority: 'no_priority',
+      })
+    },
+    [createIssue, projectId],
+  )
 
   // Filter issues
   const filteredIssues = issues.filter((issue) => {
@@ -299,19 +302,19 @@ function ProjectIssuesPage() {
         {(statusFilter !== 'all' ||
           priorityFilter !== 'all' ||
           searchQuery) && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8"
-              onClick={() => {
-                setStatusFilter('all')
-                setPriorityFilter('all')
-                setSearchQuery('')
-              }}
-            >
-              Clear filters
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8"
+            onClick={() => {
+              setStatusFilter('all')
+              setPriorityFilter('all')
+              setSearchQuery('')
+            }}
+          >
+            Clear filters
+          </Button>
+        )}
 
         <div className="flex-1" />
 

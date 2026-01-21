@@ -319,7 +319,7 @@ function IssueDetail() {
                       size="sm"
                       disabled={createComment.isPending || !newComment.trim()}
                       onClick={() => {
-                        if (sendTyping) sendTyping(false);
+                        if (sendTyping) sendTyping(false)
                       }}
                     >
                       {createComment.isPending ? 'Posting...' : 'Comment'}

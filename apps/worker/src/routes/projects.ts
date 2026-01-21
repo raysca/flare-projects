@@ -401,4 +401,29 @@ app.put("/:id/members/:userId", zValidator("json", updateMemberSchema), async (c
     return c.json({ message: "Member role updated" });
 });
 
+/**
+ * GET /:id/ws
+ * Connect to workspace WebSocket (WorkspaceDO)
+ */
+app.get("/:id/ws", async (c) => {
+    const projectId = c.req.param("id");
+    const user = c.var.user;
+    const db = createDrizzleClient(c.env.DB);
+
+    // Fetch user details to get name
+    const userDetails = await db.select({ name: users.name }).from(users).where(eq(users.id, user.id)).get();
+    const userName = userDetails?.name || user.email;
+
+    // Create Stub
+    const id = c.env.WORKSPACE_DO.idFromName(projectId);
+    const stub = c.env.WORKSPACE_DO.get(id);
+
+    // Pass user info to DO
+    const url = new URL(c.req.url);
+    url.searchParams.set("userId", user.id);
+    url.searchParams.set("userName", userName);
+
+    return stub.fetch(url.toString(), c.req.raw);
+});
+
 export default app;

@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { createDrizzleClient, projects, projectMembers, users } from "@linearflow/database";
+import { createDrizzleClient, projects, projectMembers, users, labels } from "@linearflow/database";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import type { Env } from "../index";
 import { authMiddleware, type Variables } from "../middleware/auth";
@@ -424,6 +424,38 @@ app.get("/:id/ws", async (c) => {
     url.searchParams.set("userName", userName);
 
     return stub.fetch(url.toString(), c.req.raw);
+});
+
+/**
+ * GET /:id/labels
+ * List project labels
+ */
+app.get("/:id/labels", async (c) => {
+    const projectId = c.req.param("id");
+    const user = c.var.user;
+    const db = createDrizzleClient(c.env.DB);
+
+    // Check membership
+    const member = await db
+        .select()
+        .from(projectMembers)
+        .where(and(
+            eq(projectMembers.projectId, projectId),
+            eq(projectMembers.userId, user.id)
+        ))
+        .get();
+
+    if (!member) {
+        return c.json({ error: "Access denied" }, 403);
+    }
+
+    const projectLabels = await db
+        .select()
+        .from(labels)
+        .where(eq(labels.projectId, projectId))
+        .orderBy(labels.name);
+
+    return c.json(projectLabels);
 });
 
 export default app;

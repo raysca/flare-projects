@@ -38,3 +38,11 @@ export const labelKeys = {
   details: () => [...labelKeys.all, 'detail'] as const,
   detail: (id: string) => [...labelKeys.details(), id] as const,
 }
+
+export const cycleKeys = {
+  all: ['cycles'] as const,
+  lists: () => [...cycleKeys.all, 'list'] as const,
+  list: (projectId: string) => [...cycleKeys.lists(), projectId] as const,
+  details: () => [...cycleKeys.all, 'detail'] as const,
+  detail: (id: string) => [...cycleKeys.details(), id] as const,
+}

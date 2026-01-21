@@ -38,7 +38,7 @@ export function stableId(name: string): string {
   const version = "4";
   const variant = ["8", "9", "a", "b"][Math.abs(hash1) % 4];
 
-  return `${hex1}-${hex2}-${version}${hex3.slice(1)}-${variant}${hex4.slice(0, 3)}-${hex4.slice(3)}${hex2}`;
+  return `${hex1}-${hex2}-${version}${hex3.slice(1)}-${variant}${hex4.slice(0, 3)}-${hex4.slice(3)}${hex2.slice(0, 3)}`;
 }
 
 /**

@@ -45,6 +45,7 @@ export interface Label {
 export interface Cycle {
   id: string
   name: string
+  projectId: string
   startDate: string
   endDate: string
   status: 'upcoming' | 'active' | 'completed'

@@ -33,6 +33,8 @@ interface IssueFormProps {
   onCancel: () => void
   isSubmitting?: boolean
   initialValues?: Partial<CreateIssueInput>
+  projectId: string
+  onProjectChange: (projectId: string) => void
 }
 
 export function IssueForm({
@@ -44,13 +46,12 @@ export function IssueForm({
   onCancel,
   isSubmitting,
   initialValues,
+  projectId,
+  onProjectChange,
 }: IssueFormProps) {
   const [title, setTitle] = useState(initialValues?.title ?? '')
   const [description, setDescription] = useState(
     initialValues?.description ?? '',
-  )
-  const [projectId, setProjectId] = useState(
-    initialValues?.projectId ?? projects[0]?.id ?? '',
   )
   const [cycleId, setCycleId] = useState(initialValues?.cycleId ?? '')
   const [status, setStatus] = useState<IssueStatus>(
@@ -82,6 +83,8 @@ export function IssueForm({
 
     setError('')
 
+    setError('')
+
     try {
       await onSubmit({
         title: title.trim(),
@@ -90,10 +93,11 @@ export function IssueForm({
         priority,
         assigneeId,
         projectId,
-        cycleId: cycleId || undefined,
+        cycleId: cycleId && cycleId !== 'no_cycle' ? cycleId : undefined,
         labelIds: labelIds.length > 0 ? labelIds : undefined,
       })
     } catch (err) {
+      console.error('Issue creation error:', err)
       setError(err instanceof Error ? err.message : 'Failed to create issue')
     }
   }
@@ -103,7 +107,7 @@ export function IssueForm({
       {/* Project */}
       <div className="space-y-2">
         <FormLabel htmlFor="project">Project</FormLabel>
-        <Select value={projectId} onValueChange={setProjectId}>
+        <Select value={projectId} onValueChange={onProjectChange}>
           <SelectTrigger>
             <SelectValue placeholder="Select project" />
           </SelectTrigger>

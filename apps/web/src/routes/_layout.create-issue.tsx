@@ -1,40 +1,49 @@
+import { useState, useEffect } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { IssueForm } from '@/components/issues/issue-form'
 import { useCreateIssue } from '@/hooks/use-issues'
-import { useProjects } from '@/hooks/use-projects'
+import { useProjects, useProjectMembers } from '@/hooks/use-projects'
+import { useProjectCycles } from '@/hooks/use-cycles'
+import { useProjectLabels } from '@/hooks/use-labels'
 import type { CreateIssueInput } from '@/types/issues'
+
+interface CreateIssueSearch {
+  projectId?: string
+}
 
 export const Route = createFileRoute('/_layout/create-issue')({
   component: CreateIssue,
+  validateSearch: (search: Record<string, unknown>): CreateIssueSearch => {
+    return {
+      projectId: search.projectId as string | undefined,
+    }
+  },
 })
 
 function CreateIssue() {
   const navigate = useNavigate()
+  const search = Route.useSearch()
 
   // Queries
   const { data: projectList = [], isLoading: isLoadingProjects } = useProjects()
 
-  // We should ideally fetch members/labels/cycles here but they might be project-specific.
-  // For now, let's fetch GLOBAL users (or just me?) for assignee.
-  // And fetch GLOBAL labels? Or we need to fetch labels for selected project?
-  // Since IssueForm handles project selection internally (or we pass list), fetching project-specific data
-  // inside CreateIssue is hard unless we lift state.
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(
+    search.projectId ?? '',
+  )
 
-  // If we want IssueForm to be generic, it should probably be able to handle fetching or we pass "loadProjectData" callback?
-  // Or: CreateIssue creates issue, but IssueForm needs to switch resources on project change.
-  // Let's keep it simple: Pass ALL users and ALL labels (if global or manageable).
-  // But wait, labels are workspace specific (now project specific?).
+  // Sync selectedProjectId with projectList if empty
+  useEffect(() => {
+    if (!selectedProjectId && projectList.length > 0) {
+      setSelectedProjectId(projectList[0].id)
+    }
+  }, [projectList, selectedProjectId])
 
-  // Let's fetch global users for now.
-  // Labels... maybe we can leave empty or fetch global labels if they exist.
-  // Cycles... need projectId.
-
-  // Refactor needed: IssueForm should take `projectId` and `onProjectIdChange` so parent can fetch data.
-  // But IssueForm was managing it. I'll stick to basic implementation: Create Issue with minimal deps.
-  // Labels/Cycles/Assignees might need improvement later.
+  const { data: members = [] } = useProjectMembers(selectedProjectId)
+  const { data: cycles = [] } = useProjectCycles(selectedProjectId)
+  const { data: labels = [] } = useProjectLabels(selectedProjectId)
 
   const createIssue = useCreateIssue()
 
@@ -74,10 +83,6 @@ function CreateIssue() {
     )
   }
 
-  // Temporary: Empty arrays for members/labels/cycles until we implement dynamic fetching or global store.
-  // We can fetch members via useUsers() (global).
-  // Cycles/Labels require projectId.
-
   return (
     <div className="max-w-2xl mx-auto py-8">
       <Link
@@ -94,12 +99,20 @@ function CreateIssue() {
         <CardContent>
           <IssueForm
             projects={projectList}
-            members={[]} // To be implemented: Fetch users
-            labels={[]} // To be implemented: Fetch labels for selected project
-            cycles={[]} // To be implemented: Fetch cycles for selected project
+            members={members.map((m) => ({
+              id: m.userId,
+              name: m.name,
+              email: m.email,
+              avatarUrl: m.avatarUrl,
+            }))}
+            labels={labels}
+            cycles={cycles}
+            projectId={selectedProjectId}
+            onProjectChange={setSelectedProjectId}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             isSubmitting={createIssue.isPending}
+            initialValues={{ projectId: selectedProjectId }}
           />
         </CardContent>
       </Card>

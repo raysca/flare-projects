@@ -1,6 +1,12 @@
 import { useState, useCallback } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { LayoutDashboard, Plus, Search, HelpCircle, Loader2 } from 'lucide-react'
+import {
+  LayoutDashboard,
+  Plus,
+  Search,
+  HelpCircle,
+  Loader2,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -38,7 +44,7 @@ function MyIssuesPage() {
   const { data: issues = [], isLoading: isLoadingIssues } = useIssues({
     assigneeId: user?.id,
     ...filters,
-    search: searchQuery || undefined
+    search: searchQuery || undefined,
   })
 
   // View mode
@@ -59,7 +65,7 @@ function MyIssuesPage() {
         params: { issueId },
       })
     },
-    [navigate]
+    [navigate],
   )
 
   useIssueListNavigation({
@@ -79,7 +85,7 @@ function MyIssuesPage() {
         input: { status },
       })
     },
-    [selectedIssueId, updateIssue]
+    [selectedIssueId, updateIssue],
   )
 
   useKeyboardShortcuts({
@@ -88,6 +94,11 @@ function MyIssuesPage() {
         key: '/',
         handler: () => document.getElementById('search-input')?.focus(),
       },
+      {
+        key: 'c',
+        handler: () => navigate({ to: '/create-issue' }),
+      },
+      { key: '?', handler: () => setShortcutsDialogOpen(true) },
       { key: '1', handler: () => handleQuickStatusChange('backlog') },
       { key: '2', handler: () => handleQuickStatusChange('todo') },
       { key: '3', handler: () => handleQuickStatusChange('in_progress') },
@@ -99,7 +110,11 @@ function MyIssuesPage() {
   })
 
   if (isLoadingUser) {
-    return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
+    return (
+      <div className="flex justify-center p-8">
+        <Loader2 className="animate-spin" />
+      </div>
+    )
   }
 
   // Loaded but no user? (Should be handled by auth guard)
@@ -114,8 +129,8 @@ function MyIssuesPage() {
         </div>
         <h2 className="text-3xl font-bold mb-4">Welcome, {user.name}</h2>
         <p className="text-muted-foreground max-w-lg mx-auto mb-8">
-          You don't have any issues assigned to you yet.
-          Create a new issue to get started.
+          You don't have any issues assigned to you yet. Create a new issue to
+          get started.
         </p>
         <div className="flex justify-center gap-4">
           <Link to="/create-issue">

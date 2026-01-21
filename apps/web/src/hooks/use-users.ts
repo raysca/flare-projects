@@ -1,29 +1,39 @@
-import { useQuery } from '@tanstack/react-query'
-import { apiFetch } from '@/lib/api'
-import { userKeys } from '@/lib/query-keys'
-import type { User } from '@/types/issues'
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
 
-// Fetch all users
+export interface User {
+    id: string;
+    name: string;
+    avatarUrl?: string;
+    email: string;
+}
+
+export const userKeys = {
+    all: ["users"] as const,
+    lists: () => [...userKeys.all, "list"] as const,
+    list: (filters: string) => [...userKeys.lists(), { filters }] as const,
+    details: () => [...userKeys.all, "detail"] as const,
+    detail: (id: string) => [...userKeys.details(), id] as const,
+};
+
 export function useUsers() {
     return useQuery({
-        queryKey: userKeys.all,
-        queryFn: () => apiFetch<User[]>('/users'),
-    })
+        queryKey: userKeys.lists(),
+        queryFn: () => apiFetch<User[]>("/users"),
+    });
 }
 
-// Fetch current user
-export function useMe() {
+export function useUser(userId: string | undefined) {
     return useQuery({
-        queryKey: userKeys.me(),
-        queryFn: () => apiFetch<User>('/users/me'),
-    })
-}
-
-// Fetch single user
-export function useUser(userId: string) {
-    return useQuery({
-        queryKey: userKeys.detail(userId),
+        queryKey: userKeys.detail(userId ?? ""),
         queryFn: () => apiFetch<User>(`/users/${userId}`),
-        enabled: !!userId,
-    })
+        enabled: !!userId
+    });
+}
+
+export function useCurrentUser() {
+    return useQuery({
+        queryKey: ["currentUser"],
+        queryFn: () => apiFetch<User>("/users/me")
+    });
 }

@@ -47,21 +47,23 @@ export function IssueForm({
 }: IssueFormProps) {
   const [title, setTitle] = useState(initialValues?.title ?? '')
   const [description, setDescription] = useState(
-    initialValues?.description ?? ''
+    initialValues?.description ?? '',
   )
-  const [projectId, setProjectId] = useState(initialValues?.projectId ?? projects[0]?.id ?? '')
+  const [projectId, setProjectId] = useState(
+    initialValues?.projectId ?? projects[0]?.id ?? '',
+  )
   const [cycleId, setCycleId] = useState(initialValues?.cycleId ?? '')
   const [status, setStatus] = useState<IssueStatus>(
-    initialValues?.status ?? 'backlog'
+    initialValues?.status ?? 'backlog',
   )
   const [priority, setPriority] = useState<IssuePriority>(
-    initialValues?.priority ?? 'no_priority'
+    initialValues?.priority ?? 'no_priority',
   )
   const [assigneeId, setAssigneeId] = useState<string | undefined>(
-    initialValues?.assigneeId
+    initialValues?.assigneeId,
   )
   const [labelIds, setLabelIds] = useState<string[]>(
-    initialValues?.labelIds ?? []
+    initialValues?.labelIds ?? [],
   )
   const [error, setError] = useState('')
 
@@ -118,7 +120,10 @@ export function IssueForm({
       {/* Cycle (Optional) */}
       <div className="space-y-2">
         <FormLabel htmlFor="cycle">Cycle (Optional)</FormLabel>
-        <Select value={cycleId || 'no_cycle'} onValueChange={(val) => setCycleId(val === 'no_cycle' ? '' : val)}>
+        <Select
+          value={cycleId || 'no_cycle'}
+          onValueChange={(val) => setCycleId(val === 'no_cycle' ? '' : val)}
+        >
           <SelectTrigger>
             <SelectValue placeholder="No cycle" />
           </SelectTrigger>

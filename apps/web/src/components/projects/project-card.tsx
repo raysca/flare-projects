@@ -2,10 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { Calendar } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import {
-  PROJECT_STATUS_CONFIG,
-  getProgressColor,
-} from '@/lib/project-utils'
+import { PROJECT_STATUS_CONFIG, getProgressColor } from '@/lib/project-utils'
 import { getInitials } from '@/lib/issue-utils'
 import { cn } from '@/lib/utils'
 import type { ProjectListItem } from '@/types/projects'
@@ -19,10 +16,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const StatusIcon = statusConfig.icon
 
   return (
-    <Link
-      to="/projects/$projectId"
-      params={{ projectId: project.id }}
-    >
+    <Link to="/projects/$projectId" params={{ projectId: project.id }}>
       <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full group">
         <CardHeader className="pb-3">
           <div className="flex justify-between items-start">
@@ -33,7 +27,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
               className={cn(
                 'flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded-full uppercase font-bold tracking-wider',
                 statusConfig.bgColor,
-                statusConfig.textColor
+                statusConfig.textColor,
               )}
             >
               <StatusIcon className="size-3" />
@@ -65,7 +59,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                 <div
                   className={cn(
                     'h-full rounded-full transition-all duration-500',
-                    getProgressColor(project.status, project.progress)
+                    getProgressColor(project.status, project.progress),
                   )}
                   style={{ width: `${project.progress}%` }}
                 />

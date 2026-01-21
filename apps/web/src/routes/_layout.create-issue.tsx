@@ -65,10 +65,7 @@ function CreateIssue() {
             <p className="text-muted-foreground mb-4">
               You need to create a project first.
             </p>
-            <Link
-              to="/projects/new"
-              className="text-primary hover:underline"
-            >
+            <Link to="/projects/new" className="text-primary hover:underline">
               Create a Project
             </Link>
           </CardContent>

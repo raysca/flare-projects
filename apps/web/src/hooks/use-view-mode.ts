@@ -26,7 +26,7 @@ export function useViewMode(workspaceSlug: string) {
       setViewModeState(mode)
       localStorage.setItem(getStorageKey(workspaceSlug), mode)
     },
-    [workspaceSlug]
+    [workspaceSlug],
   )
 
   const toggleViewMode = useCallback(() => {

@@ -1,6 +1,14 @@
 import { useState, useRef, useEffect } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowLeft, MessageSquare, Pencil, Check, X, Repeat, Network } from 'lucide-react'
+import {
+  ArrowLeft,
+  MessageSquare,
+  Pencil,
+  Check,
+  X,
+  Repeat,
+  Network,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,6 +26,7 @@ import {
   useCreateComment,
 } from '@/hooks/use-issues'
 import { useUsers } from '@/hooks/use-users'
+import { useIssueSocket } from '@/hooks/use-issue-socket'
 import { getInitials } from '@/lib/issue-utils'
 import type { IssueStatus, IssuePriority } from '@/types/issues'
 
@@ -28,9 +37,13 @@ export const Route = createFileRoute('/_layout/issue/$issueId')({
 function IssueDetail() {
   const { issueId } = Route.useParams()
 
+  // Enable real-time updates
+  useIssueSocket(issueId)
+
   // Queries
   const { data: issue, isLoading: isLoadingIssue } = useIssue(issueId)
-  const { data: comments = [], isLoading: isLoadingComments } = useIssueComments(issueId)
+  const { data: comments = [], isLoading: isLoadingComments } =
+    useIssueComments(issueId)
   const { data: users = [] } = useUsers()
 
   // Mutations

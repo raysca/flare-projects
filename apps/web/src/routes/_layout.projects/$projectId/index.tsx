@@ -18,11 +18,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ProjectStatusSelect } from '@/components/projects/project-status-select'
 import { ProjectLeadSelect } from '@/components/projects/project-lead-select'
 import { StatusSelect } from '@/components/issues/status-select'
-import { useProject, useUpdateProject, useProjectIssues } from '@/hooks/use-projects'
 import {
-  getProgressColor,
-  formatTargetDate,
-} from '@/lib/project-utils'
+  useProject,
+  useUpdateProject,
+  useProjectIssues,
+} from '@/hooks/use-projects'
+import { getProgressColor, formatTargetDate } from '@/lib/project-utils'
 import { getInitials } from '@/lib/issue-utils'
 import { cn } from '@/lib/utils'
 import type { ProjectStatus } from '@/types/projects'
@@ -131,10 +132,10 @@ function ProjectDetail() {
   // Calculate issue stats
   const totalIssues = issues.length
   const completedIssues = issues.filter(
-    (i) => i.status === 'done' || i.status === 'cancelled'
+    (i) => i.status === 'done' || i.status === 'cancelled',
   ).length
   const inProgressIssues = issues.filter(
-    (i) => i.status === 'in_progress' || i.status === 'in_review'
+    (i) => i.status === 'in_progress' || i.status === 'in_review',
   ).length
 
   return (
@@ -284,10 +285,7 @@ function ProjectDetail() {
                 <p className="text-muted-foreground mb-4">
                   No issues assigned to this project yet.
                 </p>
-                <Link
-                  to="/create-issue"
-                  search={{ projectId: project.id }}
-                >
+                <Link to="/create-issue" search={{ projectId: project.id }}>
                   <Button variant="outline" size="sm">
                     Create Issue
                   </Button>
@@ -391,7 +389,7 @@ function ProjectDetail() {
                     <div
                       className={cn(
                         'h-full rounded-full transition-all duration-300',
-                        getProgressColor(project.status, project.progress)
+                        getProgressColor(project.status, project.progress),
                       )}
                       style={{ width: `${project.progress}%` }}
                     />

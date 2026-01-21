@@ -7,7 +7,6 @@ import { ProjectStatusSelect } from './project-status-select'
 import { ProjectLeadSelect } from './project-lead-select'
 import type { ProjectStatus, CreateProjectInput } from '@/types/projects'
 
-
 interface ProjectFormProps {
   onSubmit: (input: CreateProjectInput) => Promise<void>
   onCancel: () => void
@@ -23,20 +22,24 @@ export function ProjectForm({
 }: ProjectFormProps) {
   const [name, setName] = useState(initialValues?.name ?? '')
   const [identifier, setIdentifier] = useState(initialValues?.identifier ?? '')
-  const [description, setDescription] = useState(initialValues?.description ?? '')
-  const [status, setStatus] = useState<ProjectStatus>(
-    initialValues?.status ?? 'planned'
+  const [description, setDescription] = useState(
+    initialValues?.description ?? '',
   )
-  const [leadId, setLeadId] = useState<string | undefined>(initialValues?.leadId)
+  const [status, setStatus] = useState<ProjectStatus>(
+    initialValues?.status ?? 'planned',
+  )
+  const [leadId, setLeadId] = useState<string | undefined>(
+    initialValues?.leadId,
+  )
   const [startDate, setStartDate] = useState(
     initialValues?.startDate
       ? new Date(initialValues.startDate).toISOString().split('T')[0]
-      : ''
+      : '',
   )
   const [targetDate, setTargetDate] = useState(
     initialValues?.targetDate
       ? new Date(initialValues.targetDate).toISOString().split('T')[0]
-      : ''
+      : '',
   )
   const [error, setError] = useState('')
 
@@ -139,10 +142,7 @@ export function ProjectForm({
         </div>
         <div className="space-y-2">
           <Label>Lead</Label>
-          <ProjectLeadSelect
-            value={leadId}
-            onValueChange={setLeadId}
-          />
+          <ProjectLeadSelect value={leadId} onValueChange={setLeadId} />
         </div>
       </div>
 

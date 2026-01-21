@@ -25,7 +25,7 @@ export function ViewToggle({
       <div
         className={cn(
           'inline-flex items-center rounded-md border bg-background p-0.5',
-          className
+          className,
         )}
       >
         <Tooltip>

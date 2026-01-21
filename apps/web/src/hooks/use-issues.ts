@@ -11,9 +11,7 @@ import type {
 
 // Build query string from filters
 // Build query string from filters
-function buildQueryString(
-  filters?: IssueFilters
-): string {
+function buildQueryString(filters?: IssueFilters): string {
   const params = new URLSearchParams()
 
   if (filters?.status?.length) {
@@ -42,8 +40,7 @@ function buildQueryString(
 export function useIssues(filters?: IssueFilters) {
   return useQuery({
     queryKey: issueKeys.list(filters),
-    queryFn: () =>
-      apiFetch<Issue[]>(`/issues?${buildQueryString(filters)}`),
+    queryFn: () => apiFetch<Issue[]>(`/issues?${buildQueryString(filters)}`),
   })
 }
 
@@ -107,7 +104,7 @@ export function useUpdateIssue() {
 
       // Snapshot previous values
       const previousIssue = queryClient.getQueryData<Issue>(
-        issueKeys.detail(issueId)
+        issueKeys.detail(issueId),
       )
       const previousLists = queryClient.getQueriesData<Issue[]>({
         queryKey: issueKeys.lists(),
@@ -119,10 +116,12 @@ export function useUpdateIssue() {
 
         // Apply string | null fields
         if ('assigneeId' in input) {
-          merged.assigneeId = input.assigneeId === null ? undefined : input.assigneeId
+          merged.assigneeId =
+            input.assigneeId === null ? undefined : input.assigneeId
         }
         if ('projectId' in input) {
-          merged.projectId = input.projectId === null ? undefined : input.projectId
+          merged.projectId =
+            input.projectId === null ? undefined : input.projectId
         }
 
         // Apply number | null fields
@@ -132,7 +131,8 @@ export function useUpdateIssue() {
 
         // Apply other fields that don't have null handling
         if (input.title !== undefined) merged.title = input.title
-        if (input.description !== undefined) merged.description = input.description
+        if (input.description !== undefined)
+          merged.description = input.description
         if (input.status !== undefined) merged.status = input.status
         if (input.priority !== undefined) merged.priority = input.priority
         if (input.type !== undefined) merged.type = input.type
@@ -151,7 +151,7 @@ export function useUpdateIssue() {
       if (previousIssue) {
         queryClient.setQueryData<Issue>(
           issueKeys.detail(issueId),
-          mergeUpdate(previousIssue)
+          mergeUpdate(previousIssue),
         )
       }
 
@@ -161,8 +161,8 @@ export function useUpdateIssue() {
           queryClient.setQueryData<Issue[]>(
             queryKey,
             issues.map((issue) =>
-              issue.id === issueId ? mergeUpdate(issue) : issue
-            )
+              issue.id === issueId ? mergeUpdate(issue) : issue,
+            ),
           )
         }
       })
@@ -174,7 +174,7 @@ export function useUpdateIssue() {
       if (context?.previousIssue) {
         queryClient.setQueryData(
           issueKeys.detail(issueId),
-          context.previousIssue
+          context.previousIssue,
         )
       }
       if (context?.previousLists) {
@@ -221,7 +221,7 @@ export function useCreateComment() {
     onSuccess: (newComment, { issueId }) => {
       // Add to comments cache
       const previousComments = queryClient.getQueryData<Comment[]>(
-        issueKeys.comments(issueId)
+        issueKeys.comments(issueId),
       )
       if (previousComments) {
         queryClient.setQueryData<Comment[]>(issueKeys.comments(issueId), [

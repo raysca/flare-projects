@@ -85,7 +85,7 @@ export function IssueQuickCreate({
       onSubmit={handleSubmit}
       className={cn(
         'flex items-center gap-2 p-2 border rounded-lg bg-background',
-        className
+        className,
       )}
     >
       <Plus className="size-4 text-muted-foreground shrink-0" />

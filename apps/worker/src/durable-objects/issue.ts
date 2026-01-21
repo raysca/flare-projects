@@ -40,6 +40,17 @@ export class IssueDO extends DurableObject {
       return new Response(null, { status: 101, webSocket: client });
     }
 
+    // Handle internal broadcast requests from the API
+    if (request.method === "POST" && url.pathname === "/broadcast") {
+      try {
+        const data = await request.json() as WebSocketMessage;
+        this.broadcast(data);
+        return new Response("OK", { status: 200 });
+      } catch (e) {
+        return new Response("Invalid request body", { status: 400 });
+      }
+    }
+
     // Allow HTTP requests for updating issue state if needed, 
     // but primary interaction is often via standard API -> DB, then DB -> DO broadcast or API -> DO -> Broadcast
     // For now, simple WebSocket upgrade support.

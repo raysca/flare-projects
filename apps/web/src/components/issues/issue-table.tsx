@@ -1,6 +1,7 @@
 import { Skeleton } from '@/components/ui/skeleton'
 import { IssueRow } from './issue-row'
-import type { Issue } from '@/types/issues'
+import { useUpdateIssue } from '@/hooks/use-issues'
+import type { Issue, IssueStatus, IssuePriority } from '@/types/issues'
 
 interface IssueTableProps {
   issues: Issue[]
@@ -17,6 +18,18 @@ export function IssueTable({
   onSelectIssue,
   isLoading,
 }: IssueTableProps) {
+  const updateIssue = useUpdateIssue()
+
+  const handleStatusChange = async (issueId: string, status: IssueStatus) => {
+    await updateIssue.mutateAsync({ issueId, input: { status } })
+  }
+
+  const handlePriorityChange = async (
+    issueId: string,
+    priority: IssuePriority,
+  ) => {
+    await updateIssue.mutateAsync({ issueId, input: { priority } })
+  }
   if (isLoading) {
     return <IssueTableSkeleton />
   }
@@ -47,6 +60,10 @@ export function IssueTable({
             workspaceSlug={workspaceSlug}
             isSelected={selectedId === issue.id}
             onSelect={() => onSelectIssue?.(issue.id)}
+            onStatusChange={(status) => handleStatusChange(issue.id, status)}
+            onPriorityChange={(priority) =>
+              handlePriorityChange(issue.id, priority)
+            }
           />
         ))}
       </div>

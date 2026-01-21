@@ -13,7 +13,12 @@
 
 body {
   @apply m-0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
@@ -263,13 +268,13 @@ code {
   --font-family-mono: 'JetBrains Mono', 'SF Mono', monospace;
 
   /* Font Sizes - Linear's scale */
-  --font-size-xs: 0.6875rem;    /* 11px */
-  --font-size-sm: 0.8125rem;    /* 13px */
-  --font-size-base: 0.875rem;   /* 14px */
-  --font-size-lg: 1rem;         /* 16px */
-  --font-size-xl: 1.125rem;     /* 18px */
-  --font-size-2xl: 1.25rem;     /* 20px */
-  --font-size-3xl: 1.5rem;      /* 24px */
+  --font-size-xs: 0.6875rem; /* 11px */
+  --font-size-sm: 0.8125rem; /* 13px */
+  --font-size-base: 0.875rem; /* 14px */
+  --font-size-lg: 1rem; /* 16px */
+  --font-size-xl: 1.125rem; /* 18px */
+  --font-size-2xl: 1.25rem; /* 20px */
+  --font-size-3xl: 1.5rem; /* 24px */
 
   /* Line Heights */
   --line-height-tight: 1.2;
@@ -287,9 +292,12 @@ code {
   /* Shadows - Very subtle for dark mode */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  --shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-xl:
+    0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 
   /* Animations - Linear's signature easings */
@@ -327,12 +335,18 @@ code {
   }
 
   /* Smooth transitions */
-  button, a, [role='button'], input, select, textarea {
-    transition: background-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
-                border-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
-                color 150ms cubic-bezier(0.16, 1, 0.3, 1),
-                box-shadow 150ms cubic-bezier(0.16, 1, 0.3, 1),
-                transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  button,
+  a,
+  [role='button'],
+  input,
+  select,
+  textarea {
+    transition:
+      background-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 150ms cubic-bezier(0.16, 1, 0.3, 1),
+      color 150ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 150ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   /* Focus states */
@@ -443,17 +457,21 @@ code {
    ============================================ */
 
 /* Dialog/Modal backdrop */
-[data-state="open"][data-overlay] {
+[data-state='open'][data-overlay] {
   animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes overlayShow {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Dialog content animation */
-[data-state="open"][data-content] {
+[data-state='open'][data-content] {
   animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -469,7 +487,7 @@ code {
 }
 
 /* Dropdown animation */
-[data-state="open"][data-dropdown] {
+[data-state='open'][data-dropdown] {
   animation: dropdownShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -485,7 +503,7 @@ code {
 }
 
 /* Popover animation */
-[data-state="open"][data-popover] {
+[data-state='open'][data-popover] {
   animation: popoverShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 

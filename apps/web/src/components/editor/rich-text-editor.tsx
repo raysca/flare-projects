@@ -82,7 +82,7 @@ export function RichTextEditor({
         className={cn(
           'prose dark:prose-invert max-w-none prose-sm',
           '[&_p]:my-2 [&_ul]:my-2 [&_ol]:my-2 [&_blockquote]:my-2',
-          className
+          className,
         )}
       >
         <EditorContent editor={editor} />
@@ -95,7 +95,7 @@ export function RichTextEditor({
       className={cn(
         'rounded-md border border-input bg-background',
         'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
-        className
+        className,
       )}
     >
       {/* Toolbar */}
@@ -193,7 +193,7 @@ export function RichTextEditor({
           '[&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)]',
           '[&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left',
           '[&_.ProseMirror_p.is-editor-empty:first-child::before]:h-0',
-          '[&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none'
+          '[&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none',
         )}
         style={{ minHeight }}
       >
@@ -227,7 +227,7 @@ function ToolbarButton({
           size="sm"
           className={cn(
             'h-7 w-7 p-0',
-            isActive && 'bg-accent text-accent-foreground'
+            isActive && 'bg-accent text-accent-foreground',
           )}
           onClick={onClick}
           disabled={disabled}

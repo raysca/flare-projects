@@ -50,7 +50,7 @@ export function AssigneeSelect({
           className={cn(
             'justify-between gap-2',
             size === 'sm' ? 'h-8 text-xs' : 'h-9',
-            className
+            className,
           )}
         >
           {selectedMember ? (
@@ -90,7 +90,7 @@ export function AssigneeSelect({
                 <Check
                   className={cn(
                     'ml-auto size-4',
-                    !value ? 'opacity-100' : 'opacity-0'
+                    !value ? 'opacity-100' : 'opacity-0',
                   )}
                 />
               </CommandItem>
@@ -113,7 +113,7 @@ export function AssigneeSelect({
                   <Check
                     className={cn(
                       'ml-auto size-4',
-                      value === member.id ? 'opacity-100' : 'opacity-0'
+                      value === member.id ? 'opacity-100' : 'opacity-0',
                     )}
                   />
                 </CommandItem>

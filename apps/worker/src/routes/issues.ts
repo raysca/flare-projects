@@ -5,8 +5,42 @@ import { createDrizzleClient, issues, issueLabels, issueSubscribers, projectMemb
 import { eq, and, desc, sql, inArray, aliasedTable } from "drizzle-orm";
 import type { Env } from "../index";
 import { authMiddleware, type Variables } from "../middleware/auth";
+import { WebSocketMessage } from "../durable-objects/types";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DrizzleDB = ReturnType<typeof createDrizzleClient>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ContextWithEnv = any; // Helper type for binding access
+
+// ... (previous types and helper functions)
+
+// Helper to broadcast to IssueDO
+async function broadcastToIssue(c: ContextWithEnv, issueId: string, message: WebSocketMessage) {
+    try {
+        const id = c.env.ISSUE_DO.idFromName(issueId);
+        const stub = c.env.ISSUE_DO.get(id);
+        c.executionCtx.waitUntil(stub.fetch("http://internal/broadcast", {
+            method: "POST",
+            body: JSON.stringify(message)
+        }));
+    } catch (e) {
+        console.error("Failed to broadcast to IssueDO", e);
+    }
+}
+
+// Helper to broadcast to WorkspaceDO (Project Scope)
+async function broadcastToProject(c: ContextWithEnv, projectId: string, message: WebSocketMessage) {
+    try {
+        const id = c.env.WORKSPACE_DO.idFromName(projectId);
+        const stub = c.env.WORKSPACE_DO.get(id);
+        c.executionCtx.waitUntil(stub.fetch("http://internal/broadcast", {
+            method: "POST",
+            body: JSON.stringify(message)
+        }));
+    } catch (e) {
+        console.error("Failed to broadcast to WorkspaceDO", e);
+    }
+}
 
 // Status values for type safety
 const STATUS_VALUES = ["backlog", "todo", "in_progress", "in_review", "done", "cancelled"] as const;
@@ -393,6 +427,16 @@ app.post("/", zValidator("json", createIssueSchema), async (c) => {
 
     const newIssue = await db.select().from(issues).where(eq(issues.id, issueId)).get();
 
+    if (newIssue) {
+        // Broadcast to project
+        await broadcastToProject(c, data.projectId, {
+            type: "issue_created",
+            payload: newIssue,
+            senderId: user.id,
+            timestamp: Date.now()
+        });
+    }
+
     return c.json(newIssue, 201);
 });
 
@@ -713,6 +757,24 @@ app.put("/:id", zValidator("json", updateIssueSchema), async (c) => {
 
     const updatedIssue = await db.select().from(issues).where(eq(issues.id, issueId)).get();
 
+    if (updatedIssue) {
+        // Broadcast to issue room
+        await broadcastToIssue(c, issueId, {
+            type: "issue_updated",
+            payload: updatedIssue,
+            senderId: user.id,
+            timestamp: Date.now()
+        });
+
+        // Broadcast to project room
+        await broadcastToProject(c, issue.projectId, {
+            type: "issue_updated",
+            payload: updatedIssue,
+            senderId: user.id,
+            timestamp: Date.now()
+        });
+    }
+
     return c.json(updatedIssue);
 });
 
@@ -757,6 +819,22 @@ app.delete("/:id", async (c) => {
     });
 
     await db.delete(issues).where(eq(issues.id, issueId));
+
+    // Broadcast to issue room (so viewers know it's gone)
+    await broadcastToIssue(c, issueId, {
+        type: "issue_deleted",
+        payload: { id: issueId },
+        senderId: user.id,
+        timestamp: Date.now()
+    });
+
+    // Broadcast to project room (remove from lists)
+    await broadcastToProject(c, issue.projectId, {
+        type: "issue_deleted",
+        payload: { id: issueId },
+        senderId: user.id,
+        timestamp: Date.now()
+    });
 
     return c.json({ message: "Issue deleted" });
 });
@@ -871,6 +949,15 @@ app.post("/:id/comments", zValidator("json", z.object({ body: z.string().min(1) 
         .innerJoin(users, eq(comments.userId, users.id))
         .where(eq(comments.id, commentId))
         .get();
+
+    if (newComment) {
+        await broadcastToIssue(c, issueId, {
+            type: "comment_created",
+            payload: newComment,
+            senderId: user.id,
+            timestamp: Date.now()
+        });
+    }
 
     return c.json(newComment, 201);
 });

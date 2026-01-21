@@ -8,7 +8,9 @@ import type { Issue, IssueStatus } from '@/types/issues'
 interface IssueBoardProps {
   issues: Issue[]
   workspaceSlug: string
-  onQuickCreate?: (status: IssueStatus) => void
+  projectId?: string
+  onQuickCreate?: (title: string, status: IssueStatus) => Promise<void>
+  onExpandCreate?: (status: IssueStatus) => void
   isLoading?: boolean
 }
 
@@ -16,6 +18,7 @@ export function IssueBoard({
   issues,
   workspaceSlug,
   onQuickCreate,
+  onExpandCreate,
   isLoading,
 }: IssueBoardProps) {
   // Group issues by status
@@ -52,6 +55,7 @@ export function IssueBoard({
             issues={issuesByStatus[status]}
             workspaceSlug={workspaceSlug}
             onQuickCreate={onQuickCreate}
+            onExpandCreate={onExpandCreate}
           />
         ))}
       </div>
@@ -77,7 +81,7 @@ function IssueBoardSkeleton() {
             {Array.from({ length: Math.floor(Math.random() * 3) + 1 }).map(
               (_, i) => (
                 <Skeleton key={i} className="h-24 w-full rounded-lg" />
-              )
+              ),
             )}
           </div>
         </div>

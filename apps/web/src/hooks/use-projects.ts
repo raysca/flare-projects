@@ -87,25 +87,29 @@ export function useUpdateProject() {
       }),
     onMutate: async ({ projectId, input }) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: projectKeys.detail(projectId) })
+      await queryClient.cancelQueries({
+        queryKey: projectKeys.detail(projectId),
+      })
       await queryClient.cancelQueries({ queryKey: projectKeys.lists() })
 
       // Snapshot previous values
       const previousProject = queryClient.getQueryData<Project>(
-        projectKeys.detail(projectId)
+        projectKeys.detail(projectId),
       )
       const previousLists = queryClient.getQueriesData<ProjectListItem[]>({
         queryKey: projectKeys.lists(),
       })
 
       // Helper to merge update input with project
-      const mergeUpdate = <T extends Project | ProjectListItem>(project: T): T => {
+      const mergeUpdate = <T extends Project | ProjectListItem>(
+        project: T,
+      ): T => {
         const merged = { ...project }
 
         // Apply nullable fields
         if ('leadId' in input) {
           if (input.leadId === null) {
-            ; (merged as Project).lead = undefined
+            ;(merged as Project).lead = undefined
           }
         }
 
@@ -117,10 +121,10 @@ export function useUpdateProject() {
 
         // Date fields
         if ('description' in merged && input.description !== undefined) {
-          ; (merged as Project).description = input.description
+          ;(merged as Project).description = input.description
         }
         if ('startDate' in merged && input.startDate !== undefined) {
-          ; (merged as Project).startDate =
+          ;(merged as Project).startDate =
             input.startDate === null ? undefined : input.startDate
         }
         if (input.targetDate !== undefined) {
@@ -135,7 +139,7 @@ export function useUpdateProject() {
       if (previousProject) {
         queryClient.setQueryData<Project>(
           projectKeys.detail(projectId),
-          mergeUpdate(previousProject)
+          mergeUpdate(previousProject),
         )
       }
 
@@ -145,8 +149,8 @@ export function useUpdateProject() {
           queryClient.setQueryData<ProjectListItem[]>(
             queryKey,
             projects.map((project) =>
-              project.id === projectId ? mergeUpdate(project) : project
-            )
+              project.id === projectId ? mergeUpdate(project) : project,
+            ),
           )
         }
       })
@@ -158,7 +162,7 @@ export function useUpdateProject() {
       if (context?.previousProject) {
         queryClient.setQueryData(
           projectKeys.detail(projectId),
-          context.previousProject
+          context.previousProject,
         )
       }
       if (context?.previousLists) {
@@ -199,13 +203,23 @@ export function useAddMember() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ projectId, email, role }: { projectId: string; email: string; role?: string }) =>
+    mutationFn: ({
+      projectId,
+      email,
+      role,
+    }: {
+      projectId: string
+      email: string
+      role?: string
+    }) =>
       apiFetch(`/projects/${projectId}/members`, {
         method: 'POST',
         body: JSON.stringify({ email, role }),
       }),
     onSuccess: (_data, { projectId }) => {
-      queryClient.invalidateQueries({ queryKey: projectKeys.members(projectId) })
+      queryClient.invalidateQueries({
+        queryKey: projectKeys.members(projectId),
+      })
     },
   })
 }
@@ -218,7 +232,7 @@ export function useInviteMember() {
         method: 'POST',
         body: JSON.stringify(input),
       }),
-    // We don't necessarily update members list until they accept, 
+    // We don't necessarily update members list until they accept,
     // but we might want to refetch invitations list if we had one.
     // For now do nothing or optimistically notify.
   })
@@ -229,12 +243,20 @@ export function useRemoveMember() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ projectId, userId }: { projectId: string; userId: string }) =>
+    mutationFn: ({
+      projectId,
+      userId,
+    }: {
+      projectId: string
+      userId: string
+    }) =>
       apiFetch(`/projects/${projectId}/members/${userId}`, {
         method: 'DELETE',
       }),
     onSuccess: (_data, { projectId }) => {
-      queryClient.invalidateQueries({ queryKey: projectKeys.members(projectId) })
+      queryClient.invalidateQueries({
+        queryKey: projectKeys.members(projectId),
+      })
     },
   })
 }
@@ -244,13 +266,23 @@ export function useUpdateMemberRole() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ projectId, userId, role }: { projectId: string; userId: string; role: string }) =>
+    mutationFn: ({
+      projectId,
+      userId,
+      role,
+    }: {
+      projectId: string
+      userId: string
+      role: string
+    }) =>
       apiFetch(`/projects/${projectId}/members/${userId}`, {
         method: 'PUT',
         body: JSON.stringify({ role }),
       }),
     onSuccess: (_data, { projectId }) => {
-      queryClient.invalidateQueries({ queryKey: projectKeys.members(projectId) })
+      queryClient.invalidateQueries({
+        queryKey: projectKeys.members(projectId),
+      })
     },
   })
 }

@@ -45,9 +45,7 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
   },
   {
     name: 'General',
-    shortcuts: [
-      { keys: ['?'], description: 'Show keyboard shortcuts' },
-    ],
+    shortcuts: [{ keys: ['?'], description: 'Show keyboard shortcuts' }],
   },
 ]
 

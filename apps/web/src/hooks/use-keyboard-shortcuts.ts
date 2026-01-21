@@ -19,7 +19,8 @@ function isInputElement(element: EventTarget | null): boolean {
   if (!element || !(element instanceof HTMLElement)) return false
 
   const tagName = element.tagName.toLowerCase()
-  const isInput = tagName === 'input' || tagName === 'textarea' || tagName === 'select'
+  const isInput =
+    tagName === 'input' || tagName === 'textarea' || tagName === 'select'
   const isEditable = element.isContentEditable
 
   return isInput || isEditable
@@ -55,7 +56,7 @@ export function useKeyboardShortcuts({
         }
       }
     },
-    [enabled]
+    [enabled],
   )
 
   useEffect(() => {

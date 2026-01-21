@@ -57,7 +57,7 @@ export function LabelSelect({
           className={cn(
             'justify-between gap-2',
             size === 'sm' ? 'h-8 text-xs' : 'h-9',
-            className
+            className,
           )}
         >
           {selectedLabels.length > 0 ? (
@@ -67,7 +67,10 @@ export function LabelSelect({
                   key={label.id}
                   variant="secondary"
                   className="px-1.5 py-0 text-xs"
-                  style={{ backgroundColor: `${label.color}20`, color: label.color }}
+                  style={{
+                    backgroundColor: `${label.color}20`,
+                    color: label.color,
+                  }}
                 >
                   {label.name}
                 </Badge>
@@ -107,7 +110,7 @@ export function LabelSelect({
                   <Check
                     className={cn(
                       'ml-auto size-4',
-                      value.includes(label.id) ? 'opacity-100' : 'opacity-0'
+                      value.includes(label.id) ? 'opacity-100' : 'opacity-0',
                     )}
                   />
                 </CommandItem>

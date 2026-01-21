@@ -145,7 +145,7 @@ export function getPriorityConfig(priority: IssuePriority): PriorityConfig {
 // Format issue identifier (e.g., "PROJ-123")
 export function formatIssueIdentifier(
   workspaceSlug: string,
-  issueNumber: number
+  issueNumber: number,
 ): string {
   return `${workspaceSlug.toUpperCase()}-${issueNumber}`
 }

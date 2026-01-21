@@ -2,10 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import {
-  PRIORITY_CONFIG,
-  getInitials,
-} from '@/lib/issue-utils'
+import { PRIORITY_CONFIG, getInitials } from '@/lib/issue-utils'
 import { cn } from '@/lib/utils'
 import type { Issue } from '@/types/issues'
 
@@ -24,11 +21,7 @@ export function IssueCard({ issue }: IssueCardProps) {
     : `#${issue.number}`
 
   return (
-    <Link
-      to="/issue/$issueId"
-      params={{ issueId: issue.id }}
-      className="block"
-    >
+    <Link to="/issue/$issueId" params={{ issueId: issue.id }} className="block">
       <Card className="hover:bg-accent/50 hover:shadow-md transition-all cursor-pointer group">
         <CardContent className="p-3 space-y-2">
           {/* Top row: ID and Priority */}

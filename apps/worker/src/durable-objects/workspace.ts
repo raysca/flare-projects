@@ -46,6 +46,17 @@ export class WorkspaceDO extends DurableObject {
       return new Response(null, { status: 101, webSocket: client });
     }
 
+    // Handle internal broadcast requests from the API
+    if (request.method === "POST" && url.pathname === "/broadcast") {
+      try {
+        const data = await request.json() as WebSocketMessage;
+        this.broadcast(data);
+        return new Response("OK", { status: 200 });
+      } catch (e) {
+        return new Response("Invalid request body", { status: 400 });
+      }
+    }
+
     return new Response("Expected WebSocket Upgrade", { status: 400 });
   }
 

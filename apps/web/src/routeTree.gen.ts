@@ -21,6 +21,7 @@ import { Route as LayoutIssueIssueIdRouteImport } from './routes/_layout.issue/$
 import { Route as LayoutProjectsProjectIdRouteRouteImport } from './routes/_layout.projects/$projectId/route'
 import { Route as LayoutProjectsProjectIdIndexRouteImport } from './routes/_layout.projects/$projectId/index'
 import { Route as LayoutProjectsProjectIdSettingsRouteImport } from './routes/_layout.projects/$projectId/settings'
+import { Route as LayoutProjectsProjectIdIssuesRouteImport } from './routes/_layout.projects/$projectId/issues'
 import { Route as LayoutProjectsProjectIdCyclesIndexRouteImport } from './routes/_layout.projects/$projectId/cycles/index'
 import { Route as LayoutProjectsProjectIdCyclesNewRouteImport } from './routes/_layout.projects/$projectId/cycles/new'
 import { Route as LayoutProjectsProjectIdCyclesCycleIdRouteImport } from './routes/_layout.projects/$projectId/cycles/$cycleId'
@@ -87,6 +88,12 @@ const LayoutProjectsProjectIdSettingsRoute =
     path: '/settings',
     getParentRoute: () => LayoutProjectsProjectIdRouteRoute,
   } as any)
+const LayoutProjectsProjectIdIssuesRoute =
+  LayoutProjectsProjectIdIssuesRouteImport.update({
+    id: '/issues',
+    path: '/issues',
+    getParentRoute: () => LayoutProjectsProjectIdRouteRoute,
+  } as any)
 const LayoutProjectsProjectIdCyclesIndexRoute =
   LayoutProjectsProjectIdCyclesIndexRouteImport.update({
     id: '/cycles/',
@@ -116,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/issue/$issueId': typeof LayoutIssueIssueIdRoute
   '/projects/new': typeof LayoutProjectsNewRoute
   '/projects/': typeof LayoutProjectsIndexRoute
+  '/projects/$projectId/issues': typeof LayoutProjectsProjectIdIssuesRoute
   '/projects/$projectId/settings': typeof LayoutProjectsProjectIdSettingsRoute
   '/projects/$projectId/': typeof LayoutProjectsProjectIdIndexRoute
   '/projects/$projectId/cycles/$cycleId': typeof LayoutProjectsProjectIdCyclesCycleIdRoute
@@ -131,6 +139,7 @@ export interface FileRoutesByTo {
   '/issue/$issueId': typeof LayoutIssueIssueIdRoute
   '/projects/new': typeof LayoutProjectsNewRoute
   '/projects': typeof LayoutProjectsIndexRoute
+  '/projects/$projectId/issues': typeof LayoutProjectsProjectIdIssuesRoute
   '/projects/$projectId/settings': typeof LayoutProjectsProjectIdSettingsRoute
   '/projects/$projectId': typeof LayoutProjectsProjectIdIndexRoute
   '/projects/$projectId/cycles/$cycleId': typeof LayoutProjectsProjectIdCyclesCycleIdRoute
@@ -149,6 +158,7 @@ export interface FileRoutesById {
   '/_layout/issue/$issueId': typeof LayoutIssueIssueIdRoute
   '/_layout/projects/new': typeof LayoutProjectsNewRoute
   '/_layout/projects/': typeof LayoutProjectsIndexRoute
+  '/_layout/projects/$projectId/issues': typeof LayoutProjectsProjectIdIssuesRoute
   '/_layout/projects/$projectId/settings': typeof LayoutProjectsProjectIdSettingsRoute
   '/_layout/projects/$projectId/': typeof LayoutProjectsProjectIdIndexRoute
   '/_layout/projects/$projectId/cycles/$cycleId': typeof LayoutProjectsProjectIdCyclesCycleIdRoute
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/issue/$issueId'
     | '/projects/new'
     | '/projects/'
+    | '/projects/$projectId/issues'
     | '/projects/$projectId/settings'
     | '/projects/$projectId/'
     | '/projects/$projectId/cycles/$cycleId'
@@ -182,6 +193,7 @@ export interface FileRouteTypes {
     | '/issue/$issueId'
     | '/projects/new'
     | '/projects'
+    | '/projects/$projectId/issues'
     | '/projects/$projectId/settings'
     | '/projects/$projectId'
     | '/projects/$projectId/cycles/$cycleId'
@@ -199,6 +211,7 @@ export interface FileRouteTypes {
     | '/_layout/issue/$issueId'
     | '/_layout/projects/new'
     | '/_layout/projects/'
+    | '/_layout/projects/$projectId/issues'
     | '/_layout/projects/$projectId/settings'
     | '/_layout/projects/$projectId/'
     | '/_layout/projects/$projectId/cycles/$cycleId'
@@ -298,6 +311,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutProjectsProjectIdSettingsRouteImport
       parentRoute: typeof LayoutProjectsProjectIdRouteRoute
     }
+    '/_layout/projects/$projectId/issues': {
+      id: '/_layout/projects/$projectId/issues'
+      path: '/issues'
+      fullPath: '/projects/$projectId/issues'
+      preLoaderRoute: typeof LayoutProjectsProjectIdIssuesRouteImport
+      parentRoute: typeof LayoutProjectsProjectIdRouteRoute
+    }
     '/_layout/projects/$projectId/cycles/': {
       id: '/_layout/projects/$projectId/cycles/'
       path: '/cycles'
@@ -323,6 +343,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface LayoutProjectsProjectIdRouteRouteChildren {
+  LayoutProjectsProjectIdIssuesRoute: typeof LayoutProjectsProjectIdIssuesRoute
   LayoutProjectsProjectIdSettingsRoute: typeof LayoutProjectsProjectIdSettingsRoute
   LayoutProjectsProjectIdIndexRoute: typeof LayoutProjectsProjectIdIndexRoute
   LayoutProjectsProjectIdCyclesCycleIdRoute: typeof LayoutProjectsProjectIdCyclesCycleIdRoute
@@ -332,6 +353,7 @@ interface LayoutProjectsProjectIdRouteRouteChildren {
 
 const LayoutProjectsProjectIdRouteRouteChildren: LayoutProjectsProjectIdRouteRouteChildren =
   {
+    LayoutProjectsProjectIdIssuesRoute: LayoutProjectsProjectIdIssuesRoute,
     LayoutProjectsProjectIdSettingsRoute: LayoutProjectsProjectIdSettingsRoute,
     LayoutProjectsProjectIdIndexRoute: LayoutProjectsProjectIdIndexRoute,
     LayoutProjectsProjectIdCyclesCycleIdRoute:

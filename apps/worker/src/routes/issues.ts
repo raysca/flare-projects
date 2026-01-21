@@ -947,23 +947,43 @@ app.post("/:id/comments", zValidator("json", z.object({ body: z.string().min(1) 
         entityId: commentId,
     });
 
-    // Mention detection (simple email matching)
+    // Mention detection
     const mentionRegex = /@([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/g;
-    const mentions = new Set<string>();
+    const tiptapMentionRegex = /data-type="mention" data-id="([a-zA-Z0-9-]+)"/g;
+
+    const mentionEmails = new Set<string>();
+    const mentionIds = new Set<string>();
+
     let match;
     while ((match = mentionRegex.exec(body)) !== null) {
-        mentions.add(match[1]);
+        mentionEmails.add(match[1]);
+    }
+    while ((match = tiptapMentionRegex.exec(body)) !== null) {
+        mentionIds.add(match[1]);
     }
 
-    if (mentions.size > 0) {
+    if (mentionEmails.size > 0 || mentionIds.size > 0) {
         // Fetch sender details
         const sender = await db.select({ name: users.name }).from(users).where(eq(users.id, user.id)).get();
         const senderName = sender?.name || user.email;
 
+        // Build query conditions
+        const conditions = [];
+        if (mentionEmails.size > 0) {
+            conditions.push(inArray(users.email, Array.from(mentionEmails)));
+        }
+        if (mentionIds.size > 0) {
+            conditions.push(inArray(users.id, Array.from(mentionIds)));
+        }
+
         const mentionedUsers = await db
             .select()
             .from(users)
-            .where(inArray(users.email, Array.from(mentions)));
+            .where(
+                conditions.length > 1
+                    ? sql`(${conditions[0]}) OR (${conditions[1]})`
+                    : conditions[0]
+            );
 
         for (const mentionedUser of mentionedUsers) {
             if (mentionedUser.id === user.id) continue;

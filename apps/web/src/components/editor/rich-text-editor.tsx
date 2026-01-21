@@ -1,7 +1,10 @@
 import { useEditor, EditorContent } from '@tiptap/react'
+import { useMemo, useEffect } from 'react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Link from '@tiptap/extension-link'
+import Mention from '@tiptap/extension-mention'
+import { getSuggestionOptions } from './suggestion'
 import {
   Bold,
   Italic,
@@ -31,6 +34,8 @@ interface RichTextEditorProps {
   readOnly?: boolean
   className?: string
   minHeight?: string
+  onFetchUsers?: (query: string) => Promise<any[]>
+  onBlur?: () => void
 }
 
 export function RichTextEditor({
@@ -40,9 +45,11 @@ export function RichTextEditor({
   readOnly = false,
   className,
   minHeight = '150px',
+  onFetchUsers,
+  onBlur,
 }: RichTextEditorProps) {
-  const editor = useEditor({
-    extensions: [
+  const extensions = useMemo(() => {
+    const list: any[] = [
       StarterKit.configure({
         heading: {
           levels: [1, 2, 3],
@@ -57,13 +64,65 @@ export function RichTextEditor({
           class: 'text-primary underline underline-offset-4 cursor-pointer',
         },
       }),
-    ],
+    ]
+
+    if (onFetchUsers) {
+      list.push(
+        Mention.configure({
+          HTMLAttributes: {
+            class:
+              'bg-primary/10 text-primary font-medium px-1 py-0.5 rounded-sm box-decoration-clone',
+          },
+          renderHTML: ({ options, node }) => {
+            return [
+              'span',
+              options.HTMLAttributes,
+              `${options.suggestion.char}${node.attrs.label ?? node.attrs.id}`,
+            ]
+          },
+          suggestion: getSuggestionOptions(onFetchUsers),
+        }),
+      )
+    } else {
+      // Read-only support for displaying mentions
+      list.push(
+        Mention.configure({
+          HTMLAttributes: {
+            class:
+              'bg-primary/10 text-primary font-medium px-1 py-0.5 rounded-sm box-decoration-clone',
+          },
+          renderHTML: ({ options, node }) => {
+            return [
+              'span',
+              options.HTMLAttributes,
+              `${options.suggestion.char}${node.attrs.label ?? node.attrs.id}`,
+            ]
+          },
+        })
+      )
+    }
+
+    return list
+  }, [placeholder, onFetchUsers])
+
+  const editor = useEditor({
+    extensions,
     content,
     editable: !readOnly,
     onUpdate: ({ editor }) => {
       onChange?.(editor.getHTML())
     },
+    onBlur: () => {
+      onBlur?.()
+    },
   })
+
+  // Sync content updates (e.g. when clearing the form)
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content)
+    }
+  }, [content, editor])
 
   if (!editor) {
     return null

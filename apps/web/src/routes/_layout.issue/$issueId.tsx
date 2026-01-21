@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import {
   ArrowLeft,
@@ -14,7 +14,6 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Textarea } from '@/components/ui/textarea'
 import { RichTextEditor } from '@/components/editor/rich-text-editor'
 import { StatusSelect } from '@/components/issues/status-select'
 import { PrioritySelect } from '@/components/issues/priority-select'
@@ -71,22 +70,20 @@ function IssueDetail() {
     }
   }, [isEditingTitle])
 
-  const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setNewComment(e.target.value)
-
-    // Handle typing indicator
-    if (sendTyping) {
-      sendTyping(true)
-
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current)
-      }
-
-      typingTimeoutRef.current = setTimeout(() => {
-        sendTyping(false)
-      }, 3000)
-    }
-  }
+  const fetchUsers = useCallback(
+    async (query: string) => {
+      const lowerQuery = query.toLowerCase()
+      return users
+        .filter((user) => user.name.toLowerCase().includes(lowerQuery))
+        .map((user) => ({
+          id: user.id,
+          name: user.name,
+          avatarUrl: user.avatarUrl,
+        }))
+        .slice(0, 5)
+    },
+    [users],
+  )
 
   if (isLoadingIssue) {
     return <IssueDetailSkeleton />
@@ -156,9 +153,15 @@ function IssueDetail() {
     })
   }
 
+
   const handleCreateComment = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newComment.trim()) return
+    // Simple check to ensure not just empty HTML tags
+    const tempDiv = document.createElement('div')
+    tempDiv.innerHTML = newComment
+    const textContent = tempDiv.textContent || tempDiv.innerText || ''
+
+    if (!textContent.trim()) return
 
     await createComment.mutateAsync({
       issueId: issue.id,
@@ -248,6 +251,7 @@ function IssueDetail() {
                   content={editedDescription}
                   onChange={setEditedDescription}
                   placeholder="Add a description..."
+                  onFetchUsers={fetchUsers}
                 />
                 <div className="flex justify-end gap-2">
                   <Button
@@ -300,35 +304,43 @@ function IssueDetail() {
               Activity
             </h3>
 
-            <form onSubmit={handleCreateComment} className="mb-8">
-              <div className="flex gap-4">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold shrink-0">
-                  ME
-                </div>
-                <div className="flex-1 space-y-2">
-                  <Textarea
-                    placeholder="Leave a comment..."
-                    value={newComment}
-                    onChange={handleCommentChange}
-                    onBlur={() => sendTyping && sendTyping(false)}
-                    className="min-h-[100px]"
-                  />
-                  <div className="flex justify-between items-center">
-                    <TypingIndicator contextId={issueId} />
-                    <Button
-                      type="submit"
-                      size="sm"
-                      disabled={createComment.isPending || !newComment.trim()}
-                      onClick={() => {
-                        if (sendTyping) sendTyping(false)
-                      }}
-                    >
-                      {createComment.isPending ? 'Posting...' : 'Comment'}
-                    </Button>
-                  </div>
+            <div className="mb-8 flex gap-4">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold shrink-0">
+                ME
+              </div>
+              <div className="flex-1 space-y-2">
+                <RichTextEditor
+                  placeholder="Leave a comment... (Type @ to mention)"
+                  content={newComment}
+                  onChange={(html) => {
+                    setNewComment(html)
+                    // Typing indicator logic
+                    if (sendTyping) {
+                      sendTyping(true)
+                      if (typingTimeoutRef.current) {
+                        clearTimeout(typingTimeoutRef.current)
+                      }
+                      typingTimeoutRef.current = setTimeout(() => {
+                        sendTyping(false)
+                      }, 3000)
+                    }
+                  }}
+                  onBlur={() => sendTyping && sendTyping(false)}
+                  minHeight="100px"
+                  onFetchUsers={fetchUsers}
+                />
+                <div className="flex justify-between items-center">
+                  <TypingIndicator contextId={issueId} />
+                  <Button
+                    onClick={handleCreateComment}
+                    size="sm"
+                    disabled={createComment.isPending || !newComment.trim()}
+                  >
+                    {createComment.isPending ? 'Posting...' : 'Comment'}
+                  </Button>
                 </div>
               </div>
-            </form>
+            </div>
 
             <div className="space-y-6">
               {isLoadingComments ? (
@@ -355,8 +367,12 @@ function IssueDetail() {
                           {new Date(comment.createdAt).toLocaleString()}
                         </span>
                       </div>
-                      <div className="text-sm prose dark:prose-invert">
-                        <p>{comment.body}</p>
+                      <div className="text-sm prose dark:prose-invert max-w-none">
+                        <RichTextEditor
+                          content={comment.body}
+                          readOnly
+                          className="border-0 p-0 focus-within:ring-0 min-h-0"
+                        />
                       </div>
                       <CommentReactions
                         issueId={issue.id}

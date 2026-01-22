@@ -9,9 +9,10 @@ import type { Issue } from '@/types/issues'
 interface IssueCardProps {
   issue: Issue
   workspaceSlug?: string
+  disableLink?: boolean
 }
 
-export function IssueCard({ issue }: IssueCardProps) {
+export function IssueCard({ issue, disableLink = false }: IssueCardProps) {
   const priorityConfig = PRIORITY_CONFIG[issue.priority]
   const PriorityIcon = priorityConfig.icon
 
@@ -20,10 +21,14 @@ export function IssueCard({ issue }: IssueCardProps) {
     ? `${issue.project.identifier}-${issue.number}`
     : `#${issue.number}`
 
-  return (
-    <Link to="/issue/$issueId" params={{ issueId: issue.id }} className="block">
-      <Card className="hover:bg-accent/50 hover:shadow-md transition-all cursor-pointer group">
-        <CardContent className="p-3 space-y-2">
+  const cardContent = (
+    <Card
+      className={cn(
+        'hover:bg-accent/50 hover:shadow-md transition-all group',
+        !disableLink && 'cursor-pointer',
+      )}
+    >
+      <CardContent className="p-3 space-y-2">
           {/* Top row: ID and Priority */}
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono text-muted-foreground">
@@ -71,6 +76,15 @@ export function IssueCard({ issue }: IssueCardProps) {
           </div>
         </CardContent>
       </Card>
+  )
+
+  if (disableLink) {
+    return cardContent
+  }
+
+  return (
+    <Link to="/issue/$issueId" params={{ issueId: issue.id }} className="block">
+      {cardContent}
     </Link>
   )
 }

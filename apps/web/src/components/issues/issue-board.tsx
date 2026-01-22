@@ -1,8 +1,22 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragStartEvent,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { IssueColumn } from './issue-column'
+import { IssueCard } from './issue-card'
 import { STATUS_ORDER } from '@/lib/issue-utils'
+import { useUpdateIssue } from '@/hooks/use-issues'
 import type { Issue, IssueStatus } from '@/types/issues'
 
 interface IssueBoardProps {
@@ -21,6 +35,20 @@ export function IssueBoard({
   onExpandCreate,
   isLoading,
 }: IssueBoardProps) {
+  const [activeIssue, setActiveIssue] = useState<Issue | null>(null)
+  const updateIssue = useUpdateIssue()
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  )
+
   // Group issues by status
   const issuesByStatus = useMemo(() => {
     const grouped: Record<IssueStatus, Issue[]> = {
@@ -41,26 +69,71 @@ export function IssueBoard({
     return grouped
   }, [issues])
 
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event
+    const issue = issues.find((i) => i.id === active.id)
+    if (issue) {
+      setActiveIssue(issue)
+    }
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    setActiveIssue(null)
+
+    if (!over) return
+
+    const issueId = active.id as string
+    const newStatus = over.id as IssueStatus
+
+    // Find the issue being dragged
+    const issue = issues.find((i) => i.id === issueId)
+    if (!issue) return
+
+    // Only update if status actually changed
+    if (issue.status !== newStatus && STATUS_ORDER.includes(newStatus)) {
+      updateIssue.mutate({
+        issueId,
+        input: { status: newStatus },
+      })
+    }
+  }
+
   if (isLoading) {
     return <IssueBoardSkeleton />
   }
 
   return (
-    <ScrollArea className="w-full whitespace-nowrap">
-      <div className="flex gap-4 pb-4 h-[calc(100vh-220px)]">
-        {STATUS_ORDER.map((status) => (
-          <IssueColumn
-            key={status}
-            status={status}
-            issues={issuesByStatus[status]}
-            workspaceSlug={workspaceSlug}
-            onQuickCreate={onQuickCreate}
-            onExpandCreate={onExpandCreate}
-          />
-        ))}
-      </div>
-      <ScrollBar orientation="horizontal" />
-    </ScrollArea>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCorners}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <ScrollArea className="w-full whitespace-nowrap">
+        <div className="flex gap-4 pb-4 h-[calc(100vh-220px)]">
+          {STATUS_ORDER.map((status) => (
+            <IssueColumn
+              key={status}
+              status={status}
+              issues={issuesByStatus[status]}
+              workspaceSlug={workspaceSlug}
+              onQuickCreate={onQuickCreate}
+              onExpandCreate={onExpandCreate}
+            />
+          ))}
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+
+      <DragOverlay>
+        {activeIssue ? (
+          <div className="opacity-80 rotate-3 scale-105">
+            <IssueCard issue={activeIssue} workspaceSlug={workspaceSlug} />
+          </div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   )
 }
 

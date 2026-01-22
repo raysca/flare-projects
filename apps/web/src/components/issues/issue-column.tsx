@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
+import { useDroppable } from '@dnd-kit/core'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { IssueCard } from './issue-card'
+import { DraggableIssueCard } from './draggable-issue-card'
 import { STATUS_CONFIG } from '@/lib/issue-utils'
 import { cn } from '@/lib/utils'
 import type { Issue, IssueStatus } from '@/types/issues'
@@ -25,6 +26,10 @@ export function IssueColumn({
 }: IssueColumnProps) {
   const config = STATUS_CONFIG[status]
   const Icon = config.icon
+
+  const { setNodeRef, isOver } = useDroppable({
+    id: status,
+  })
 
   const [isCreating, setIsCreating] = useState(false)
   const [title, setTitle] = useState('')
@@ -71,7 +76,13 @@ export function IssueColumn({
   }
 
   return (
-    <div className="flex flex-col min-w-[280px] max-w-[320px] h-full bg-muted/30 rounded-lg">
+    <div
+      ref={setNodeRef}
+      className={cn(
+        'flex flex-col min-w-[280px] max-w-[320px] h-full bg-muted/30 rounded-lg transition-colors',
+        isOver && 'bg-accent/50 ring-2 ring-primary/20',
+      )}
+    >
       {/* Column Header */}
       <div className="flex items-center justify-between px-3 py-2 border-b">
         <div className="flex items-center gap-2">
@@ -136,7 +147,7 @@ export function IssueColumn({
       <ScrollArea className="flex-1 p-2">
         <div className="space-y-2">
           {issues.map((issue) => (
-            <IssueCard
+            <DraggableIssueCard
               key={issue.id}
               issue={issue}
               workspaceSlug={workspaceSlug}

@@ -634,7 +634,7 @@ app.get('/:id/comments', async (c) => {
       parentId: comments.parentId,
       createdAt: comments.createdAt,
       updatedAt: comments.updatedAt,
-      author: {
+      user: {
         id: users.id,
         name: users.name,
         email: users.email,
@@ -703,7 +703,7 @@ app.post('/:id/comments', zValidator('json', createCommentSchema), async (c) => 
       userId: comments.userId,
       parentId: comments.parentId,
       createdAt: comments.createdAt,
-      author: {
+      user: {
         id: users.id,
         name: users.name,
         email: users.email,

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { API_URL, getAuthToken } from '../lib/api'
-import { WebSocketMessage } from '../types/websocket'
+import type { WebSocketMessage } from '../types/websocket'
 
 interface UseSocketOptions {
   enabled?: boolean
@@ -52,12 +52,27 @@ export function useSocket(
 
     // Convert HTTP URL to WebSocket URL
     const httpUrl = API_URL.replace(/\/$/, '') // remove trailing slash
-    let wsUrl = httpUrl.replace(/^http/, 'ws')
+    let wsUrl = httpUrl
+
+    // If API_URL is absolute (e.g. http://localhost:3000), replace protocol
+    if (httpUrl.startsWith('http')) {
+      wsUrl = httpUrl.replace(/^http/, 'ws')
+    } else if (httpUrl.startsWith('/')) {
+      // If API_URL is relative (e.g. /api/v1), we generally want to respect the host
+      // BUT if the WS path is root-relative (e.g. /ws/...), we might just want to use the path directly
+      // assuming the WS server is on the same host/port.
+      // Since our server serves both API and WS on the same port:
+      wsUrl = ''
+    }
 
     // Append path and auth token
+    // If wsUrl is empty, it means we rely on browser's relative path handling for WebSocket
+    // new WebSocket('/ws/...') works fine.
     wsUrl = `${wsUrl}${path}?token=${token}`
 
     console.log('WebSocket connecting to:', wsUrl)
+    // Note: If wsUrl is relative (starts with /), the browser resolves it against window.location
+    // but replaces protocol with ws:// or wss:// automatically.
     const ws = new WebSocket(wsUrl)
 
     ws.onopen = () => {

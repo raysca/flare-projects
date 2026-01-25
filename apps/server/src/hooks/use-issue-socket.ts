@@ -2,8 +2,8 @@ import { useRef, useCallback, useMemo } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useSocket } from './use-socket'
 import { issueKeys } from '../lib/query-keys'
-import { Issue, Comment } from '../types/issues'
-import {
+import type { Issue, Comment } from '../types/issues'
+import type {
     WebSocketMessage,
     IssueUpdatedEvent,
     CommentCreatedEvent,
@@ -117,28 +117,43 @@ export function useIssueSocket(issueId: string | undefined) {
                     )
                     break
                 }
-                case 'user_viewing_issue': {
+                case 'user_joined': { // Renamed from user_viewing_issue
                     const event = message as UserJoinedEvent
                     usePresenceStore
                         .getState()
                         .setUserOnline(currentIssueId, event.payload)
                     break
                 }
-                case 'user_left_issue': {
+                case 'user_left': { // Renamed from user_left_issue
                     const event = message as UserLeftEvent
                     usePresenceStore
                         .getState()
                         .setUserOffline(currentIssueId, event.payload.userId)
                     break
                 }
-                case 'user_typing': {
-                    const event = message as TypingEvent
+                case 'typing_start': { // Renamed from user_typing
+                    const event = message as TypingEvent // You might need to adjust the type if TypingEvent expects isTyping boolean
+                    // backend sends { userId, userName }
+                    // we need to pass true for isTyping
+                    const payload = event.payload as any
                     usePresenceStore
                         .getState()
                         .setTyping(
                             currentIssueId,
-                            event.payload.userId,
-                            event.payload.isTyping,
+                            payload.userId,
+                            true,
+                        )
+                    break
+                }
+                case 'typing_stop': {
+                    const event = message as TypingEvent
+                    const payload = event.payload as any
+                    usePresenceStore
+                        .getState()
+                        .setTyping(
+                            currentIssueId,
+                            payload.userId,
+                            false,
                         )
                     break
                 }
@@ -158,7 +173,7 @@ export function useIssueSocket(issueId: string | undefined) {
     )
 
     const socket = useSocket(
-        issueId ? `/issues/${issueId}/ws` : '',
+        issueId ? `/ws/issue/${issueId}` : '', // Fixed URL pattern
         socketOptions,
     )
 

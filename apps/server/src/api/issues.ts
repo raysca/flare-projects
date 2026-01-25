@@ -18,6 +18,7 @@ import { eq, and, desc, sql, inArray, aliasedTable } from 'drizzle-orm';
 import type { Env } from '../lib/app';
 import { authMiddleware } from '../middleware/auth';
 import { broadcast } from '../realtime/broadcast';
+import { logActivity } from '../services/activity';
 
 const app = new Hono<Env>();
 
@@ -265,6 +266,21 @@ app.post('/', zValidator('json', createIssueSchema), async (c) => {
     });
   }
 
+  // Log activity
+  await logActivity(db, {
+    projectId: data.projectId,
+    userId: user.id,
+    issueId: issueId,
+    action: 'created',
+    entityType: 'issue',
+    entityId: issueId,
+    metadata: {
+      title: data.title,
+      status: data.status || 'backlog',
+      priority: data.priority || 'no_priority',
+    },
+  });
+
   const [newIssue] = await db.select().from(issues).where(eq(issues.id, issueId));
 
   if (newIssue) {
@@ -420,7 +436,15 @@ app.put('/:id', zValidator('json', updateIssueSchema), async (c) => {
 
   await db.update(issues).set(updateValues).where(eq(issues.id, issueId));
 
+  // Sync Labels if provided
   if (labelIds !== undefined) {
+    // Get current labels for activity logging
+    const currentLabels = await db
+      .select({ labelId: issueLabels.labelId })
+      .from(issueLabels)
+      .where(eq(issueLabels.issueId, issueId));
+    const currentLabelIds = currentLabels.map((l) => l.labelId);
+
     await db.delete(issueLabels).where(eq(issueLabels.issueId, issueId));
     if (labelIds.length > 0) {
       await db.insert(issueLabels).values(
@@ -431,6 +455,111 @@ app.put('/:id', zValidator('json', updateIssueSchema), async (c) => {
         }))
       );
     }
+
+    // Log label changes
+    const addedLabels = labelIds.filter((id) => !currentLabelIds.includes(id));
+    const removedLabels = currentLabelIds.filter((id) => !labelIds.includes(id));
+
+    if (addedLabels.length > 0) {
+      await logActivity(db, {
+        projectId: issue.projectId,
+        userId: user.id,
+        issueId: issueId,
+        action: 'labeled',
+        entityType: 'issue',
+        entityId: issueId,
+        newValue: addedLabels.join(','),
+      });
+    }
+
+    if (removedLabels.length > 0) {
+      await logActivity(db, {
+        projectId: issue.projectId,
+        userId: user.id,
+        issueId: issueId,
+        action: 'unlabeled',
+        entityType: 'issue',
+        entityId: issueId,
+        oldValue: removedLabels.join(','),
+      });
+    }
+  }
+
+  // Log status change
+  if (data.status && data.status !== issue.status) {
+    await logActivity(db, {
+      projectId: issue.projectId,
+      userId: user.id,
+      issueId: issueId,
+      action: 'status_changed',
+      entityType: 'issue',
+      entityId: issueId,
+      oldValue: issue.status,
+      newValue: data.status,
+    });
+  }
+
+  // Log assignee change
+  if (data.assigneeId !== undefined && data.assigneeId !== issue.assigneeId) {
+    if (data.assigneeId === null && issue.assigneeId) {
+      await logActivity(db, {
+        projectId: issue.projectId,
+        userId: user.id,
+        issueId: issueId,
+        action: 'unassigned',
+        entityType: 'issue',
+        entityId: issueId,
+        oldValue: issue.assigneeId,
+      });
+    } else if (data.assigneeId) {
+      await logActivity(db, {
+        projectId: issue.projectId,
+        userId: user.id,
+        issueId: issueId,
+        action: 'assigned',
+        entityType: 'issue',
+        entityId: issueId,
+        oldValue: issue.assigneeId || undefined,
+        newValue: data.assigneeId,
+      });
+
+      // Auto-subscribe new assignee if not already subscribed
+      const [existingSub] = await db
+        .select()
+        .from(issueSubscribers)
+        .where(
+          and(eq(issueSubscribers.issueId, issueId), eq(issueSubscribers.userId, data.assigneeId))
+        );
+
+      if (!existingSub) {
+        await db.insert(issueSubscribers).values({
+          id: crypto.randomUUID(),
+          issueId: issueId,
+          userId: data.assigneeId,
+        });
+      }
+    }
+  }
+
+  // Log general update if other fields changed
+  const otherFieldsChanged =
+    Object.keys(updateData).filter(
+      (key) =>
+        key !== 'status' &&
+        key !== 'assigneeId' &&
+        updateData[key as keyof typeof updateData] !== undefined
+    ).length > 0;
+
+  if (otherFieldsChanged) {
+    await logActivity(db, {
+      projectId: issue.projectId,
+      userId: user.id,
+      issueId: issueId,
+      action: 'updated',
+      entityType: 'issue',
+      entityId: issueId,
+      metadata: { fields: Object.keys(updateData) },
+    });
   }
 
   const [updated] = await db.select().from(issues).where(eq(issues.id, issueId));

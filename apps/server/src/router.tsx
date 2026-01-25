@@ -1,62 +1,24 @@
-import {
-  createRouter,
-  createHashHistory,
-  createRootRoute,
-  createRoute,
-  Outlet,
-} from '@tanstack/react-router';
-import { AuthProvider } from '@/context/auth-context';
-import { LoginPage } from './pages/login';
-import { SignupPage } from './pages/signup';
-import { DashboardPage } from './pages/dashboard';
-import '@/index.css';
+import { createRouter as createTanStackRouter } from '@tanstack/react-router';
+import { routeTree } from './routeTree.gen';
+import { QueryClient } from '@tanstack/react-query';
 
-// Root route with auth provider
-const rootRoute = createRootRoute({
-  component: () => (
-    <AuthProvider>
-      <Outlet />
-    </AuthProvider>
-  ),
-});
+export function createRouter() {
+  const queryClient = new QueryClient();
 
-// Index/Dashboard route
-const indexRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/',
-  component: DashboardPage,
-});
+  return createTanStackRouter({
+    routeTree,
+    context: {
+      queryClient,
+    },
+    defaultPreload: 'intent',
+    // Since we're serving this via Bun, we can use standard history
+    // No need for hash history unless specifically requested
+  });
+}
 
-// Login route
-const loginRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/login',
-  component: LoginPage,
-});
-
-// Signup route
-const signupRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/signup',
-  component: SignupPage,
-});
-
-// Create route tree
-const routeTree = rootRoute.addChildren([indexRoute, loginRoute, signupRoute]);
-
-// Create hash-based history for SPA routing without server config
-const hashHistory = createHashHistory();
-
-// Create and export the router instance
-export const router = createRouter({
-  routeTree,
-  history: hashHistory,
-  defaultPreload: 'intent',
-});
-
-// Register router for type safety
 declare module '@tanstack/react-router' {
   interface Register {
-    router: typeof router;
+    router: ReturnType<typeof createRouter>;
   }
 }
+

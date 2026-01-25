@@ -5,13 +5,14 @@ import type { Env } from './lib/app';
 import { dbMiddleware } from './middleware/db';
 
 // Import routes
-import authRoutes from './routes/auth';
-import usersRoutes from './routes/users';
-import projectsRoutes from './routes/projects';
-import issuesRoutes from './routes/issues';
-import cyclesRoutes from './routes/cycles';
-import invitationsRoutes from './routes/invitations';
-import devRoutes from './routes/dev';
+// Import routes
+import authRoutes from './api/auth';
+import usersRoutes from './api/users';
+import projectsRoutes from './api/projects';
+import issuesRoutes from './api/issues';
+import cyclesRoutes from './api/cycles';
+import invitationsRoutes from './api/invitations';
+import devRoutes from './api/dev';
 
 // Create main API app
 const api = new Hono<Env>();

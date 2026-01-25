@@ -2,6 +2,7 @@
 // Export all schema modules
 
 export * from "./users";
+export * from "./sessions";
 
 export * from "./issues";
 export * from "./projects";

@@ -1,4 +1,3 @@
-import { DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../schema";
 
 // Import all seed data
@@ -15,15 +14,21 @@ import {
 } from "./data";
 import { hashPassword } from "@linearflow/shared";
 
+// Generic database type that works with both D1 and Bun SQLite
+type AnyDrizzleDB = {
+  insert: (table: any) => { values: (data: any) => any };
+  delete: (table: any) => any;
+};
+
 /**
- * Batch insert helper for D1 which has a limit on SQL variables
- * D1 has a limit of ~100 variables per query, so we batch inserts
+ * Batch insert helper for SQLite databases
+ * Smaller batch size for D1, can be larger for local SQLite
  */
 async function batchInsert<T>(
-  db: DrizzleD1Database<typeof schema>,
+  db: AnyDrizzleDB,
   table: any,
   data: T[],
-  batchSize: number = 3
+  batchSize: number = 10
 ): Promise<void> {
   for (let i = 0; i < data.length; i += batchSize) {
     const batch = data.slice(i, i + batchSize);
@@ -53,7 +58,7 @@ export interface SeedOptions {
  * This should be run only in development environments
  */
 export async function seed(
-  db: DrizzleD1Database<typeof schema>,
+  db: AnyDrizzleDB,
   options: SeedOptions = {}
 ): Promise<void> {
   const { clean = true, tables, verbose = false } = options;
@@ -71,19 +76,19 @@ export async function seed(
     if (clean) {
       console.log("🧹 Cleaning existing data...");
       // Delete in reverse order of dependencies
-      await db.delete(schema.commentReactions).run();
-      await db.delete(schema.comments).run();
-      await db.delete(schema.issueLabels).run();
-      await db.delete(schema.issueSubscribers).run();
-      await db.delete(schema.issues).run();
-      await db.delete(schema.cycles).run();
-      await db.delete(schema.projectMembers).run();
-      await db.delete(schema.projects).run();
-      await db.delete(schema.labels).run();
-      await db.delete(schema.notificationPreferences).run();
-      await db.delete(schema.notifications).run();
-      await db.delete(schema.activityLog).run();
-      await db.delete(schema.users).run();
+      await db.delete(schema.commentReactions);
+      await db.delete(schema.comments);
+      await db.delete(schema.issueLabels);
+      await db.delete(schema.issueSubscribers);
+      await db.delete(schema.issues);
+      await db.delete(schema.cycles);
+      await db.delete(schema.projectMembers);
+      await db.delete(schema.projects);
+      await db.delete(schema.labels);
+      await db.delete(schema.notificationPreferences);
+      await db.delete(schema.notifications);
+      await db.delete(schema.activityLog);
+      await db.delete(schema.users);
       console.log("   ✓ Cleaned existing data\n");
     }
 

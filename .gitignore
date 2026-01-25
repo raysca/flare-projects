@@ -145,3 +145,12 @@ vite.config.ts.timestamp-*
 # Bun
 bun.lockb
 PR_*.md
+
+# SQLite database and uploads
+apps/server/data/*
+!apps/server/data/.gitkeep
+apps/server/data/uploads/*
+!apps/server/data/uploads/.gitkeep
+*.db
+*.db-wal
+*.db-shm

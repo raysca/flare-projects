@@ -10,7 +10,7 @@
     "dev": "bun run --filter='*' dev",
     "build": "bun run --filter='*' build",
     "lint": "bun run --filter='*' lint",
-    "seed": "curl -X POST http://localhost:8787/api/dev/seed?clean=true&verbose=true",
+    "seed": "curl -X POST http://localhost:3000/api/dev/seed?clean=true&verbose=true",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "type-check": "bun run --filter='*' type-check"

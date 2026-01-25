@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 import { users } from "./users";
 import { projects } from "./projects";
@@ -50,7 +50,11 @@ export const issues = sqliteTable("issues", {
   updatedAt: integer("updated_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
-});
+}, (table) => ({
+  assigneeStatusIdx: index("issues_assignee_status_idx").on(table.assigneeId, table.status),
+  reporterIdx: index("issues_reporter_idx").on(table.reporterId),
+  dueDateIdx: index("issues_due_date_idx").on(table.dueDate),
+}));
 
 // Issue-Label junction table (many-to-many)
 export const issueLabels = sqliteTable("issue_labels", {

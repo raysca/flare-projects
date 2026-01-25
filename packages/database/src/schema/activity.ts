@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 import { users } from "./users";
 import { projects } from "./projects";
@@ -40,7 +40,9 @@ export const activityLog = sqliteTable("activity_log", {
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .default(sql`(unixepoch())`),
-});
+}, (table) => ({
+  userCreatedIdx: index("activity_log_user_created_idx").on(table.userId, table.createdAt),
+}));
 
 export type ActivityLog = typeof activityLog.$inferSelect;
 export type NewActivityLog = typeof activityLog.$inferInsert;

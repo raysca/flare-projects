@@ -39,6 +39,7 @@ export const labelKeys = {
   detail: (id: string) => [...labelKeys.details(), id] as const,
 }
 
+
 export const cycleKeys = {
   all: ['cycles'] as const,
   lists: () => [...cycleKeys.all, 'list'] as const,
@@ -46,3 +47,13 @@ export const cycleKeys = {
   details: () => [...cycleKeys.all, 'detail'] as const,
   detail: (id: string) => [...cycleKeys.details(), id] as const,
 }
+
+export const dashboardKeys = {
+  all: ['dashboard'] as const,
+  stats: () => [...dashboardKeys.all, 'stats'] as const,
+  issues: (filter?: string) => [...dashboardKeys.all, 'issues', filter] as const,
+  overdue: () => [...dashboardKeys.all, 'overdue'] as const,
+  activity: () => [...dashboardKeys.all, 'activity'] as const,
+  mentions: () => [...dashboardKeys.all, 'mentions'] as const,
+}
+

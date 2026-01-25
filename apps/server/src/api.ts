@@ -14,6 +14,8 @@ import cyclesRoutes from './api/cycles';
 import invitationsRoutes from './api/invitations';
 import devRoutes from './api/dev';
 
+import dashboardRoutes from './api/dashboard';
+
 // Create main API app
 const api = new Hono<Env>();
 
@@ -42,6 +44,7 @@ api.route('/projects', projectsRoutes);
 api.route('/issues', issuesRoutes);
 api.route('/cycles', cyclesRoutes);
 api.route('/invitations', invitationsRoutes);
+api.route('/dashboard', dashboardRoutes);
 
 // Dev routes (development only)
 if (process.env.NODE_ENV !== 'production') {

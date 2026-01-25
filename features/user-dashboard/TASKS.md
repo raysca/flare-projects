@@ -1,8 +1,8 @@
 # Implementation Tasks: User Dashboard
 
-## [ ] Phase 1: Backend Foundation
+## [x] Phase 1: Backend Foundation
 
-### [ ] Task 1.1: Add dashboard query keys
+### [x] Task 1.1: Add dashboard query keys
 **File:** `apps/server/src/lib/query-keys.ts`
 
 - Add `dashboardKeys` object with keys for: `all`, `stats`, `issues`, `overdue`, `activity`, `mentions`
@@ -12,7 +12,7 @@
 
 ---
 
-### [ ] Task 1.2: Create dashboard stats endpoint
+### [x] Task 1.2: Create dashboard stats endpoint
 **File:** `apps/server/src/api/dashboard.ts` (new)
 
 Implement `GET /dashboard/stats`:
@@ -26,7 +26,7 @@ Implement `GET /dashboard/stats`:
 
 ---
 
-### [ ] Task 1.3: Create dashboard overdue endpoint
+### [x] Task 1.3: Create dashboard overdue endpoint
 **File:** `apps/server/src/api/dashboard.ts`
 
 Implement `GET /dashboard/overdue`:
@@ -40,7 +40,7 @@ Implement `GET /dashboard/overdue`:
 
 ---
 
-### [ ] Task 1.4: Create dashboard issues endpoint
+### [x] Task 1.4: Create dashboard issues endpoint
 **File:** `apps/server/src/api/dashboard.ts`
 
 Implement `GET /dashboard/issues`:
@@ -57,7 +57,7 @@ Implement `GET /dashboard/issues`:
 
 ---
 
-### [ ] Task 1.5: Create dashboard activity endpoint
+### [x] Task 1.5: Create dashboard activity endpoint
 **File:** `apps/server/src/api/dashboard.ts`
 
 Implement `GET /dashboard/activity`:
@@ -71,7 +71,7 @@ Implement `GET /dashboard/activity`:
 
 ---
 
-### [ ] Task 1.6: Create dashboard mentions endpoint
+### [x] Task 1.6: Create dashboard mentions endpoint
 **File:** `apps/server/src/api/dashboard.ts`
 
 Implement `GET /dashboard/mentions`:
@@ -85,7 +85,7 @@ Implement `GET /dashboard/mentions`:
 
 ---
 
-### [ ] Task 1.7: Mount dashboard routes
+### [x] Task 1.7: Mount dashboard routes
 **File:** `apps/server/src/api.ts`
 
 - Import and mount `dashboardRoutes` at `/dashboard`
@@ -94,7 +94,7 @@ Implement `GET /dashboard/mentions`:
 
 ---
 
-### [ ] Task 1.8: Add database indexes for dashboard queries
+### [x] Task 1.8: Add database indexes for dashboard queries
 **File:** `packages/database/src/schema/issues.ts` or migration
 
 Add indexes:
@@ -107,9 +107,9 @@ Add indexes:
 
 ---
 
-## [ ] Phase 2: Frontend Hooks
+## [x] Phase 2: Frontend Hooks
 
-### [ ] Task 2.1: Create useDashboardStats hook
+### [x] Task 2.1: Create useDashboardStats hook
 **File:** `apps/server/src/hooks/use-dashboard.ts` (new)
 
 - Fetch from `GET /api/v1/dashboard/stats`
@@ -121,7 +121,7 @@ Add indexes:
 
 ---
 
-### [ ] Task 2.2: Create useDashboardOverdue hook
+### [x] Task 2.2: Create useDashboardOverdue hook
 **File:** `apps/server/src/hooks/use-dashboard.ts`
 
 - Fetch from `GET /api/v1/dashboard/overdue`
@@ -133,7 +133,7 @@ Add indexes:
 
 ---
 
-### [ ] Task 2.3: Create useDashboardIssues hook
+### [x] Task 2.3: Create useDashboardIssues hook
 **File:** `apps/server/src/hooks/use-dashboard.ts`
 
 - Fetch from `GET /api/v1/dashboard/issues`
@@ -146,7 +146,7 @@ Add indexes:
 
 ---
 
-### [ ] Task 2.4: Create useDashboardActivity hook
+### [x] Task 2.4: Create useDashboardActivity hook
 **File:** `apps/server/src/hooks/use-dashboard.ts`
 
 - Fetch from `GET /api/v1/dashboard/activity`
@@ -158,7 +158,7 @@ Add indexes:
 
 ---
 
-### [ ] Task 2.5: Create useDashboardMentions hook
+### [x] Task 2.5: Create useDashboardMentions hook
 **File:** `apps/server/src/hooks/use-dashboard.ts`
 
 - Fetch from `GET /api/v1/dashboard/mentions`
@@ -170,9 +170,9 @@ Add indexes:
 
 ---
 
-## [ ] Phase 3: Frontend Components
+## [x] Phase 3: Frontend Components
 
-### [ ] Task 3.1: Create StatCard component
+### [x] Task 3.1: Create StatCard component
 **File:** `apps/server/src/components/dashboard/stat-card.tsx` (new)
 
 - Display icon, label, count
@@ -184,7 +184,7 @@ Add indexes:
 
 ---
 
-### [ ] Task 3.2: Create DashboardStatsCards component
+### [x] Task 3.2: Create DashboardStatsCards component
 **File:** `apps/server/src/components/dashboard/dashboard-stats-cards.tsx` (new)
 
 - Use `useDashboardStats` hook
@@ -200,7 +200,7 @@ Add indexes:
 
 ---
 
-### [ ] Task 3.3: Create OverdueIssuesCard component
+### [x] Task 3.3: Create OverdueIssuesCard component
 **File:** `apps/server/src/components/dashboard/overdue-issues-card.tsx` (new)
 
 - Card with header "Overdue Issues" and count badge
@@ -215,7 +215,7 @@ Add indexes:
 
 ---
 
-### [ ] Task 3.4: Create MyIssuesCard component
+### [x] Task 3.4: Create MyIssuesCard component
 **File:** `apps/server/src/components/dashboard/my-issues-card.tsx` (new)
 
 - Card with header "My Issues"
@@ -231,7 +231,7 @@ Add indexes:
 
 ---
 
-### [ ] Task 3.5: Create RecentActivityCard component
+### [x] Task 3.5: Create RecentActivityCard component
 **File:** `apps/server/src/components/dashboard/recent-activity-card.tsx` (new)
 
 - Card with header "Recent Activity"
@@ -246,7 +246,7 @@ Add indexes:
 
 ---
 
-### [ ] Task 3.6: Create NotificationsPreviewCard component
+### [x] Task 3.6: Create NotificationsPreviewCard component
 **File:** `apps/server/src/components/dashboard/notifications-preview-card.tsx` (new)
 
 - Card with header "Notifications" and unread count badge
@@ -261,7 +261,7 @@ Add indexes:
 
 ---
 
-### [ ] Task 3.7: Create DashboardHeader component
+### [x] Task 3.7: Create DashboardHeader component
 **File:** `apps/server/src/components/dashboard/dashboard-header.tsx` (new)
 
 - Welcome message: "Welcome back, {userName}!"
@@ -273,7 +273,7 @@ Add indexes:
 
 ---
 
-### [ ] Task 3.8: Create DashboardSkeleton component
+### [x] Task 3.8: Create DashboardSkeleton component
 **File:** `apps/server/src/components/dashboard/dashboard-skeleton.tsx` (new)
 
 - Full-page skeleton matching dashboard layout
